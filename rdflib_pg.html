@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>RDFLIB Playground</title>
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="./js/rdflib.min.js"></script>
+        <!--<script src="./js/rdflib_pg.js"></script>-->
+    </head>
+    <body class="container">
+        <div>
+          <h1>RDFLIB Playground</h1>
+        </div>
+        <div>
+          <h3>Enter Raw VC Graph</h3>
+          <form id="vcform">
+            <textarea id="vc" form="vcform">
+            </textarea>
+            <input type="submit" value="Parse VC" id="parse">
+          </form>
+        </div>
+    </body>
+    <script>
+        console.log("$rdf:\n", $rdf);
+        var webId = 'https://kezike17.solidtest.space/profile/card#me';
+        var me = $rdf.sym(webId);
+
+        /*const N3 = require('n3');
+        const { DataFactory } = N3;
+        const { namedNode, literal, defaultGraph, quad } = DataFactory;
+        const parser = new N3.Parser();
+
+        function parseCredential(event) {
+            event.preventDefault();
+            parser.parse($("#vc").val(), (error, quad, prefixes) => {
+                if (quad) {
+                  console.log(quad);
+                } else {
+                  console.log("That's all the quads! Here are the prefixes:", prefixes);
+                }
+            });
+        }*/
+
+        function parseCredential(event) {
+            event.preventDefault();
+            var vc = $("#vc").val();
+            var store = $rdf.graph();
+            var base = me.value;
+            var type = "text/n3";
+            $rdf.parse(vc, store, base, type, (err, res) => {
+                if (err) {
+                  console.error(err.name + ": " + err.message);
+                  return;
+                }
+                var stmts = res.statements;
+                for (var i=0; i < stmts.length; i++) {
+                  var stmt = stmts[i];
+                  var sub = stmt.subject.value;
+                  var pred = stmt.predicate.value;
+                  var obj = stmt.object.value;
+                  console.log(sub, pred, obj);
+                }
+                console.log("res:\n", res);
+            });
+        }
+
+        $(document).on("click", "#parse", parseCredential);
+    </script>
+</html>

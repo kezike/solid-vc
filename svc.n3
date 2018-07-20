@@ -1,0 +1,77 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcelements: <http://dublincore.org/2012/06/14/dcelements#> .
+@prefix dcterms: <http://dublincore.org/2012/06/14/dcterms#> .
+@prefix svc: <http://dig.csail.mit.edu/2018/svc#> .
+
+<http://dig.csail.mit.edu/2018/svc#> a owl:Ontology ;
+    dcterms:title "The Solid Verifiable Credentials Schema Vocabulary"@en ;
+    rdfs:comment """
+    This ontology describes the classes and properties that are key
+    to the SolidVC ecosystem. The design is intentionally terse and
+    focused in order to allow for a relatively simple interface for
+    the production and consumption of verifiable credentials.
+    """@en .
+
+svc:Transaction a rdfs:Class ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:subClassOf rdfs:Resource ;
+    rdfs:label "Transaction"@en ;
+    rdfs:comment "The class of linked transactions, representing statements, attestations, and credentials about an entity"@en .
+
+svc:id a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "id"@en ;
+    rdfs:comment "The ID of a transaction"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range rdfs:Literal .
+
+svc:credPlain a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "credPlain"@en ;
+    rdfs:comment "The plaintext of a credential in a transaction"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range rdfs:Literal .
+
+svc:credSigned a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "credSigned"@en ;
+    rdfs:comment "The value of the signed credential in a transaction"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range rdfs:Literal .
+
+svc:prevTxn a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "prevTxn"@en ;
+    rdfs:comment "The link to the previous transaction"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range  rdfs:Literal .
+
+svc:prevHash a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "prevHash"@en ;
+    rdfs:comment "The hash of the previous transaction"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range rdfs:Literal .
+
+svc:issuer a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "issuer"@en ;
+    rdfs:comment "The public key of the issuer of a transaction"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range rdfs:Literal .
+
+svc:subject a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "subject"@en ;
+    rdfs:comment "The public key of the subject of a transaction"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range rdfs:Literal .
+
+svc:timestamp a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "timestamp"@en ;
+    rdfs:comment "The timestamp of the creation of a transaction"@en ;
+    rdfs:domain owl:Transaction ;
+    rdfs:range rdfs:Literal .

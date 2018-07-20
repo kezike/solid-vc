@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Solid VC</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"/>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+        <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+        <link rel="shortcut icon" type="./img/png" href="./img/favicon.png"/>
+        <script src="./node_modules/@trust/oidc-web/dist/oidc-web.min.js"></script>
+        <!--<script src="./node_modules/oidc-web/src/index.js"></script>-->
+    </head>
+  <body class="container">
+      <div>
+          <h1>Solid VC</h1>
+          <!--<button id="login" class="btn">Login</button>-->
+      </div>
+      <div>
+          <h3>Create Verifiable Credential</h3>
+          <form>
+              <fieldset>
+                <!--Credential: <input type="file" accept=".json" id="credential" required><br>
+                <input type="submit" value="Issue Credential" id="issue-cred">-->
+                <!--Public Key: <input type="file" placeholder="ie. http://example.com/people/peter/keys/23" size="40" id="creator" required><br>-->
+                <!--Signature: <input type="file" id="signature" required><br>-->
+                <!--Next Credential URI:--><!--<input type="text" class="hidden" id="credential-next" required><br>-->
+                <!--Next Credential Hash:--><!--<input type="text" class="hidden" id="hash-next" required><br>-->
+                <!--Head Hash:--><!--<input type="text" class="hidden" id="hash-head" required><br>-->
+                <!--<input type="datetime-local" class="hidden" id="timestamp" name="timestamp" value=""><br>-->
+                <input type="text" id="subject"><br>
+                <input type="text" id="predicate"><br>
+                <input type="text" id="object"><br>
+                <button id="add-stmt">Add Statement</button>
+                <input type="submit" value="Issue Credential" id="issue-cred">
+              </fieldset>
+          </form>
+      </div>
+      <div id=stmts></div>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script>
+      var OIDCWebClient = OIDC.OIDCWebClient;
+      var options = {solid:true};
+      var oidc = new OIDCWebClient(options);
+      var provider = 'https://kezike17.solidtest.space/';
+
+      document.addEventListener('DOMContentLoaded', () => {
+         oidc.currentSession().then((session) => {
+             if (!session.hasCredentials()) {
+               console.log('Session is missing credentials! Redirecting to login...');
+               oidc.login(provider).then((rp) => {
+                   /*sessionFromResponse().then((respSession) => {
+                       // localStorage.setItem("oidc.fetch", respSession.fetch);
+                       window.session = respSession;
+                       window.fetch = respSession.fetch;
+                       console.log('session:', respSession);
+                       console.log('fetch:', respSession.fetch);
+                   });*/
+                   oidc.currentSession().then((currSession) => {
+                       // localStorage.setItem("oidc.fetch", session.fetch);
+                       window.session = currSession;
+                       window.fetch = currSession.fetch;
+                       console.log('idxSession:', currSession);
+                       console.log('idxFetch:', currSession.fetch);
+                   });
+               });
+             } else {
+               console.log('Session has credentials!');
+               // localStorage.setItem("oidc.fetch", session.fetch);
+               window.session = session;
+               window.fetch = session.fetch;
+               console.log('idxSession:', session);
+               console.log('idxFetch:', session.fetch);
+             }
+         });
+         /*$.getScript("app.js", function(){
+             alert("app.js loaded and executed");
+         });*/
+      });
+  </script>
+  <script src="./js/dist/js/app.bundle.js" charset="utf-8"></script>
+  <!--<script src="./js/app.js"></script>-->
+</html>

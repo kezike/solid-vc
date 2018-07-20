@@ -1,0 +1,41 @@
+{
+  "name": "solid-vc",
+  "version": "1.0.0",
+  "description": "Creating verifiable claims on the internet with serverless DLT technologies",
+  "main": "./js/app.js",
+  "scripts": {
+    "build": "webpack --config ./js/webpack.config.js",
+    "start": "webpack-dev-server --config ./js/webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kayode Ezike <kezike17@mit.edu>",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "css-loader": "^0.28.9",
+    "escape-html": "^1.0.3",
+    "file-system": "^2.2.2",
+    "fs": "0.0.1-security",
+    "node-uuid": "^1.4.8",
+    "oidc-auth-manager": "^0.14.1",
+    "rdflib": "^0.17.0",
+    "requirejs": "^2.3.5",
+    "solid-app-set": "^1.0.0",
+    "solid-auth-client": "^1.0.0",
+    "solid-client": "^0.24.3",
+    "standard": "^10.0.3",
+    "style-loader": "^0.19.1",
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.11.1"
+  },
+  "dependencies": {
+    "@trust/oidc-web": "^0.2.1",
+    "get-ssl-certificate": "^2.1.0",
+    "n3": "^1.0.0-beta.1",
+    "node-forge": "^0.7.5"
+  }
+}

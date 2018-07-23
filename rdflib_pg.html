@@ -13,8 +13,7 @@
         <div>
           <h3>Enter Raw VC Graph</h3>
           <form id="vcform">
-            <textarea id="vc" form="vcform">
-            </textarea>
+            <textarea id="vc" rows=25 cols=100 form="vcform"></textarea>
             <input type="submit" value="Parse VC" id="parse">
           </form>
         </div>
@@ -24,29 +23,20 @@
         var webId = 'https://kezike17.solidtest.space/profile/card#me';
         var me = $rdf.sym(webId);
 
-        /*const N3 = require('n3');
-        const { DataFactory } = N3;
-        const { namedNode, literal, defaultGraph, quad } = DataFactory;
-        const parser = new N3.Parser();
-
-        function parseCredential(event) {
-            event.preventDefault();
-            parser.parse($("#vc").val(), (error, quad, prefixes) => {
-                if (quad) {
-                  console.log(quad);
-                } else {
-                  console.log("That's all the quads! Here are the prefixes:", prefixes);
-                }
-            });
-        }*/
-
         function parseCredential(event) {
             event.preventDefault();
             var vc = $("#vc").val();
             var store = $rdf.graph();
             var base = me.value;
             var type = "text/n3";
-            $rdf.parse(vc, store, base, type, (err, res) => {
+            var prefixPattern = /(@prefix (\w|\d)*: <.*>\.(\r|\n)*)*/;
+            var prefixResult = prefixPattern.exec(vc);
+            // console.log("prefixes:\n", prefixResult);
+            var prefixes = prefixResult[0];
+            var body = vc.split(prefixes)[1];
+            console.log("prefixes:\n" + prefixes);
+            console.log("body:\n" + body);
+            /*$rdf.parse(vc, store, base, type, (err, res) => {
                 if (err) {
                   console.error(err.name + ": " + err.message);
                   return;
@@ -60,7 +50,7 @@
                   console.log(sub, pred, obj);
                 }
                 console.log("res:\n", res);
-            });
+            });*/
         }
 
         $(document).on("click", "#parse", parseCredential);

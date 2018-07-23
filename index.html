@@ -23,14 +23,31 @@
                 <input type="submit" value="Issue Credential" id="issue-cred">-->
                 <!--Public Key: <input type="file" placeholder="ie. http://example.com/people/peter/keys/23" size="40" id="creator" required><br>-->
                 <!--Signature: <input type="file" id="signature" required><br>-->
-                <!--Next Credential URI:--><!--<input type="text" class="hidden" id="credential-next" required><br>-->
-                <!--Next Credential Hash:--><!--<input type="text" class="hidden" id="hash-next" required><br>-->
-                <!--Head Hash:--><!--<input type="text" class="hidden" id="hash-head" required><br>-->
-                <!--<input type="datetime-local" class="hidden" id="timestamp" name="timestamp" value=""><br>-->
-                <input type="text" id="subject"><br>
+
+                <!--<input type="text" id="subject"><br>
                 <input type="text" id="predicate"><br>
                 <input type="text" id="object"><br>
-                <button id="add-stmt">Add Statement</button>
+                <button id="add-stmt">Add Statement</button>-->
+                <select id="credContext">
+                  <option value="">Select Credential Context</option>
+                  <option value="edu">Education</option>
+                  <option value="fin">Finance</option>
+                  <option value="gov">Government</option>
+                  <option value="health">Health</option>
+                  <option value="law">Law</option>
+                  <option value="med">Medicine</option>
+                  <option value="trans">Transportation</option>
+                  <option value="travel">Travel</option>
+                </select>
+                <select id="credSerialization">
+                  <option value="">Select Credential Serialization</option>
+                  <option value="application/ld+json">JSON-LD</option>
+                  <option value="text/n3">N3</option>
+                  <option value="application/nquads">NTriples</option>
+                  <option value="application/rdf+xml">RDF/XML</option>
+                  <option value="text/turtle">Turtle</option>
+                </select>
+                <textarea id="credPlain" rows=25 cols=100 form="vcform"></textarea>
                 <input type="submit" value="Issue Credential" id="issue-cred">
               </fieldset>
           </form>

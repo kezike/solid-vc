@@ -202,14 +202,11 @@ SolidVC = {
 
     // Bind events
     bindEvents: function() {
-        // $(document).on("click", "#login", SolidVC.login);
-        $(document).on("click", "#add-stmt", SolidVC.addStatement);
+        // $(document).on("click", "#add-stmt", SolidVC.addStatement);
+        // $(document).on("click", ".remove-stmt", SolidVC.removeStatement);
+        // $(document).on("change", "#signature", SolidVC.handleSignatureUpload);
+        // $(document).on("change", "#creator", SolidVC.handleCreatorUpload);
         $(document).on("click", "#issue-cred", SolidVC.issueCredential);
-        // $(document).on("change", "#credential", SolidVC.handleCredentialUpload);
-        $(document).on("change", "#signature", SolidVC.handleSignatureUpload);
-        $(document).on("change", "#creator", SolidVC.handleCreatorUpload);
-        // $(document).on("click", "#post-cred", SolidVC.insert);
-        $(document).on("click", "img", SolidVC.removeStatement);
     },
 
     // Handle credential upload
@@ -390,6 +387,7 @@ SolidVC = {
           stmtsDiv.append(stmt.obj.value);
           var cancelImg = $("<img src='../img/cancel.png'>");
           cancelImg.attr("id", "cancel-" + i.toString());
+          cancelImg.attr("class", "remove-stmt");
           stmtsDiv.append(cancelImg);
           stmtsDiv.append("</div>");
         }
@@ -403,14 +401,34 @@ SolidVC = {
         console.log("signed credential:", SolidVC.signedCredential);
         return SolidVC.signedCredential;*/
         event.preventDefault();
-        var stmts = SolidVC.statements;
+        var credPlain = $("#credPlain").val();
+        var credContext = $("#credContext").val();
+        var credSerialization = $("#credSerialization").val();
+        if (credPlain === "") {
+          alert("Please include a credential in the text area");
+          $("#credPlain").focus();
+          return;
+        }
+        if (credContext === "") {
+          alert("Please select a valid context for the credential");
+          $("#credContext").focus();
+          return;
+        }
+        if (credSerialization === "") {
+          alert("Please select a valid serialization for the credential");
+          $("#credSerialization").focus();
+          return;
+        }
+        /*var stmts = SolidVC.statements;
         if (stmts.length == 0) {
           alert("Please add at least one statement to credential");
           return;
-        }
+        }*/
         SolidVC.credentialN3 += ":txn14 a svc:Transaction .\n";
         SolidVC.credentialN3 += ":txn14 svc:id 10 .\n";
-        var credPlain = "\"\"\"\n";
+        credPlain = "\"\"\"\n" + credPlain + "\"\"\"@en";
+        /*
+        credPlain = "\"\"\"\n";
         for (var i = 0; i < stmts.length; i++) {
           var stmt = stmts[i];
           var sub = stmt.sub;
@@ -419,6 +437,7 @@ SolidVC = {
           credPlain += sub + " " + pred + " " + obj + " .\n";
         }
         credPlain += "\"\"\"@en";
+        */
         SolidVC.credentialN3 += ":txn14 svc:credPlain " + credPlain + " .\n";
         SolidVC.credentialN3 += ":txn14 svc:credSigned " + credPlain + " .\n";
         SolidVC.credentialN3 += ":txn14 svc:prevTxn " + ":txn13" + " .\n";
@@ -432,7 +451,7 @@ SolidVC = {
             headers: {
               'user-agent': 'Mozilla/4.0 MDN Example',
               'content-Type': 'text/n3',
-              'slug': 'credential14'
+              'slug': 'credential-17'
             },
             mode: 'cors',
             credentials: 'include',
@@ -442,10 +461,13 @@ SolidVC = {
             console.log(response);
             // SolidVC.insertCredential();
         });
-        $("#subject").val("");
+        /*$("#subject").val("");
         $("#predicate").val("");
         $("#object").val("");
-        SolidVC.statements = [];
+        SolidVC.statements = [];*/
+        $("#credPlain").val("");
+        $("#credContext").val("");
+        $("#credSerialization").val("");
     },
 
     insertCredential: function() {

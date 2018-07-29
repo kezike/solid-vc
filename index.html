@@ -28,25 +28,30 @@
                 <input type="text" id="predicate"><br>
                 <input type="text" id="object"><br>
                 <button id="add-stmt">Add Statement</button>-->
-                <select id="credContext">
-                  <option value="">Select Credential Context</option>
-                  <option value="edu">Education</option>
-                  <option value="fin">Finance</option>
-                  <option value="gov">Government</option>
-                  <option value="health">Health</option>
-                  <option value="law">Law</option>
-                  <option value="med">Medicine</option>
-                  <option value="trans">Transportation</option>
-                  <option value="travel">Travel</option>
-                </select>
-                <select id="credSerialization">
-                  <option value="">Select Credential Serialization</option>
-                  <option value="application/ld+json">JSON-LD</option>
-                  <option value="text/n3">N3</option>
-                  <option value="application/nquads">NTriples</option>
-                  <option value="application/rdf+xml">RDF/XML</option>
-                  <option value="text/turtle">Turtle</option>
-                </select>
+                <div>
+                    <select id="credContext">
+                        <option value="">Select Credential Context ("General" if unsure)</option>
+                        <option value="svcEdu">Education</option>
+                        <option value="svcFin">Finance</option>
+                        <option value="svcGen">General</option>
+                        <option value="svcGov">Government</option>
+                        <option value="svcHealth">Health</option>
+                        <option value="svcLaw">Law</option>
+                        <option value="svcMed">Medicine</option>
+                        <option value="svcOcc">Occupation</option>
+                        <option value="svcTrans">Transportation</option>
+                        <option value="svcTravel">Travel</option>
+                    </select>
+                    <!--<select id="credSerialization">
+                        <option value="">Select Credential Serialization ("Plaintext" if unsure)</option>
+                        <option value="jsonld">JSON-LD</option>
+                        <option value="n3">N3</option>
+                        <option value="ntriples">NTriples</option>
+                        <option value="plain">Plaintext</option>
+                        <option value="rdfxml">RDF/XML</option>
+                        <option value="turtle">Turtle</option>
+                    </select>-->
+                </div>
                 <textarea id="credPlain" rows=25 cols=100 form="vcform"></textarea>
                 <input type="submit" value="Issue Credential" id="issue-cred">
               </fieldset>
@@ -78,8 +83,8 @@
                        // localStorage.setItem("oidc.fetch", session.fetch);
                        window.session = currSession;
                        window.fetch = currSession.fetch;
-                       console.log('idxSession:', currSession);
-                       console.log('idxFetch:', currSession.fetch);
+                       // console.log('idxSession:', currSession);
+                       // console.log('idxFetch:', currSession.fetch);
                    });
                });
              } else {
@@ -87,8 +92,8 @@
                // localStorage.setItem("oidc.fetch", session.fetch);
                window.session = session;
                window.fetch = session.fetch;
-               console.log('idxSession:', session);
-               console.log('idxFetch:', session.fetch);
+               // console.log('idxSession:', session);
+               // console.log('idxFetch:', session.fetch);
              }
          });
          /*$.getScript("app.js", function(){

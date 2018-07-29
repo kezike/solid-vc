@@ -12,6 +12,7 @@ var options = {solid:true};
 var oidc = new OIDCWebClient(options);
 
 var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
+var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
 
 // var webID = 'https://kezike.databox.me/profile/card#me';
 // var webID = 'https://kezike_test.solidtest.space/profile/card#me';
@@ -46,7 +47,17 @@ SolidVC = {
                   "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",
                   "@prefix dcterms: <http://dublincore.org/2012/06/14/dcterms#> .",
                   "@prefix dcelements: <http://dublincore.org/2012/06/14/dcelements#> .",
-                  "@prefix svc: <http://dig.csail.mit.edu/2018/svc#> ."
+                  "@prefix svc: <http://dig.csail.mit.edu/2018/svc#> .",
+                  "@prefix svcEdu: <http://dig.csail.mit.edu/2018/svc-edu#> .",
+                  "@prefix svcFin: <http://dig.csail.mit.edu/2018/svc-fin#> .",
+                  "@prefix svcGen: <http://dig.csail.mit.edu/2018/svc-gen#> .",
+                  "@prefix svcGov: <http://dig.csail.mit.edu/2018/svc-gov#> .",
+                  "@prefix svcHealth: <http://dig.csail.mit.edu/2018/svc-health#> .",
+                  "@prefix svcLaw: <http://dig.csail.mit.edu/2018/svc-law#> .",
+                  "@prefix svcMed: <http://dig.csail.mit.edu/2018/svc-med#> .",
+                  "@prefix svcOcc: <http://dig.csail.mit.edu/2018/svc-occ#> .",
+                  "@prefix svcTrans: <http://dig.csail.mit.edu/2018/svc-trans#> .",
+                  "@prefix svcTravel: <http://dig.csail.mit.edu/2018/svc-travel#> ."
     ],
 
     statements: [],
@@ -127,7 +138,6 @@ SolidVC = {
           var prefix = prefixes[i];
           SolidVC.credentialN3 += prefix + "\n";
         }
-        console.log("SolidVC.credentialN3:\n", SolidVC.credentialN3);
     },
 
     // Load user profile
@@ -403,7 +413,7 @@ SolidVC = {
         event.preventDefault();
         var credPlain = $("#credPlain").val();
         var credContext = $("#credContext").val();
-        var credSerialization = $("#credSerialization").val();
+        // var credSerialization = $("#credSerialization").val();
         if (credPlain === "") {
           alert("Please include a credential in the text area");
           $("#credPlain").focus();
@@ -414,52 +424,69 @@ SolidVC = {
           $("#credContext").focus();
           return;
         }
-        if (credSerialization === "") {
+        /*if (credSerialization === "") {
           alert("Please select a valid serialization for the credential");
           $("#credSerialization").focus();
           return;
-        }
-        /*var stmts = SolidVC.statements;
-        if (stmts.length == 0) {
-          alert("Please add at least one statement to credential");
-          return;
         }*/
-        SolidVC.credentialN3 += ":txn14 a svc:Transaction .\n";
-        SolidVC.credentialN3 += ":txn14 svc:id 10 .\n";
-        credPlain = "\"\"\"\n" + credPlain + "\"\"\"@en";
-        /*
-        credPlain = "\"\"\"\n";
-        for (var i = 0; i < stmts.length; i++) {
-          var stmt = stmts[i];
-          var sub = stmt.sub;
-          var pred = stmt.pred;
-          var obj = stmt.obj;
-          credPlain += sub + " " + pred + " " + obj + " .\n";
-        }
-        credPlain += "\"\"\"@en";
-        */
-        SolidVC.credentialN3 += ":txn14 svc:credPlain " + credPlain + " .\n";
-        SolidVC.credentialN3 += ":txn14 svc:credSigned " + credPlain + " .\n";
-        SolidVC.credentialN3 += ":txn14 svc:prevTxn " + ":txn13" + " .\n";
-        SolidVC.credentialN3 += ":txn14 svc:prevHash " + ":txn13" + " .\n";
-        SolidVC.credentialN3 += ":txn14 svc:issuer <" + myWebID + "> .\n";
-        SolidVC.credentialN3 += ":txn14 svc:subject <" + myWebID + "> .\n";
-        SolidVC.credentialN3 += ":txn14 svc:timestamp \"" + new Date() + "\" .\n";
-        // console.log("SolidVC.credentialN3:\n", SolidVC.credentialN3);
+        /*SolidVC.credentialN3 += ":txn a svc:Transaction .\n";
+        SolidVC.credentialN3 += ":txn svc:id 10 .\n";
+        credPlain = "\"\"\"" + credPlain + "\"\"\"@en";
+        SolidVC.credentialN3 += ":txn svc:credPlain " + credPlain + " .\n";
+        SolidVC.credentialN3 += ":txn svc:credContext " + credContext + ":ticker .\n";
+        // SolidVC.credentialN3 += ":txn svc:credSerialization \"" + credSerialization + "\" .\n";
+        SolidVC.credentialN3 += ":txn svc:prevTxn " + ":txn" + " .\n";
+        SolidVC.credentialN3 += ":txn svc:prevHash " + ":txn" + " .\n";
+        SolidVC.credentialN3 += ":txn svc:issuer <" + myWebID + "> .\n";
+        SolidVC.credentialN3 += ":txn svc:subject <" + myWebID + "> .\n";
+        SolidVC.credentialN3 += ":txn svc:signature <" + myWebID + "-signs-cred> .\n";
+        SolidVC.credentialN3 += ":txn svc:timestamp \"" + (new Date()).toISOString() + "\" .\n";
+        // console.log("SolidVC.credentialN3:\n", SolidVC.credentialN3);*/
+
+        var credStore = $rdf.graph();
+        var credPlainStore = $rdf.graph();
+        var me = $rdf.sym(myWebID);
+        var base = me.value;
+        var type = "text/n3";
+        $rdf.parse(credPlain, credPlainStore, base, type, (errParse, resParse) => {
+            if (errParse) {
+              // console.error(errParse.name + ": " + errParse.message);
+              console.log("errParse:\n", errParse);
+              return;
+            }
+            credStore.add($rdf.sym("https://kezike17.solidtest.space/public/credentials"), SVC("credPlain"), resParse);
+            $rdf.serialize(null, credStore, base, type, /*null*/ (errSer, resSer) => {
+                if (errSer) {
+                  var errMsg = errSer.name + ": " + errSer.message;
+                  alert(errMsg);
+                  console.error(errMsg);
+                  return;
+                }
+                console.log("resSer:\n", resSer);
+                SolidVC.credentialN3 = resSer;
+            }, {});
+        });
+
         svcFetch(credentialRepo, {
             method: 'POST',
             headers: {
-              'user-agent': 'Mozilla/4.0 MDN Example',
-              'content-Type': 'text/n3',
-              'slug': 'credential-17'
+              // 'user-agent': 'Mozilla/4.0 MDN Example',
+              'content-type': 'text/n3',
+              'slug': 'credential-4'
             },
             mode: 'cors',
             credentials: 'include',
             body: SolidVC.credentialN3
         })
-        .then((response) => {
-            console.log(response);
+        .then((resPostCred) => {
+            console.log(resPostCred);
             // SolidVC.insertCredential();
+            if (!resPostCred.ok) {
+              var errMsg = resPostCred.status + ": " + resPostCred.statusText + "\nMake sure your credential is well-formed\nMake sure you are properly authenticated\nRefresh the page and try again";
+              alert(errMsg);
+              console.error(errMsg);
+              return;
+            }
         });
         /*$("#subject").val("");
         $("#predicate").val("");
@@ -467,7 +494,7 @@ SolidVC = {
         SolidVC.statements = [];*/
         $("#credPlain").val("");
         $("#credContext").val("");
-        $("#credSerialization").val("");
+        // $("#credSerialization").val("");
     },
 
     insertCredential: function() {

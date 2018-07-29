@@ -35,6 +35,7 @@
   "dependencies": {
     "@trust/oidc-web": "^0.2.1",
     "get-ssl-certificate": "^2.1.0",
+    "glob": "^7.1.2",
     "n3": "^1.0.0-beta.1",
     "node-forge": "^0.7.5"
   }

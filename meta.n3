@@ -1,0 +1,21 @@
+@prefix : <#>.
+@prefix svc: <http://dig.csail.mit.edu/2018/svc#>.
+@prefix svcGen: <http://dig.csail.mit.edu/2018/svc-gen#>.
+
+:gen
+    a svc:Transaction;
+    svc:id 0;
+    svc:credPlain {};
+    svc:credContext svcGen:ticker;
+    svc:prevTxn :gen;
+    svc:prevHash "GEN_HASH";
+    svc:issuer "GEN_ISSUER";
+    svc:subject "GEN_SUBJECT";
+    svc:signature "GEN_SIG";
+    svc:timestamp "0000-00-00T00:00:00.000Z".
+
+:lgr
+    a svc:Ledger;
+    svc:genesis :gen;
+    svc:head :gen;
+    svc:numTxns 1.

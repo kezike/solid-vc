@@ -28,19 +28,25 @@
                 <input type="text" id="predicate"><br>
                 <input type="text" id="object"><br>
                 <button id="add-stmt">Add Statement</button>-->
+                <div id="profile" class="hidden">
+                    <h3 id="name"></h3>
+                    <div>
+                        <img id="image" height="100" width="100">
+                    </div>
+                </div>
                 <div>
                     <select id="credContext">
                         <option value="">Select Credential Context ("General" if unsure)</option>
-                        <option value="svcEdu">Education</option>
-                        <option value="svcFin">Finance</option>
-                        <option value="svcGen">General</option>
-                        <option value="svcGov">Government</option>
-                        <option value="svcHealth">Health</option>
-                        <option value="svcLaw">Law</option>
-                        <option value="svcMed">Medicine</option>
-                        <option value="svcOcc">Occupation</option>
-                        <option value="svcTrans">Transportation</option>
-                        <option value="svcTravel">Travel</option>
+                        <option value="SVC_EDU">Education</option>
+                        <option value="SVC_FIN">Finance</option>
+                        <option value="SVC_GEN">General</option>
+                        <option value="SVC_GOV">Government</option>
+                        <option value="SVC_HEALTH">Health</option>
+                        <option value="SVC_LAW">Law</option>
+                        <option value="SVC_MED">Medicine</option>
+                        <option value="SVC_OCC">Occupation</option>
+                        <option value="SVC_TRANS">Transportation</option>
+                        <option value="SVC_TRAVEL">Travel</option>
                     </select>
                     <!--<select id="credSerialization">
                         <option value="">Select Credential Serialization ("Plaintext" if unsure)</option>
@@ -54,6 +60,7 @@
                 </div>
                 <textarea id="credPlain" rows=25 cols=100 form="vcform"></textarea>
                 <input type="submit" value="Issue Credential" id="issue-cred">
+                <button id="patch-meta">Patch Meta</button>
               </fieldset>
           </form>
       </div>
@@ -61,7 +68,7 @@
   </body>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  <script>
+  <!--<script>
       var OIDCWebClient = OIDC.OIDCWebClient;
       var options = {solid:true};
       var oidc = new OIDCWebClient(options);
@@ -100,7 +107,8 @@
              alert("app.js loaded and executed");
          });*/
       });
-  </script>
-  <script src="./js/dist/js/app.bundle.js" charset="utf-8"></script>
+  </script>-->
+  <script src="./js/rdflib.min.js" charset="utf-8"></script>
+  <script src="./js/dist/app.bundle.js" charset="utf-8"></script>
   <!--<script src="./js/app.js"></script>-->
 </html>

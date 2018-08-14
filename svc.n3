@@ -4,6 +4,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://dublincore.org/2012/06/14/dcterms#> .
 @prefix dcelements: <http://dublincore.org/2012/06/14/dcelements#> .
+@prefix sec: <https://w3id.org/security#> .
 @prefix svc: <http://dig.csail.mit.edu/2018/svc#> .
 
 <http://dig.csail.mit.edu/2018/svc#> a owl:Ontology ;
@@ -18,32 +19,115 @@
     as a component of his MEng thesis work with DIG.
     """@en .
 
+svc:Metadata a rdfs:Class ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:subClassOf rdfs:Resource ;
+    rdfs:label "Metadata"@en ;
+    rdfs:comment "The class representing metadata about various ledgers"@en .
+
+svc:metaEdu a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaEdu"@en ;
+    rdfs:comment "The URI of the education ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaFin a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaFin"@en ;
+    rdfs:comment "The URI of the finance ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaGen a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaGen"@en ;
+    rdfs:comment "The URI of the general ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaGov a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaGov"@en ;
+    rdfs:comment "The URI of the government ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaHealth a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaHealth"@en ;
+    rdfs:comment "The URI of the health ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaLaw a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaLaw"@en ;
+    rdfs:comment "The URI of the law ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaMed a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaMed"@en ;
+    rdfs:comment "The URI of the medical ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaOcc a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaOcc"@en ;
+    rdfs:comment "The URI of the occupation ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaTrans a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaTrans"@en ;
+    rdfs:comment "The URI of the transportation ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
+svc:metaTravel a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "metaTravel"@en ;
+    rdfs:comment "The URI of the travel ledger metadata document"@en ;
+    rdfs:domain svc:Metadata ;
+    rdfs:range rdfs:Literal .
+
 svc:Ledger a rdfs:Class ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:subClassOf rdfs:Resource ;
     rdfs:label "Ledger"@en ;
-    rdfs:comment "The class representing a record of metadata about linked transactions"@en .
+    rdfs:comment "The class representing information about a particular ledger of linked transactions"@en .
 
 svc:genesis a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "genesis"@en ;
-    rdfs:comment "The URI of the earliest transaction in a ledger"@en ;
+    rdfs:comment "The ID of the earliest transaction in a ledger"@en ;
     rdfs:domain svc:Ledger ;
     rdfs:range rdfs:Literal .
 
 svc:head a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "head"@en ;
-    rdfs:comment "The URI of the latest transaction in a ledger"@en ;
+    rdfs:comment "The ID of the latest transaction in a ledger"@en ;
     rdfs:domain svc:Ledger ;
     rdfs:range rdfs:Literal .
 
-svc:numTxns a rdf:Property ;
+svc:length a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "numTxns"@en ;
-    rdfs:comment "The number of transactions in a ledger"@en ;
+    rdfs:label "length"@en ;
+    rdfs:comment "The number of client-defined transactions in a ledger"@en ;
     rdfs:domain svc:Ledger ;
     rdfs:range xsd:nonNegativeInteger .
+
+svc:locked a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "locked"@en ;
+    rdfs:comment "Whether or not someone has claimed write access to a ledger"@en ;
+    rdfs:domain svc:Ledger ;
+    rdfs:range xsd:boolean .
 
 svc:Transaction a rdfs:Class ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
@@ -72,10 +156,10 @@ svc:credContext a rdf:Property ;
     rdfs:domain svc:Transaction ;
     rdfs:range rdfs:Literal .
 
-svc:prevTxn a rdf:Property ;
+svc:prev a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "prevTxn"@en ;
-    rdfs:comment "The URI of the previous transaction"@en ;
+    rdfs:label "prev"@en ;
+    rdfs:comment "The ID of the previous transaction"@en ;
     rdfs:domain svc:Transaction ;
     rdfs:range  rdfs:Literal .
 
@@ -86,13 +170,6 @@ svc:prevHash a rdf:Property ;
     rdfs:domain svc:Transaction ;
     rdfs:range rdfs:Literal .
 
-svc:issuer a rdf:Property ;
-    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "issuer"@en ;
-    rdfs:comment "The public key of the issuer of a transaction"@en ;
-    rdfs:domain svc:Transaction ;
-    rdfs:range rdfs:Literal .
-
 svc:subject a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "subject"@en ;
@@ -100,16 +177,16 @@ svc:subject a rdf:Property ;
     rdfs:domain svc:Transaction ;
     rdfs:range rdfs:Literal .
 
-svc:signature a rdf:Property ;
+svc:proof a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "signature"@en ;
-    rdfs:comment "The issuer's signature of credPlain"@en ;
-    rdfs:domain owl:Transaction ;
-    rdfs:range rdfs:Literal .
-
-svc:timestamp a rdf:Property ;
-    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "timestamp"@en ;
-    rdfs:comment "The timestamp of the creation of a transaction"@en ;
-    rdfs:domain owl:Transaction ;
-    rdfs:range xsd:dateTimeStamp .
+    rdfs:label "proof"@en ;
+    rdfs:comment """
+    The digital proof verifying a transaction:
+    - 'type': The proof type (ie. sec:RsaSignature2018)
+    - 'created': The timestamp of the creation of a transaction
+    - 'creator': The public key of the issuer of a transaction
+    - 'nonce': Optional value proving effort in proof creation
+    - 'signatureValue': The creator's signature of credPlain
+    """@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range rdfs:Literal.

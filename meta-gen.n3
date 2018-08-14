@@ -1,0 +1,10 @@
+@prefix : <#>.
+@prefix svc: <http://dig.csail.mit.edu/2018/svc#>.
+@prefix genesis: <https://kezike17.solidtest.space/public/svc/genesis-gen.n3#>.
+
+:ledger
+    a svc:Ledger;
+    svc:genesis genesis:txn;
+    svc:head genesis:txn;
+    svc:length 1;
+    svc:locked 0.

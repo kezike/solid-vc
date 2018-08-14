@@ -12,31 +12,32 @@
   "license": "ISC",
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-preset-env": "^1.6.1",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
-    "css-loader": "^0.28.9",
+    "css-loader": "^0.28.11",
     "escape-html": "^1.0.3",
     "file-system": "^2.2.2",
     "fs": "0.0.1-security",
     "node-uuid": "^1.4.8",
     "oidc-auth-manager": "^0.14.1",
-    "rdflib": "^0.17.0",
     "requirejs": "^2.3.5",
     "solid-app-set": "^1.0.0",
-    "solid-auth-client": "^1.0.0",
     "solid-client": "^0.24.3",
     "standard": "^10.0.3",
     "style-loader": "^0.19.1",
-    "webpack": "^3.10.0",
-    "webpack-dev-server": "^2.11.1"
+    "webpack": "^3.12.0",
+    "webpack-dev-server": "^2.11.2"
   },
   "dependencies": {
     "@trust/oidc-web": "^0.2.1",
-    "get-ssl-certificate": "^2.1.0",
+    "get-ssl-certificate": "^2.1.2",
     "glob": "^7.1.2",
     "n3": "^1.0.0-beta.1",
-    "node-forge": "^0.7.5"
+    "node-forge": "^0.7.5",
+    "rdf-canonize": "^0.2.0",
+    "rdflib": "^0.17.0",
+    "solid-auth-client": "^2.0.0"
   }
 }

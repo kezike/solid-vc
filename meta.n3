@@ -1,21 +1,25 @@
 @prefix : <#>.
 @prefix svc: <http://dig.csail.mit.edu/2018/svc#>.
-@prefix svcGen: <http://dig.csail.mit.edu/2018/svc-gen#>.
+@prefix metaEdu: <https://kezike17.solidtest.space/public/svc/meta-edu.n3#>.
+@prefix metaFin: <https://kezike17.solidtest.space/public/svc/meta-fin.n3#>.
+@prefix metaGen: <https://kezike17.solidtest.space/public/svc/meta-gen.n3#>.
+@prefix metaGov: <https://kezike17.solidtest.space/public/svc/meta-gov.n3#>.
+@prefix metaHealth: <https://kezike17.solidtest.space/public/svc/meta-health.n3#>.
+@prefix metaLaw: <https://kezike17.solidtest.space/public/svc/meta-law.n3#>.
+@prefix metaMed: <https://kezike17.solidtest.space/public/svc/meta-med.n3#>.
+@prefix metaOcc: <https://kezike17.solidtest.space/public/svc/meta-occ.n3#>.
+@prefix metaTrans: <https://kezike17.solidtest.space/public/svc/meta-trans.n3#>.
+@prefix metaTravel: <https://kezike17.solidtest.space/public/svc/meta-travel.n3#>.
 
-:gen
-    a svc:Transaction;
-    svc:id 0;
-    svc:credPlain {};
-    svc:credContext svcGen:ticker;
-    svc:prevTxn :gen;
-    svc:prevHash "GEN_HASH";
-    svc:issuer "GEN_ISSUER";
-    svc:subject "GEN_SUBJECT";
-    svc:signature "GEN_SIG";
-    svc:timestamp "0000-00-00T00:00:00.000Z".
-
-:lgr
-    a svc:Ledger;
-    svc:genesis :gen;
-    svc:head :gen;
-    svc:numTxns 1.
+:config
+    a svc:Metadata;
+    svc:metaEdu metaEdu:;
+    svc:metaFin metaFin:;
+    svc:metaGen metaGen:;
+    svc:metaGov metaGov:;
+    svc:metaHealth metaHealth:;
+    svc:metaLaw metaLaw:;
+    svc:metaMed metaMed:;
+    svc:metaOcc metaOcc:;
+    svc:metaTrans metaTrans:;
+    svc:metaTravel metaTravel:.

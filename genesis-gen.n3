@@ -1,0 +1,20 @@
+@prefix : <#>.
+@prefix svc: <http://dig.csail.mit.edu/2018/svc#>.
+@prefix svcGen: <http://dig.csail.mit.edu/2018/svc-gen#>.
+@prefix sec: <https://w3id.org/security#>.
+
+:proof
+    a sec:RsaSignature2018;
+    sec:created "0000-00-00T00:00:00.000Z";
+    sec:creator "GEN_CREATOR";
+    sec:signatureValue "GEN_SIG".
+
+:txn
+    a svc:Transaction;
+    svc:id 0;
+    svc:credPlain {};
+    svc:credContext svcGen:ticker;
+    svc:prev :txn;
+    svc:prevHash "GEN_HASH";
+    svc:subject "GEN_SUBJECT";
+    svc:proof :proof.

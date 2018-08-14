@@ -1,7 +1,7 @@
 'use strict';
 
 var n3 = require('n3');
-var $rdf = require('rdflib');
+// var $rdf = require('rdflib');
 var auth = require('solid-auth-client');
 var forge = require('node-forge');
 var ed25519 = forge.pki.ed25519;
@@ -11,31 +11,47 @@ var OIDCWebClient = OIDC.OIDCWebClient;
 var options = {solid:true};
 var oidc = new OIDCWebClient(options);
 
-var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
-var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
-
 // var webID = 'https://kezike.databox.me/profile/card#me';
 // var webID = 'https://kezike_test.solidtest.space/profile/card#me';
 // var myWebID = 'https://kayodeyezike.com/profile/card#me';
 var provider = 'https://kezike17.solidtest.space/';
+// var provider = 'https://kezike17.solid.community/';
 var publicRepo = provider + 'public/';
-var credentialRepo = publicRepo + 'credentials/';
-var credentialGraph = $rdf.graph(credentialRepo);
+var svcRepo = publicRepo + 'svc/';
+var credentialRepo = svcRepo + 'credentials/';
+// var credentialGraph = $rdf.graph(credentialRepo);
+var metaFile = svcRepo + 'meta.n3';
 var myWebID = 'https://kezike17.solidtest.space/profile/card#me';
 var timWebID = 'https://www.w3.org/People/Berners-Lee/card#i';
 var homeURI = 'http://localhost:8080/';
 var popupURI = homeURI + 'popup.html';
 
-/*var store = $rdf.graph();
-var timeout = 5000; // 5000 ms timeout
-var fetcher = new $rdf.Fetcher(store, timeout);*/
+var THIS = $rdf.Namespace('#');
+var META = $rdf.Namespace(metaFile + '#');
+var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
+var RDF = $rdf.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+var RDFS = $rdf.Namespace('http://www.w3.org/2000/01/rdf-schema#');
+var WS = $rdf.Namespace('https://www.w3.org/ns/pim/space#');
+var SEC = $rdf.Namespace('https://w3id.org/security#');
+var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
 
 var svcSession;
 var svcFetch;
-
 var SolidVC = SolidVC || {};
 
 SolidVC = {
+    namespaces: {
+      SVC_EDU: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-edu#'),
+      SVC_FIN: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-fin#'),
+      SVC_GEN: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-gen#'),
+      SVC_GOV: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-gov#'),
+      SVC_HEALTH: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-health#'),
+      SVC_LAW: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-law#'),
+      SVC_MED: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-med#'),
+      SVC_OCC: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-occ#'),
+      SVC_TRANS: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-trans#'),
+      SVC_TRAVEL: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-travel#')
+    },
     
     credential: {},
 
@@ -70,11 +86,13 @@ SolidVC = {
 
     creator: "",
 
-    privateKey: "",
+    privateKey: {},
 
-    publicKey: "",
+    publicKey: {},
 
     session: {},
+
+    fetch: auth.fetch,
 
     accessToken: "",
 
@@ -96,40 +114,25 @@ SolidVC = {
       "sec": "https://w3id.org/security/v1"
     },
 
-    DefaultSigType: "RSASignature2018",
+    DefaultSigType: 'RsaSignature2018',
 
-    fetch: function(url, options) {},
+    fetcher: null,
+
+    updateManager: null,
 
     // Initialize app
     init: function() {
-        SolidVC.generateKeyPair();
+        SolidVC.generateKeyPair({keyType: 'RSA', bits: 2048, workers: 2});
         SolidVC.bindEvents();
         SolidVC.addPrefixes();
         SolidVC.displayStatements();
-        // var session = window.localStorage.getItem("oidc.session");
-        // var fetch = window.localStorage.getItem("oidc.fetch");
-        // var authorization = JSON.parse(session)["authorization"];
-        // var accessToken = authorization["access_token"];
-        // SolidVC.session = session;
-        // SolidVC.fetch = eval('(' + fetch + ')');
-        // SolidVC.accessToken = accessToken;
-        // var session = window.session;
-        // var fetch = window.fetch;
-        svcSession = window.session;
+        /*svcSession = window.session;
         svcFetch = window.fetch;
-        // SolidVC.session = window.session;
-        // SolidVC.fetch = window.fetch;
+        SolidVC.fetcher = $rdf.fetcher($rdf.graph(), {fetch: svcFetch});
         console.log("svcSession:\n", svcSession);
-        console.log("svcFetch:\n", svcFetch);
-        // console.log("accessToken:\n", accessToken);
-        // console.log("SolidVC.accessToken:\n", SolidVC.accessToken);
-        /*var store = $rdf.graph();
-        var timeout = 5000; // 5000 ms timeout
-        var fetcher = new $rdf.Fetcher(store, timeout);
-        fetcher.createContainer(publicRepo, "creep", null);*/
-        /*if (svcSession == undefined || svcFetch == undefined) {
-          location.reload();
-        }*/
+        console.log("SolidVC.fetcher._fetch:\n", SolidVC.fetcher._fetch);*/
+        console.log('auth.fetch:', auth.fetch);
+        SolidVC.login();
     },
 
     addPrefixes: function() {
@@ -142,30 +145,29 @@ SolidVC = {
 
     // Load user profile
     loadProfile: function (webId) {
-        var store = $rdf.graph();
-        fetcher.nowOrWhenFetched(webId, function(ok, body, xhr) {
+        SolidVC.fetcher.nowOrWhenFetched(webId, function(ok, body, xhr) {
             if (!ok) {
               console.log("Oops, something happened and couldn't fetch data");
             } else {
               try {
                 var me = $rdf.sym(webId);
                 var name = FOAF('name');
-                var myNameObj = store.any(me, name);
+                var myNameObj = SolidVC.fetcher.store.any(me, name);
                 var myName = myNameObj.value;
-                var img = FOAF('img');
-                var myImgObj = store.any(me, img);
-                var myImg = myImgObj.value;
+                /*var img = FOAF('img');
+                var myImgObj = SolidVC.fetcher.store.any(me, img);
+                var myImg = myImgObj.value;*/
                 var knows = FOAF('knows');
-                var myFriends = store.each(me, knows);
+                var myFriends = SolidVC.fetcher.store.each(me, knows);
                 console.log('My name:', myName);
-                console.log('My image:', myImg);
+                // console.log('My image:', myImg);
                 console.log('My friends:');
                 for (var i = 0; i < myFriends.length; i++) {
                   var friend = myFriends[i];
                   console.log(friend.value);
                 }
                 document.getElementById('name').textContent = myName;
-                document.getElementById('image').setAttribute('src', myImg);
+                // document.getElementById('image').setAttribute('src', myImg);
                 document.getElementById('profile').classList.remove('hidden');
               } catch (err) {
                 console.log(err);
@@ -176,47 +178,41 @@ SolidVC = {
 
     // Login to app
     login: function() {
-        /*auth.login().then(function(loginSession) {
-            // var webId = loginSession.webId;
-            console.log('loginSession:', loginSession);
-            // console.log('webId', webId);
-            // SolidVC.loadProfile(webId);
-        }).catch(function(err) {
-           console.error(err);
-        });*/
-        /*auth.popupLogin({popupUri: popupURI}).then(function(popupSession) {
-            // var webId = popupSession.webId;
-            console.log('popupSession:', popupSession);
-            // console.log('webId', webId);
-            // SolidVC.loadProfile(webId);
-        }).catch(function(err) {
-           console.error(err);
-        });*/
-        /*auth.currentSession().then(function(currentSession) {
-            // var webId;
-            if (currentSession) {
-              var webId = currentSession.webId;
-              console.log('currentSession:', currentSession);
-              console.log('webId:', webId);
-              // SolidVC.loadProfile(webId);
-            } else {
-              auth.popupLogin({popupUri: popupURI}).then(function(popupSession) {
-                  var webId = popupSession.webId;
-                  console.log('popupSession:', popupSession);
-                  console.log('webId', webId);
-                  // SolidVC.loadProfile(webId);
+        auth.currentSession().then((currentSession) => {
+            if (!currentSession) {
+              auth.popupLogin({popupUri: popupURI}).then((popupSession) => {
+                  SolidVC.session = popupSession;
+                  console.log('popupSession:', SolidVC.session);
+                  SolidVC.fetcher = $rdf.fetcher($rdf.graph());
+                  SolidVC.updateManager = new $rdf.UpdateManager(SolidVC.fetcher.store);
+                  console.log("SolidVC.fetcher:", SolidVC.fetcher);
+                  console.log("SolidVC.fetcher._fetch:", SolidVC.fetcher._fetch);
+                  // SolidVC.loadProfile(popupSession.webId);
+              }).catch((err) => {
+                 console.error(err.name + ": " + err.message);
               });
+              return;
             }
-        });*/
+            SolidVC.session = currentSession;
+            console.log('currentSession:', SolidVC.session);
+            SolidVC.fetcher = $rdf.fetcher($rdf.graph());
+            SolidVC.updateManager = new $rdf.UpdateManager(SolidVC.fetcher.store);
+            console.log("SolidVC.fetcher:", SolidVC.fetcher);
+            console.log("SolidVC.fetcher._fetch:", SolidVC.fetcher._fetch);
+            // SolidVC.loadProfile(popupSession.webId);
+        }).catch((err) => {
+           console.error(err.name + ": " + err.message);
+        });
     },
 
     // Bind events
     bindEvents: function() {
-        // $(document).on("click", "#add-stmt", SolidVC.addStatement);
-        // $(document).on("click", ".remove-stmt", SolidVC.removeStatement);
-        // $(document).on("change", "#signature", SolidVC.handleSignatureUpload);
-        // $(document).on("change", "#creator", SolidVC.handleCreatorUpload);
-        $(document).on("click", "#issue-cred", SolidVC.issueCredential);
+        // $(document).on('click', '#add-stmt', SolidVC.addStatement);
+        // $(document).on('click', '.remove-stmt', SolidVC.removeStatement);
+        // $(document).on('change', '#signature', SolidVC.handleSignatureUpload);
+        // $(document).on('change', '#creator', SolidVC.handleCreatorUpload);
+        $(document).on('click', '#issue-cred', SolidVC.issueCredential);
+        $(document).on('click', '#patch-meta', SolidVC.patchMetaFile);
     },
 
     // Handle credential upload
@@ -322,23 +318,44 @@ SolidVC = {
     },
 
     // Generate (privKey, pubKey) pair
-    generateKeyPair: function() {
-        rsa.generateKeyPair({bits: 2048, workers: 2}, function(err, keypair) {
-            SolidVC.privateKey = keypair.privateKey;
-            SolidVC.publicKey = keypair.publicKey;
-        });
+    generateKeyPair: function(options) {
+        switch (options.keyType) {
+          case 'RSA':
+            rsa.generateKeyPair({bits: options.bits, workers: options.workers}, (err, keypair) => {
+                SolidVC.privateKey['RSA'] = keypair.privateKey;
+                SolidVC.publicKey['RSA'] = keypair.publicKey;
+            });
+          default:
+            rsa.generateKeyPair({bits: options.bits, workers: options.workers}, (err, keypair) => {
+                SolidVC.privateKey['RSA'] = keypair.privateKey;
+                SolidVC.publicKey['RSA'] = keypair.publicKey;
+            });
+        }
     },
 
-    // Produce signature for credential
-    signCredential: function(credential, options=SolidVC.DefaultCredentialSignerOptions, credentialSigner=SolidVC.signCredentialDefault) {
+    /** Produce JSON-LD signature for credential
+     *
+     * @param credential {Object} Credential object
+     * @param options {Object} Optional configuration for signature
+     * @param credentialSigner {Object} Function for signing credential
+     *
+     * @returns {Object} Signed JSON-LD credential
+     */
+    signCredentialJsonLD: function(credential, options=SolidVC.DefaultCredentialSignerOptions, credentialSigner=SolidVC.signCredentialDefaultJsonLD) {
         return credentialSigner(credential, options);
     },
 
-    // Produce signature for credential
-    signCredentialDefault: function(credential, options) {
+    /** Produce JSON-LD signature for credential
+     *
+     * @param credential {Object} Credential object
+     * @param options {Object} Optional configuration for signature
+     *
+     * @returns {Object} Signed JSON-LD credential
+     */
+    signCredentialDefaultJsonLD: function(credential, options) {
         var md = forge.md.sha256.create();
         md.update(options.serializedCredential, 'utf8');
-        var signature = SolidVC.privateKey.sign(md);
+        var signature = SolidVC.privateKey[options.keyType].sign(md);
         credential["signature"] = {};
         credential["signature"]["@context"] = SolidVC.DefaultContext;
         credential["signature"]["@type"] = SolidVC.DefaultSigType;
@@ -347,11 +364,50 @@ SolidVC = {
         return credential;
     },
 
+    /** Produce N3 signature for credential
+     *
+     * @param credential {IndexedFormula} Credential triple store
+     * @param options {Object} Optional configuration for signature
+     * @param credentialSigner {Object} Function for signing credential
+     *
+     * @returns {IndexedFormula} Signed N3 credential
+     */
+    signCredentialN3: function(credential, options={}, credentialSigner=SolidVC.signCredentialDefaultN3) {
+        return credentialSigner(credential, options);
+    },
+
+    /** Produce N3 signature for credential
+     *
+     * @param credential {IndexedFormula} Credential triple store
+     * @param options {Object} Optional configuration for signature
+     *
+     * @returns {IndexedFormula} Signed N3 credential
+     */
+    signCredentialDefaultN3: function(credential, options) {
+        var signature;
+        var txn = $rdf.sym(THIS('txn'));
+        var md = forge.md.sha256.create();
+        var proof = $rdf.sym(THIS('proof'));
+        if (!options.type || !options.creator || !options.keyType) {
+          // TODO: At the moment this is not needed because it is enforced elsewhere
+          // This may become necessary in future iterations when users select parameters
+        }
+        credential.add(proof, RDF('type'), SEC($rdf.Literal.fromValue(options.type)));
+        credential.add(proof, SEC('created'), $rdf.Literal.fromValue(new Date()));
+        credential.add(proof, SEC('creator'), $rdf.Literal.fromValue(options.creator));
+        // credential.add(proof, SEC("nonce"), options.nonce);
+        md.update(credential.toCanonical(), 'utf8');
+        signature = SolidVC.privateKey[options.keyType].sign(md);
+        credential.add(proof, SEC('signatureValue'), $rdf.Literal.fromValue(signature));
+        credential.add(txn, SVC('proof'), $rdf.Literal.fromValue(proof));
+        return credential;
+    },
+
     addStatement: function(event) {
         event.preventDefault();
-        var sub = $rdf.sym($("#subject").val());
-        var pred = FOAF($("#predicate").val());
-        var obj = $rdf.sym($("#object").val());
+        var sub = $rdf.sym($('#subject').val());
+        var pred = FOAF($('#predicate').val());
+        var obj = $rdf.sym($('#object').val());
         if (sub === "") {
           alert("Please include a subject");
           return;
@@ -366,9 +422,9 @@ SolidVC = {
         }
         var stmt = {"sub": sub, "pred": pred, "obj": obj};
         SolidVC.statements.push(stmt);
-        $("#subject").val("");
-        $("#predicate").val("");
-        $("#object").val("");
+        $('#subject').val("");
+        $('#predicate').val("");
+        $('#object').val("");
         SolidVC.displayStatements();
     },
 
@@ -383,7 +439,7 @@ SolidVC = {
 
     displayStatements: function() {
         var stmts = SolidVC.statements;
-        var stmtsDiv = $("#stmts");
+        var stmtsDiv = $('#stmts');
         stmtsDiv.empty();
         for (var i = 0; i < stmts.length; i++) {
           var stmt = stmts[i];
@@ -396,8 +452,8 @@ SolidVC = {
           stmtsDiv.append("; object: ");
           stmtsDiv.append(stmt.obj.value);
           var cancelImg = $("<img src='../img/cancel.png'>");
-          cancelImg.attr("id", "cancel-" + i.toString());
-          cancelImg.attr("class", "remove-stmt");
+          cancelImg.attr('id', 'cancel-' + i.toString());
+          cancelImg.attr('class', 'remove-stmt');
           stmtsDiv.append(cancelImg);
           stmtsDiv.append("</div>");
         }
@@ -411,17 +467,17 @@ SolidVC = {
         console.log("signed credential:", SolidVC.signedCredential);
         return SolidVC.signedCredential;*/
         event.preventDefault();
-        var credPlain = $("#credPlain").val();
-        var credContext = $("#credContext").val();
-        // var credSerialization = $("#credSerialization").val();
+        var credPlain = $('#credPlain').val();
+        var credContext = $('#credContext').val();
+        // var credSerialization = $('#credSerialization').val();
         if (credPlain === "") {
           alert("Please include a credential in the text area");
-          $("#credPlain").focus();
+          $('#credPlain').focus();
           return;
         }
         if (credContext === "") {
           alert("Please select a valid context for the credential");
-          $("#credContext").focus();
+          $('#credContext').focus();
           return;
         }
         /*if (credSerialization === "") {
@@ -435,7 +491,7 @@ SolidVC = {
         SolidVC.credentialN3 += ":txn svc:credPlain " + credPlain + " .\n";
         SolidVC.credentialN3 += ":txn svc:credContext " + credContext + ":ticker .\n";
         // SolidVC.credentialN3 += ":txn svc:credSerialization \"" + credSerialization + "\" .\n";
-        SolidVC.credentialN3 += ":txn svc:prevTxn " + ":txn" + " .\n";
+        SolidVC.credentialN3 += ":txn svc:prev " + ":txn" + " .\n";
         SolidVC.credentialN3 += ":txn svc:prevHash " + ":txn" + " .\n";
         SolidVC.credentialN3 += ":txn svc:issuer <" + myWebID + "> .\n";
         SolidVC.credentialN3 += ":txn svc:subject <" + myWebID + "> .\n";
@@ -443,82 +499,100 @@ SolidVC = {
         SolidVC.credentialN3 += ":txn svc:timestamp \"" + (new Date()).toISOString() + "\" .\n";
         // console.log("SolidVC.credentialN3:\n", SolidVC.credentialN3);*/
 
-        var credStore = $rdf.graph();
-        var credPlainStore = $rdf.graph();
-        var me = $rdf.sym(myWebID);
-        var base = me.value;
-        var type = "text/n3";
-        $rdf.parse(credPlain, credPlainStore, base, type, (errParse, resParse) => {
-            if (errParse) {
-              // console.error(errParse.name + ": " + errParse.message);
-              console.log("errParse:\n", errParse);
-              return;
-            }
-            credStore.add($rdf.sym("https://kezike17.solidtest.space/public/credentials"), SVC("credPlain"), resParse);
-            $rdf.serialize(null, credStore, base, type, /*null*/ (errSer, resSer) => {
-                if (errSer) {
-                  var errMsg = errSer.name + ": " + errSer.message;
-                  alert(errMsg);
-                  console.error(errMsg);
-                  return;
-                }
-                console.log("resSer:\n", resSer);
-                SolidVC.credentialN3 = resSer;
-            }, {});
-        });
+        var getOptions = {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'include',
+          clearPreviousData: true
+        };
 
-        svcFetch(credentialRepo, {
-            method: 'POST',
-            headers: {
-              // 'user-agent': 'Mozilla/4.0 MDN Example',
-              'content-type': 'text/n3',
-              'slug': 'credential-4'
-            },
-            mode: 'cors',
-            credentials: 'include',
-            body: SolidVC.credentialN3
-        })
-        .then((resPostCred) => {
-            console.log(resPostCred);
-            // SolidVC.insertCredential();
-            if (!resPostCred.ok) {
-              var errMsg = resPostCred.status + ": " + resPostCred.statusText + "\nMake sure your credential is well-formed\nMake sure you are properly authenticated\nRefresh the page and try again";
-              alert(errMsg);
-              console.error(errMsg);
-              return;
-            }
+        var postOptions = {
+          method: 'POST',
+          headers: {
+            'content-type': 'text/n3',
+            'slug': 'Properly populated in POST request below'
+          },
+          mode: 'cors',
+          credentials: 'include',
+          body: 'Properly populated in POST request below'
+        };
+
+        SolidVC.fetcher.load(metaFile, getOptions).then((resGetMeta) => {
+            var currTxnIdxStr = SolidVC.fetcher.store.match(undefined, SVC('length'), undefined)[0].object.value;
+            var currTxnSlugStr = 'credential-' + currTxnIdxStr;
+            var prevTxnIdxStr = currTxnIdxStr - 1;
+            var prevTxnStr = 'credential-' + prevTxnIdxStr;
+            var prevTxnId = SolidVC.fetcher.store.match(undefined, SVC('id'), undefined)[0].object.value;
+            var prevHash = 'Properly populated in GET request below';
+            SolidVC.fetcher.load(prevTxnId, getOptions).then((resGetPrev) => {
+                THIS = $rdf.Namespace(credentialRepo + currTxnSlugStr + '.n3#');
+                var credStore = $rdf.graph();
+                var credPlainStore = $rdf.graph();
+                var me = $rdf.sym(myWebID);
+                var base = me.value;
+                var type = 'text/n3';
+                var md = forge.md.sha256.create();
+                md.update(SolidVC.fetcher.store.toCanonical(), 'utf8');
+                prevHash = md.digest().data;
+                $rdf.parse(credPlain, credPlainStore, base, type, (errParse, resParse) => {
+                    if (errParse) {
+                      // console.error(errParse.name + ": " + errParse.message);
+                      console.log("errParse:\n", errParse);
+                      return;
+                    }
+                    var txn = $rdf.sym(THIS('txn'));
+                    credStore.add(THIS('txn'), RDF('type'), SVC('Transaction'));
+                    credStore.add(THIS('txn'), SVC('id'), THIS('txn'));
+                    credStore.add(THIS('txn'), SVC('credPlain'), resParse);
+                    credStore.add(THIS('txn'), SVC('credContext'), SolidVC.namespaces[$rdf.Literal.fromValue(credContext)]('ticker'));
+                    credStore.add(THIS('txn'), SVC('prev'), $rdf.sym(prevTxnId));
+                    credStore.add(THIS('txn'), SVC('prevHash'), $rdf.Literal.fromValue(prevHash));
+                    SolidVC.signCredentialN3(credStore, {type: 'RsaSignature2018', creator: myWebID, keyType: 'RSA'});
+                    $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
+                        if (errSer) {
+                          var errMsg = errSer.name + ": " + errSer.message;
+                          alert(errMsg);
+                          console.error(errMsg);
+                          return;
+                        }
+                        // console.log("resSer:\n", resSer);
+                        SolidVC.credentialN3 = resSer;
+                    }, {});
+                });
+                postOptions.headers.slug = currTxnSlugStr;
+                postOptions.body = SolidVC.credentialN3;
+                SolidVC.fetcher.load(credentialRepo, postOptions).then((resPostCred) => {
+                    console.log(resPostCred);
+                }).catch((err) => {
+                   console.error(err.name + ": " + err.message);
+                });
+            }).catch((err) => {
+               console.error(err.name + ": " + err.message);
+            });
+        }).catch((err) => {
+           console.error(err.name + ": " + err.message);
         });
-        /*$("#subject").val("");
-        $("#predicate").val("");
-        $("#object").val("");
+        /*$('#subject').val("");
+        $('#predicate').val("");
+        $('#object').val("");
         SolidVC.statements = [];*/
-        $("#credPlain").val("");
-        $("#credContext").val("");
-        // $("#credSerialization").val("");
+        $('#credPlain').val("");
+        $('#credContext').val("");
+        // $('#credSerialization').val("");
     },
 
-    insertCredential: function() {
+    patchMetaFile: function(event) {
         event.preventDefault();
-        var store = $rdf.graph(credentialRepo + "credential-5.n3");
-        var updateManager = new $rdf.UpdateManager(store);
-        var sub = $rdf.sym($("#subject").val());
-        var pred = FOAF($("#predicate").val());
-        var obj = $rdf.sym($("#object").val());
-        var stmt = new $rdf.Statement(sub, pred, obj, store);
-        // var stmt = new $rdf.Statement(sub, pred, obj, credentialGraph);
-        // store.add(sub, pred, obj);
-        updateManager.insert_statement(stmt, () => {});
-    },
-
-    updateCredential: function() {
-        event.preventDefault();
-        var store = $rdf.graph(credentialRepo + "credential-5.n3");
-        var updateManager = new $rdf.UpdateManager(store);
-        var sub = $rdf.sym($("#subject").val());
-        var pred = FOAF($("#predicate").val());
-        var obj = $rdf.sym($("#object").val());
-        var updatedStatement = updateManager.update_statement(new $rdf.Statement(sub, pred, obj, sub), () => {});
-        updatedStatement.set_object(sub, () => {});
+        var insertions = $rdf.graph();
+        insertions.add(META('ledger'), SVC('locked'), $rdf.Literal.fromValue(1));
+        var deletions = $rdf.graph();
+        deletions.add(META('ledger'), SVC('locked'), $rdf.Literal.fromValue(0));
+        /*var patchOptions = {
+          insert: insertions,
+          delete: deletions
+        };
+        SolidVC.fetcher.store.applyPatch(patchOptions, metaFile, () => {});*/
+        SolidVC.updateManager.update(insertions, deletions, (uri, success, errorbody) => {});
     },
 
     // Verify credential has proper signature
@@ -526,6 +600,6 @@ SolidVC = {
     }
 };
 
-$(window).on("load", function() {
+$(window).on('load', function() {
     SolidVC.init();
 });

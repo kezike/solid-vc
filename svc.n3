@@ -104,14 +104,14 @@ svc:Ledger a rdfs:Class ;
 svc:genesis a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "genesis"@en ;
-    rdfs:comment "The ID of the earliest transaction in a ledger"@en ;
+    rdfs:comment "The URI of the earliest transaction in a ledger"@en ;
     rdfs:domain svc:Ledger ;
     rdfs:range rdfs:Literal .
 
 svc:head a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "head"@en ;
-    rdfs:comment "The ID of the latest transaction in a ledger"@en ;
+    rdfs:comment "The URI of the latest transaction in a ledger"@en ;
     rdfs:domain svc:Ledger ;
     rdfs:range rdfs:Literal .
 
@@ -159,7 +159,7 @@ svc:credContext a rdf:Property ;
 svc:prev a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "prev"@en ;
-    rdfs:comment "The ID of the previous transaction"@en ;
+    rdfs:comment "The URI of the previous transaction"@en ;
     rdfs:domain svc:Transaction ;
     rdfs:range  rdfs:Literal .
 

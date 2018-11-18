@@ -8,107 +8,19 @@
         <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
         <link rel="shortcut icon" type="./img/png" href="./img/favicon.png"/>
         <script src="./node_modules/@trust/oidc-web/dist/oidc-web.min.js"></script>
-        <!--<script src="./node_modules/oidc-web/src/index.js"></script>-->
     </head>
   <body class="container">
       <div>
           <h1>Solid VC</h1>
-          <!--<button id="login" class="btn">Login</button>-->
       </div>
       <div>
-          <h3>Create Verifiable Credential</h3>
-          <form>
-              <fieldset>
-                <!--Credential: <input type="file" accept=".json" id="credential" required><br>
-                <input type="submit" value="Issue Credential" id="issue-cred">-->
-                <!--Public Key: <input type="file" placeholder="ie. http://example.com/people/peter/keys/23" size="40" id="creator" required><br>-->
-                <!--Signature: <input type="file" id="signature" required><br>-->
-
-                <!--<input type="text" id="subject"><br>
-                <input type="text" id="predicate"><br>
-                <input type="text" id="object"><br>
-                <button id="add-stmt">Add Statement</button>-->
-                <div id="profile" class="hidden">
-                    <h3 id="name"></h3>
-                    <div>
-                        <img id="image" height="100" width="100">
-                    </div>
-                </div>
-                <div>
-                    <select id="credContext">
-                        <option value="">Select Credential Context ("General" if unsure)</option>
-                        <option value="SVC_EDU">Education</option>
-                        <option value="SVC_FIN">Finance</option>
-                        <option value="SVC_GEN">General</option>
-                        <option value="SVC_GOV">Government</option>
-                        <option value="SVC_HEALTH">Health</option>
-                        <option value="SVC_LAW">Law</option>
-                        <option value="SVC_MED">Medicine</option>
-                        <option value="SVC_OCC">Occupation</option>
-                        <option value="SVC_TRANS">Transportation</option>
-                        <option value="SVC_TRAVEL">Travel</option>
-                    </select>
-                    <!--<select id="credSerialization">
-                        <option value="">Select Credential Serialization ("Plaintext" if unsure)</option>
-                        <option value="jsonld">JSON-LD</option>
-                        <option value="n3">N3</option>
-                        <option value="ntriples">NTriples</option>
-                        <option value="plain">Plaintext</option>
-                        <option value="rdfxml">RDF/XML</option>
-                        <option value="turtle">Turtle</option>
-                    </select>-->
-                </div>
-                <textarea id="credPlain" rows=25 cols=100 form="vcform"></textarea>
-                <input type="submit" value="Issue Credential" id="issue-cred">
-                <button id="patch-meta">Patch Meta</button>
-              </fieldset>
-          </form>
+          <h3>Select Your Role</h3>
+              <button id="subject-role">Subject</button>
+              <button id="issuer-role">Issuer</button>
+              <button id="verifier-role">Verifier</button>
       </div>
-      <div id=stmts></div>
   </body>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  <!--<script>
-      var OIDCWebClient = OIDC.OIDCWebClient;
-      var options = {solid:true};
-      var oidc = new OIDCWebClient(options);
-      var provider = 'https://kezike17.solidtest.space/';
-
-      document.addEventListener('DOMContentLoaded', () => {
-         oidc.currentSession().then((session) => {
-             if (!session.hasCredentials()) {
-               console.log('Session is missing credentials! Redirecting to login...');
-               oidc.login(provider).then((rp) => {
-                   /*sessionFromResponse().then((respSession) => {
-                       // localStorage.setItem("oidc.fetch", respSession.fetch);
-                       window.session = respSession;
-                       window.fetch = respSession.fetch;
-                       console.log('session:', respSession);
-                       console.log('fetch:', respSession.fetch);
-                   });*/
-                   oidc.currentSession().then((currSession) => {
-                       // localStorage.setItem("oidc.fetch", session.fetch);
-                       window.session = currSession;
-                       window.fetch = currSession.fetch;
-                       // console.log('idxSession:', currSession);
-                       // console.log('idxFetch:', currSession.fetch);
-                   });
-               });
-             } else {
-               console.log('Session has credentials!');
-               // localStorage.setItem("oidc.fetch", session.fetch);
-               window.session = session;
-               window.fetch = session.fetch;
-               // console.log('idxSession:', session);
-               // console.log('idxFetch:', session.fetch);
-             }
-         });
-         /*$.getScript("app.js", function(){
-             alert("app.js loaded and executed");
-         });*/
-      });
-  </script>-->
-  <script src="./js/rdflib.min.js" charset="utf-8"></script>
   <script src="./js/dist/app.bundle.js" charset="utf-8"></script>
-  <!--<script src="./js/app.js"></script>-->
 </html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Solid VC</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"/>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+        <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+        <link rel="shortcut icon" type="./img/png" href="./img/favicon.png"/>
+        <script src="./node_modules/@trust/oidc-web/dist/oidc-web.min.js"></script>
+        <!--<script src="./node_modules/oidc-web/src/index.js"></script>-->
+    </head>
+  <body class="container">
+      <div>
+          <h1>Solid VC Subject</h1>
+          <!--<button id="login" class="btn">Login</button>-->
+          <button id="switch-prov">Switch Providers</button>
+      </div>
+      <div>
+          <h3>Request Verifiable Credential</h3>
+          <form>
+              <fieldset>
+                <div id="profile" class="hidden">
+                    <h3 id="name"></h3>
+                    <div>
+                        <img id="image" height="100" width="100">
+                    </div>
+                </div>
+                <div>
+                    <select id="credContext">
+                        <option value="">Select Credential Context ("General" if unsure)</option>
+                        <option value="svcEdu">Education</option>
+                        <option value="svcFin">Finance</option>
+                        <option value="svcGen">General</option>
+                        <option value="svcGov">Government</option>
+                        <option value="svcHealth">Health</option>
+                        <option value="svcLaw">Law</option>
+                        <option value="svcMed">Medicine</option>
+                        <option value="svcOcc">Occupation</option>
+                        <option value="svcTrans">Transportation</option>
+                        <option value="svcTravel">Travel</option>
+                    </select>
+                    <label for="select-issuer">Select Credential Issuer Id:</label>
+                    <input type="text" placeholder="eg.: https://example.com/profile/card#me" id="select-issuer">
+                </div>
+                <h4>Upload Required Documents</h4>
+                <h4>Optional Note to Issuer</h4>
+                <textarea id="credPlain" rows=15 cols=50 form="vcform" placeholder="Use these area to provide additional information, request clarification, or make any other miscellaneous request"></textarea>
+                <input type="submit" value="Request Credential" id="req-cred">
+              </fieldset>
+          </form>
+      </div>
+      <div id=stmts></div>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <!--<script src="./js/rdflib-ruben.min.js" charset="utf-8"></script>-->
+  <script src="./js/dist/app.bundle.js" charset="utf-8"></script>
+</html>

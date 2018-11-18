@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Solid VC</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"/>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+        <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+        <link rel="shortcut icon" type="./img/png" href="./img/favicon.png"/>
+        <script src="./node_modules/@trust/oidc-web/dist/oidc-web.min.js"></script>
+        <!--<script src="./node_modules/oidc-web/src/index.js"></script>-->
+    </head>
+  <body class="container">
+      <div>
+          <h1>Solid VC Issuer</h1>
+          <!--<button id="login" class="btn">Login</button>-->
+          <button id="switch-prov">Switch Providers</button>
+      </div>
+      <div id="active-tab">
+      </div>
+      <div id="review-tab" hidden>
+          TODO: LOAD LIST OF CREDENTIAL REQUESTS FROM INBOX
+      </div>
+      <div id="issue-tab" hidden>
+          <div>
+              <h3>Review Verifiable Credentials</h3>
+              <h5>Use guide above to determine required documents for credential of interest</h5>
+              <form>
+                  <fieldset>
+                    <!--Credential: <input type="file" accept=".json" id="credential" required><br>
+                    <input type="submit" value="Issue Credential" id="issue-cred">-->
+                    <!--Public Key: <input type="file" placeholder="ie. http://example.com/people/peter/keys/23" size="40" id="creator" required><br>-->
+                    <!--Signature: <input type="file" id="signature" required><br>-->
+
+                    <!--<input type="text" id="subject"><br>
+                    <input type="text" id="predicate"><br>
+                    <input type="text" id="object"><br>
+                    <button id="add-stmt">Add Statement</button>-->
+                    <div id="profile" class="hidden">
+                        <h3 id="name"></h3>
+                        <div>
+                            <img id="image" height="100" width="100">
+                        </div>
+                    </div>
+                    <div>
+                        <select id="credContext">
+                            <option value="">Select Credential Context ("General" if unsure)</option>
+                            <option value="svcEdu">Education</option>
+                            <option value="svcFin">Finance</option>
+                            <option value="svcGen">General</option>
+                            <!--<option value="svcGov">Government</option>
+                            <option value="svcHealth">Health</option>
+                            <option value="svcLaw">Law</option>
+                            <option value="svcMed">Medicine</option>
+                            <option value="svcOcc">Occupation</option>-->
+                            <option value="svcTrans">Transportation</option>
+                            <!--<option value="svcTravel">Travel</option>-->
+                        </select>
+                    </div>
+                    <textarea id="credPlain" rows=25 cols=100 form="vcform"></textarea>
+                    <input type="submit" value="Issue Credential" id="issue-cred">
+                    <button id="patch-meta">Patch Meta</button>
+                  </fieldset>
+              </form>
+          </div>
+      </div>
+      <div id=stmts></div>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="./js/dist/app.bundle.js" charset="utf-8"></script>
+</html>

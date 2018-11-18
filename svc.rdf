@@ -60,7 +60,7 @@
     </rdf:Property>
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#genesis">
-        <comment xml:lang="en">The ID of the earliest transaction in a ledger</comment>
+        <comment xml:lang="en">The URI of the earliest transaction in a ledger</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Ledger"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">genesis</label>
@@ -68,7 +68,7 @@
     </rdf:Property>
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#head">
-        <comment xml:lang="en">The ID of the latest transaction in a ledger</comment>
+        <comment xml:lang="en">The URI of the latest transaction in a ledger</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Ledger"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">head</label>
@@ -180,7 +180,7 @@
     </rdf:Property>
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#prev">
-        <comment xml:lang="en">The ID of the previous transaction</comment>
+        <comment xml:lang="en">The URI of the previous transaction</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Transaction"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">prev</label>

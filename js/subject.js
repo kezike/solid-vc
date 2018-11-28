@@ -35,7 +35,7 @@ SolidSub = {
     requestCredential: function(event) {
         event.preventDefault();
         var inbox;
-        var issuer = $('#issuer-id').val();
+        var issuer = $('#issuer-pubkey').val();
         console.log('ISSUER ID:');
         console.log(issuer);
         /*var inboxExt = SolidSub.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuer));

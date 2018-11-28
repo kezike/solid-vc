@@ -473,6 +473,7 @@ SolidIss = {
         console.log("signed credential:", SolidIss.signedCredential);
         return SolidIss.signedCredential;*/
         event.preventDefault();
+        var subject = $('#subject-pubkey').val();
         var credPlain = $('#cred-plain').val();
         var credContext = $('#cred-context').val();
         // var credSerialization = $('#cred-serialization').val();
@@ -533,6 +534,7 @@ SolidIss = {
                     credStore.add(THIS('cred'), SVC('id'), $rdf.Literal.fromValue(currCredId));
                     credStore.add(THIS('cred'), SVC('plain'), resParse);
                     credStore.add(THIS('cred'), SVC('context'), SolidIss.namespaces[credContext]('ticker'));
+                    credStore.add(THIS('cred'), SVC('subject'), $rdf.Literal.fromValue(subject));
                     SolidIss.signCredentialN3(credStore, {type: 'RsaSignature2018', creator: myWebId, keyType: 'RSA'});
                     $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
                         if (errSer) {

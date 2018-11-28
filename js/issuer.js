@@ -5,9 +5,13 @@
 var $n3 = require('n3');
 var $rdf = require('rdflib');
 // var $auth = require('solid-auth-client');
-var forge = require('node-forge');
+var jsonld = require('jsonld');
+var jsig = require('jsonld-signatures');
+jsig.use('jsonld', jsonld);
+/*var forge = require('node-forge');
 var ed25519 = forge.pki.ed25519;
-var rsa = forge.pki.rsa;
+var rsa = forge.pki.rsa;*/
+var util = require('./util.js');
 
 // Global variables
 var provider = 'https://kezike.solid.community/';
@@ -35,42 +39,106 @@ var RDFS = $rdf.Namespace('http://www.w3.org/2000/01/rdf-schema#');
 var WS = $rdf.Namespace('https://www.w3.org/ns/pim/space#');
 var SEC = $rdf.Namespace('https://w3id.org/security#');
 var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
+var LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
 
 var svcSession;
 var svcFetch;
 var SolidIss = SolidIss || {};
 
 SolidIss = {
-    activeTab: '', // {#review, #issue}
+    // Tab links and content
+    reviewTabLink: '#review-tab-link',
 
-    reviewTab: '#review-tab',
+    reviewTabCnt: '#review-tab-cnt',
 
-    issueTab: '#issue-tab',
+    issueTabLink: '#issue-tab-link',
+
+    issueTabCnt: '#issue-tab-cnt',
+
+    currentTabLink: '', // {SolidIss.reviewTabLink, SolidIss.issueTabLink}
+
+    currentTabCnt: '', // {SolidIss.reviewTabCnt, SolidIss.issueTabCnt}
 
     // Initialize app
     init: function(event) {
-        // SolidSub.generateKeyPair({keyType: 'RSA', bits: 2048, workers: 2});
         SolidIss.bindEvents();
-        SolidIss.activeTab = SolidIss.reviewTab;
-        $('#active-tab').load(SolidIss.activeTab);
+        $(SolidIss.issueTabLink).click();
     },
 
     // Bind events
     bindEvents: function() {
-        $(document).on('click', '#review-reqs', SolidIss.loadReview);
-        $(document).on('click', '#issue-cred', SolidIss.loadIssue);
+        $(document).on('click', '#review-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#issue-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#switch-acct', util.switchAccounts);
+        $(document).on('click', '#switch-role', util.switchRoles);
+    },
+    
+    displayTab: function(event) {
+        console.log("event.target.id:", event.target.id);
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tabcontent" and hide them
+        $('.tabcontent').css('display', 'none');
+
+        // Get all elements with class="tablinks" and remove the class "active"
+        $('.tablinks').removeClass('active');
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        switch('#' + event.target.id) {
+          case SolidIss.reviewTabLink:
+            SolidIss.currentTabLink = SolidIss.reviewTabLink;
+            SolidIss.currentTabCnt = SolidIss.reviewTabCnt;
+            $(SolidIss.currentTabCnt).css('display', 'block');
+            $(event.currentTarget).addClass('active');
+            SolidIss.loadReviewTab();
+            break;
+          case SolidIss.issueTabLink:
+            SolidIss.currentTabLink = SolidIss.issueTabLink;
+            SolidIss.currentTabCnt = SolidIss.issueTabCnt;
+            $(SolidIss.currentTabCnt).css('display', 'block');
+            $(event.currentTarget).addClass('active');
+            SolidIss.loadIssueTab();
+            break;
+        }
     },
 
-    loadReview: function(event) {
-        $(SolidIss.activeTab).hide();
-        SolidIss.activeTab = SolidIss.reviewTab;
-        $('#active-tab').load(SolidIss.activeTab);
+    loadReviewTab: function() {
+        var inbox;
+        console.log("SolidIss:", SolidIss);
+        SolidIss.fetcher.load(SolidIss.session.webId, util.getOptions).then((respFindInbox) => {
+            var inbox;
+            console.log('STORE:');
+            console.log(SolidIss.fetcher.store);
+            /*var inboxExt = SolidIss.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuer));
+            console.log('INBOX EXT:');
+            console.log(inboxExt);*/
+            SolidIss.fetcher.store.statements.forEach((stmtFind) => {
+                if (stmtFind.predicate.value == LDP('inbox').value) {
+                  console.log('INBOX:', stmtFind);
+                  inbox = stmtFind.object.value;
+                  console.log('INBOX URI:', inbox);
+                  // console.log('CONTAINED MSGS:');
+                  SolidIss.fetcher.load(inbox, util.getOptions).then((respLoadInbox) => {
+                      console.log("respLoadInbox:", respLoadInbox);
+                      SolidIss.fetcher.store.statements.forEach((stmtLoad) => {
+                          // if (stmtLoad.predicate.value == LDP('contains').value) {
+                          // }
+                          // console.log('MSG:', stmtLoad);
+                      });
+                  });
+                  return;
+                }
+            });
+            // var inbox = $rdf.uri.join(inboxExt, issuer);
+            // console.log('ISSUER INBOX:');
+            // console.log(inbox);
+        }).catch((err) => {
+           console.error(err.name + ": " + err.message);
+        });
     },
 
-    loadIssue: function(event) {
-        $(SolidIss.activeTab).hide();
-        SolidIss.activeTab = SolidIss.issueTab;
-        $('#active-tab').load(SolidIss.activeTab);
+    loadIssueTab: function() {
     },
 
     namespaces: {
@@ -148,10 +216,6 @@ SolidIss = {
     },
 
     DefaultSigType: 'RsaSignature2018',
-
-    fetcher: null,
-
-    updater: null,
 
     role: "",
 
@@ -327,7 +391,7 @@ SolidIss = {
      */
     signCredentialDefaultN3: function(credential, options) {
         var signature;
-        var txn = $rdf.sym(THIS('txn'));
+        var cred = $rdf.sym(THIS('cred'));
         var md = forge.md.sha256.create();
         var proof = $rdf.sym(THIS('proof'));
         if (!options.type || !options.creator || !options.keyType) {
@@ -341,7 +405,7 @@ SolidIss = {
         md.update(credential.toCanonical(), 'utf8');
         signature = SolidIss.privateKey[options.keyType].sign(md);
         credential.add(proof, SEC('signatureValue'), $rdf.Literal.fromValue(signature));
-        credential.add(txn, SVC('proof'), $rdf.Literal.fromValue(proof));
+        credential.add(cred, SVC('proof'), $rdf.Literal.fromValue(proof));
         return credential;
     },
 
@@ -409,46 +473,26 @@ SolidIss = {
         console.log("signed credential:", SolidIss.signedCredential);
         return SolidIss.signedCredential;*/
         event.preventDefault();
-        var credPlain = $('#credPlain').val();
-        var credContext = $('#credContext').val();
-        // var credSerialization = $('#credSerialization').val();
+        var credPlain = $('#cred-plain').val();
+        var credContext = $('#cred-context').val();
+        // var credSerialization = $('#cred-serialization').val();
         if (credPlain === "") {
           alert("Please include a credential in the text area");
-          $('#credPlain').focus();
+          $('#cred-plain').focus();
           return;
         }
         if (credContext === "") {
           alert("Please select a valid context for the credential");
-          $('#credContext').focus();
+          $('#cred-context').focus();
           return;
         }
         /*if (credSerialization === "") {
           alert("Please select a valid serialization for the credential");
-          $("#credSerialization").focus();
+          $("#cred-serialization").focus();
           return;
         }*/
-        /*SolidIss.credentialN3 += ":txn a svc:Transaction .\n";
-        SolidIss.credentialN3 += ":txn svc:id 10 .\n";
-        credPlain = "\"\"\"" + credPlain + "\"\"\"@en";
-        SolidIss.credentialN3 += ":txn svc:credPlain " + credPlain + " .\n";
-        SolidIss.credentialN3 += ":txn svc:credContext " + credContext + ":ticker .\n";
-        // SolidIss.credentialN3 += ":txn svc:credSerialization \"" + credSerialization + "\" .\n";
-        SolidIss.credentialN3 += ":txn svc:prev " + ":txn" + " .\n";
-        SolidIss.credentialN3 += ":txn svc:prevHash " + ":txn" + " .\n";
-        SolidIss.credentialN3 += ":txn svc:issuer <" + myWebId + "> .\n";
-        SolidIss.credentialN3 += ":txn svc:subject <" + myWebId + "> .\n";
-        SolidIss.credentialN3 += ":txn svc:signature <" + myWebId + "-signs-cred> .\n";
-        SolidIss.credentialN3 += ":txn svc:timestamp \"" + (new Date()).toISOString() + "\" .\n";
-        // console.log("SolidIss.credentialN3:\n", SolidIss.credentialN3);*/
 
-        var getOptions = {
-          method: 'GET',
-          mode: 'cors',
-          credentials: 'include',
-          clearPreviousData: true
-        };
-
-        var postOptions = {
+        util.postOptions = {
           method: 'POST',
           headers: {
             'content-type': 'text/n3'/*,
@@ -459,38 +503,36 @@ SolidIss = {
           body: 'Properly populated in POST request below'
         };
 
-        SolidIss.fetcher.load(metaFile, getOptions).then((resGetMeta) => {
-            var currTxnId = SolidIss.fetcher.store.match(undefined, SVC('length'), undefined)[0].object.value;
-            // var currTxnSlugStr = 'credential-' + currTxnId;
-            var prevTxn = SolidIss.fetcher.store.match(undefined, SVC('head'), undefined)[0].object.value;
-            // var prevTxnIdxStr = currTxnId - 1;
-            // var prevTxnStr = 'credential-' + prevTxnIdxStr;
-            // var prevTxnId = SolidIss.fetcher.store.match(undefined, SVC('id'), undefined)[0].object.value;
-            var prevHash = 'Properly populated in GET request below';
-            SolidIss.fetcher.load(prevTxn, getOptions).then((resGetPrev) => {
-                // THIS = $rdf.Namespace(credentialRepo + currTxnSlugStr + '.n3#');
-                THIS = $rdf.Namespace(prevTxn + '#');
+        SolidIss.fetcher.load(metaFile, util.getOptions).then((resGetMeta) => {
+            var currCredId = SolidIss.fetcher.store.match(undefined, SVC('length'), undefined)[0].object.value;
+            // var currCredSlugStr = 'credential-' + currCredId;
+            var prevCred = SolidIss.fetcher.store.match(undefined, SVC('head'), undefined)[0].object.value;
+            // var prevCredIdxStr = currCredId - 1;
+            // var prevCredStr = 'credential-' + prevCredIdxStr;
+            // var prevCredId = SolidIss.fetcher.store.match(undefined, SVC('id'), undefined)[0].object.value;
+            // var prevHash = 'Properly populated in GET request below';
+            SolidIss.fetcher.load(prevCred, util.getOptions).then((resGetPrev) => {
+                // THIS = $rdf.Namespace(credentialRepo + currCredSlugStr + '.n3#');
+                THIS = $rdf.Namespace(prevCred + '#');
                 var credStore = $rdf.graph();
                 var credPlainStore = $rdf.graph();
                 var me = $rdf.sym(myWebId);
                 var base = me.value;
                 var type = 'text/n3';
-                var md = forge.md.sha256.create();
-                md.update(SolidIss.fetcher.store.toCanonical(), 'utf8');
-                prevHash = md.digest().data;
+                // var md = forge.md.sha256.create();
+                // md.update(SolidIss.fetcher.store.toCanonical(), 'utf8');
+                // prevHash = md.digest().data;
                 $rdf.parse(credPlain, credPlainStore, base, type, (errParse, resParse) => {
                     if (errParse) {
                       // console.error(errParse.name + ": " + errParse.message);
                       console.log("errParse:\n", errParse);
                       return;
                     }
-                    var txn = $rdf.sym(THIS('txn'));
-                    credStore.add(THIS('txn'), RDF('type'), SVC('Transaction'));
-                    credStore.add(THIS('txn'), SVC('id'), $rdf.Literal.fromValue(currTxnId));
-                    credStore.add(THIS('txn'), SVC('credPlain'), resParse);
-                    credStore.add(THIS('txn'), SVC('credContext'), SolidIss.namespaces[credContext]('ticker'));
-                    credStore.add(THIS('txn'), SVC('prev'), $rdf.sym(prevTxn));
-                    credStore.add(THIS('txn'), SVC('prevHash'), $rdf.Literal.fromValue(prevHash));
+                    var cred  = $rdf.sym(THIS('cred'));
+                    credStore.add(THIS('cred'), RDF('type'), SVC('Credential'));
+                    credStore.add(THIS('cred'), SVC('id'), $rdf.Literal.fromValue(currCredId));
+                    credStore.add(THIS('cred'), SVC('plain'), resParse);
+                    credStore.add(THIS('cred'), SVC('context'), SolidIss.namespaces[credContext]('ticker'));
                     SolidIss.signCredentialN3(credStore, {type: 'RsaSignature2018', creator: myWebId, keyType: 'RSA'});
                     $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
                         if (errSer) {
@@ -503,9 +545,9 @@ SolidIss = {
                         SolidIss.credentialN3 = resSer;
                     }, {});
                 });
-                // postOptions.headers.slug = currTxnSlugStr;
-                postOptions.body = SolidIss.credentialN3;
-                SolidIss.fetcher.load(credentialRepo, postOptions).then((resPostCred) => {
+                // util.postOptions.headers.slug = currCredSlugStr;
+                util.postOptions.body = SolidIss.credentialN3;
+                SolidIss.fetcher.load(credentialRepo, util.postOptions).then((resPostCred) => {
                     console.log(resPostCred);
                 }).catch((err) => {
                    console.error(err.name + ": " + err.message);
@@ -520,35 +562,9 @@ SolidIss = {
         $('#predicate').val("");
         $('#object').val("");
         SolidIss.statements = [];*/
-        $('#credPlain').val("");
-        $('#credContext').val("");
-        // $('#credSerialization').val("");
-    },
-
-    patchMetaFile: function(event) {
-        event.preventDefault();
-        META = $rdf.Namespace('https://kezike.solid.community/public/svc/meta-gen.n3#');
-        /*SolidIss.fetcher.load(metaFile, {
-          method: 'GET',
-          mode: 'cors',
-          credentials: 'include'
-        }).then((response) => {
-            var deletions = SolidIss.fetcher.store.match(META('ledger'), SVC('locked'), $rdf.Literal.fromValue(1));
-            console.log('deletions:', deletions);
-            var insertions = $rdf.st(META('ledger'), SVC('locked'), $rdf.Literal.fromValue(0), $rdf.sym(metaFile));
-            SolidIss.updater.update(deletions, insertions, (uri, success, error) => {
-                console.log('uri:', uri);
-                console.log('success:', success);
-                console.log('error:', error);
-            });
-        });*/
-        var deletions = SolidIss.fetcher.store.match(META('ledger'), SVC('locked'), $rdf.Literal.fromValue(0));
-        var insertions = $rdf.st(META('ledger'), SVC('locked'), $rdf.Literal.fromValue(1), $rdf.sym('https://kezike.solid.community/public/svc/meta-gen.n3'));
-        SolidIss.updater.update(deletions, insertions, (uri, success, error) => {
-            console.log('uri:', uri);
-            console.log('success:', success);
-            console.log('error:', error);
-        }, true);
+        $('#cred-plain').val("");
+        $('#cred-context').val("");
+        // $('#cred-serialization').val("");
     },
 
     // Verify credential has proper signature

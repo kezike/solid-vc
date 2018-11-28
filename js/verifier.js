@@ -1,5 +1,8 @@
 // Solid Verifiable Credentials Inspector
 
+// Libraries and dependencies
+var util = require('./util.js');
+
 var SolidVer = SolidVer || {};
 
 SolidVer = {
@@ -10,6 +13,8 @@ SolidVer = {
 
     // Bind events
     bindEvents: function() {
+        $(document).on('click', '#switch-acct', util.switchAccounts);
+        $(document).on('click', '#switch-role', util.switchRoles);
     }
 };
 

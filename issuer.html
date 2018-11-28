@@ -7,24 +7,29 @@
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
         <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
         <link rel="shortcut icon" type="./img/png" href="./img/favicon.png"/>
-        <script src="./node_modules/@trust/oidc-web/dist/oidc-web.min.js"></script>
-        <!--<script src="./node_modules/oidc-web/src/index.js"></script>-->
+        <link rel="stylesheet" href="./css/styles.css">
     </head>
   <body class="container">
       <div>
           <h1>Solid VC Issuer</h1>
           <!--<button id="login" class="btn">Login</button>-->
-          <button id="switch-prov">Switch Providers</button>
+          <button id="switch-acct">Switch Accounts</button>
+          <button id="switch-role">Switch Roles</button>
       </div>
-      <div id="active-tab">
+      <div class="tab">
+          <button class="tablinks" id="issue-tab-link">Issue</button>
+          <button class="tablinks" id="review-tab-link">Review</button>
       </div>
-      <div id="review-tab" hidden>
+      <!--<div id="active-tab">
+      </div>-->
+
+      <div class="tabcontent" id="review-tab-cnt">
+          <h3>Review Credential Requests<h3>
           TODO: LOAD LIST OF CREDENTIAL REQUESTS FROM INBOX
       </div>
-      <div id="issue-tab" hidden>
+      <div class="tabcontent" id="issue-tab-cnt">
+          <h3>Issue New Credential</h3>
           <div>
-              <h3>Review Verifiable Credentials</h3>
-              <h5>Use guide above to determine required documents for credential of interest</h5>
               <form>
                   <fieldset>
                     <!--Credential: <input type="file" accept=".json" id="credential" required><br>
@@ -43,8 +48,9 @@
                         </div>
                     </div>
                     <div>
-                        <select id="credContext">
-                            <option value="">Select Credential Context ("General" if unsure)</option>
+                    <label for="cred-context">Select Credential Context:</label>
+                        <select id="cred-context">
+                            <option value="">Select "General" if unsure</option>
                             <option value="svcEdu">Education</option>
                             <option value="svcFin">Finance</option>
                             <option value="svcGen">General</option>
@@ -57,7 +63,11 @@
                             <!--<option value="svcTravel">Travel</option>-->
                         </select>
                     </div>
-                    <textarea id="credPlain" rows=25 cols=100 form="vcform"></textarea>
+                    <div>
+                        <label for="subject-id">Provide Credential Subject Id:</label>
+                        <input type="text" placeholder="eg.: https://example.com/profile/card#me" size=37 id="select-issuer">
+                    </div>
+                    <textarea id="cred-plain" rows=25 cols=100 form="vcform"></textarea>
                     <input type="submit" value="Issue Credential" id="issue-cred">
                     <button id="patch-meta">Patch Meta</button>
                   </fieldset>

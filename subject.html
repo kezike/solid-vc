@@ -14,7 +14,8 @@
       <div>
           <h1>Solid VC Subject</h1>
           <!--<button id="login" class="btn">Login</button>-->
-          <button id="switch-prov">Switch Providers</button>
+          <button id="switch-acct">Switch Accounts</button>
+          <button id="switch-role">Switch Roles</button>
       </div>
       <div>
           <h3>Request Verifiable Credential</h3>
@@ -27,25 +28,29 @@
                     </div>
                 </div>
                 <div>
-                    <select id="credContext">
-                        <option value="">Select Credential Context ("General" if unsure)</option>
+                    <label for="cred-context">Select Credential Context:</label>
+                    <select id="cred-context">
+                        <option value="">Select "General" if unsure</option>
                         <option value="svcEdu">Education</option>
                         <option value="svcFin">Finance</option>
                         <option value="svcGen">General</option>
-                        <option value="svcGov">Government</option>
+                        <!--<option value="svcGov">Government</option>
                         <option value="svcHealth">Health</option>
                         <option value="svcLaw">Law</option>
                         <option value="svcMed">Medicine</option>
-                        <option value="svcOcc">Occupation</option>
+                        <option value="svcOcc">Occupation</option>-->
                         <option value="svcTrans">Transportation</option>
-                        <option value="svcTravel">Travel</option>
+                        <!--<option value="svcTravel">Travel</option>-->
                     </select>
-                    <label for="select-issuer">Select Credential Issuer Id:</label>
-                    <input type="text" placeholder="eg.: https://example.com/profile/card#me" id="select-issuer">
+                </div>
+                <div>
+                    <label for="issuer-id">Provide Credential Issuer Id:</label>
+                    <input type="text" placeholder="eg.: https://example.com/profile/card#me" size=37 id="issuer-id">
                 </div>
                 <h4>Upload Required Documents</h4>
+                <i><h5>Use guide above to determine required documents for credential of interest</h5></i>
                 <h4>Optional Note to Issuer</h4>
-                <textarea id="credPlain" rows=15 cols=50 form="vcform" placeholder="Use these area to provide additional information, request clarification, or make any other miscellaneous request"></textarea>
+                <textarea id="cred-plain" rows=15 cols=50 form="vcform" placeholder="Use this area to provide additional information, request clarification, or make any other miscellaneous inquiry"></textarea>
                 <input type="submit" value="Request Credential" id="req-cred">
               </fieldset>
           </form>

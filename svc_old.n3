@@ -95,50 +95,98 @@ svc:metaTravel a rdf:Property ;
     rdfs:domain svc:Metadata ;
     rdfs:range rdfs:Literal .
 
-svc:Credential a rdfs:Class ;
+svc:Ledger a rdfs:Class ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:subClassOf rdfs:Resource ;
-    rdfs:label "Credential"@en ;
-    rdfs:comment "The class representing a credential in the form of groups of statements and attestations about an entity"@en .
+    rdfs:label "Ledger"@en ;
+    rdfs:comment "The class representing information about a particular ledger of linked transactions"@en .
+
+svc:genesis a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "genesis"@en ;
+    rdfs:comment "The URI of the earliest transaction in a ledger"@en ;
+    rdfs:domain svc:Ledger ;
+    rdfs:range rdfs:Literal .
+
+svc:head a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "head"@en ;
+    rdfs:comment "The URI of the latest transaction in a ledger"@en ;
+    rdfs:domain svc:Ledger ;
+    rdfs:range rdfs:Literal .
+
+svc:length a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "length"@en ;
+    rdfs:comment "The number of client-defined transactions in a ledger"@en ;
+    rdfs:domain svc:Ledger ;
+    rdfs:range xsd:nonNegativeInteger .
+
+svc:locked a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "locked"@en ;
+    rdfs:comment "Whether or not someone has claimed write access to a ledger"@en ;
+    rdfs:domain svc:Ledger ;
+    rdfs:range xsd:boolean .
+
+svc:Transaction a rdfs:Class ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:subClassOf rdfs:Resource ;
+    rdfs:label "Transaction"@en ;
+    rdfs:comment "The class representing an atomic ledger state transition in the form of groups of statements, attestations, and credentials about an entity"@en .
 
 svc:id a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "id"@en ;
-    rdfs:comment "The ID (likely URI; may be superfluous) of a credential"@en ;
-    rdfs:domain svc:Credential ;
+    rdfs:comment "The ID of a transaction"@en ;
+    rdfs:domain svc:Transaction ;
     rdfs:range xsd:nonNegativeInteger .
 
-svc:plain a rdf:Property ;
+svc:credPlain a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "plain"@en ;
-    rdfs:comment "The plaintext RDF graph representing a credential"@en ;
-    rdfs:domain svc:Credential ;
+    rdfs:label "credPlain"@en ;
+    rdfs:comment "The RDF graph representing the plaintext of a credential in a transaction"@en ;
+    rdfs:domain svc:Transaction ;
     rdfs:range rdfs:Resource .
 
-svc:context a rdf:Property ;
+svc:credContext a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "context"@en ;
-    rdfs:comment "The context of a credential (ie. 'health', 'law', 'travel')"@en ;
-    rdfs:domain svc:Credential ;
+    rdfs:label "credContext"@en ;
+    rdfs:comment "The context of the credential (ie. 'health', 'law', 'travel')"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range rdfs:Literal .
+
+svc:prev a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "prev"@en ;
+    rdfs:comment "The URI of the previous transaction"@en ;
+    rdfs:domain svc:Transaction ;
+    rdfs:range  rdfs:Literal .
+
+svc:prevHash a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "prevHash"@en ;
+    rdfs:comment "The hash of the previous transaction"@en ;
+    rdfs:domain svc:Transaction ;
     rdfs:range rdfs:Literal .
 
 svc:subject a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "subject"@en ;
-    rdfs:comment "The public key of the subject of a credential"@en ;
-    rdfs:domain svc:Credential ;
+    rdfs:comment "The public key of the subject of a transaction"@en ;
+    rdfs:domain svc:Transaction ;
     rdfs:range rdfs:Literal .
 
 svc:proof a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "proof"@en ;
     rdfs:comment """
-    The digital proof verifying a credential:
+    The digital proof verifying a transaction:
     - 'type': The proof type (ie. sec:RsaSignature2018)
-    - 'created': The timestamp of the creation of a credential
-    - 'creator': The public key of the issuer of a credential
+    - 'created': The timestamp of the creation of a transaction
+    - 'creator': The public key of the issuer of a transaction
     - 'nonce': Optional value proving effort in proof creation
-    - 'signatureValue': The creator's signature of plain
+    - 'signatureValue': The creator's signature of credPlain
     """@en ;
-    rdfs:domain svc:Credential ;
+    rdfs:domain svc:Transaction ;
     rdfs:range rdfs:Literal.

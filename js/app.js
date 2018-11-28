@@ -4,12 +4,10 @@
 var $n3 = require('n3');
 var $rdf = require('rdflib');
 var $auth = require('solid-auth-client');
+var util = require('./util.js');
 var subject = require('./subject.js');
 var issuer = require('./issuer.js');
 var verifier = require('./verifier.js');
-/*var subject;
-var issuer;
-var verifier;*/
 
 // Global variables
 var homeURI = 'http://localhost:8080/';
@@ -100,38 +98,38 @@ SolidVC = {
         });
     },
 
+    loginHelper: function(session) {
+        SolidVC.session = session;
+        console.log("currentSession:", SolidVC.session);
+        SolidVC.fetcher = $rdf.fetcher($rdf.graph());
+        console.log("SolidVC.fetcher:", SolidVC.fetcher);
+        SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
+        util.getPubKey();
+        util.getPrivKey();
+        console.log("CWD:", process.cwd());
+        util.bindKeyValue(util, 'session', SolidVC.session);
+        util.bindKeyValue(util, 'fetcher', SolidVC.fetcher);
+        util.bindKeyValue(subject, 'session', SolidVC.session);
+        util.bindKeyValue(subject, 'fetcher', SolidVC.fetcher);
+        util.bindKeyValue(issuer, 'session', SolidVC.session);
+        util.bindKeyValue(issuer, 'fetcher', SolidVC.fetcher);
+        console.log("ISSUER FETCHER:", issuer.fetcher);
+        util.bindKeyValue(verifier, 'session', SolidVC.session);
+        util.bindKeyValue(verifier, 'fetcher', SolidVC.fetcher);
+    },
+
     // Login to app
     login: function() {
         $auth.currentSession().then((currentSession) => {
             if (!currentSession) {
               $auth.popupLogin({popupUri: popupURI}).then((popupSession) => {
-                  SolidVC.session = popupSession;
-                  console.log('popupSession:', SolidVC.session);
-                  SolidVC.fetcher = $rdf.fetcher($rdf.graph());
-                  SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
-                  // subject.fetcher = Object.assign({}, SolidVC.fetcher);
-                  subject.bindKeyValue('fetcher', SolidVC.fetcher);
-                  console.log("SolidVC.fetcher:", SolidVC.fetcher);
-                  // $('body').load(SolidVC.webPage);
-                  // window.location.href = SolidVC.webPage;
+                  SolidVC.loginHelper(popupSession);
               }).catch((err) => {
                  console.error(err.name + ": " + err.message);
               });
               return;
             }
-            SolidVC.session = currentSession;
-            console.log('currentSession:', SolidVC.session);
-            SolidVC.fetcher = $rdf.fetcher($rdf.graph());
-            SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
-            // subject.fetcher = Object.assign({}, SolidVC.fetcher);
-            subject.bindKeyValue('fetcher', SolidVC.fetcher);
-            /*issuer.fetcher = SolidVC.fetcher;
-            issuer.updater = SolidVC.updater;
-            verifier.fetcher = SolidVC.fetcher;
-            verifier.updater = SolidVC.updater;*/
-            console.log("SolidVC.fetcher:", SolidVC.fetcher);
-            // $('body').load(SolidVC.webPage);
-            // window.location.href = SolidVC.webPage;
+            SolidVC.loginHelper(currentSession);
         }).catch((err) => {
            console.error(err.name + ": " + err.message);
         });
@@ -145,7 +143,7 @@ SolidVC = {
         // $(document).on('change', '#creator', SolidVC.handleCreatorUpload);
         // $(document).on('click', '#issue-cred', SolidVC.issueCredential);
         // $(document).on('click', '#patch-meta', SolidVC.patchMetaFile);
-        // $(document).on('click', '#switch-prov', SolidVC.switchProviders);
+        // $(document).on('click', '#switch-acct, SolidVC.switchAccounts);
         $(document).on('click', '#subject-role', SolidVC.loadSubject);
         $(document).on('click', '#issuer-role', SolidVC.loadIssuer);
         $(document).on('click', '#verifier-role', SolidVC.loadVerifier);
@@ -156,16 +154,6 @@ SolidVC = {
         // localStorage.clear();
         return $auth.logout();
     },
-
-    // Login as a different user
-    switchProviders: function(event) {
-        // SolidVC.logout();
-        // $auth.login('https://kezike.solidtest.space/profile/card#me');
-        console.log("Switching Providers...")
-        SolidVC.logout().then(() => {
-            SolidVC.login();
-        });
-    }
 };
 
 $(window).on('load', SolidVC.init);

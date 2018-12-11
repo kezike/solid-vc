@@ -25,9 +25,10 @@ read pass
 export SOLID_UNAME=$uname
 export SOLID_PASS=$pass
 ./login.sh $account
-cp cookies.txt ../rest
 
 # TODO - Setup necessary svc folders
+# Including:
+# - /public/svc/keys
 
 # Generate key pair
 ./generate_keypair.sh

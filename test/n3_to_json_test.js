@@ -6,7 +6,7 @@ var jsonContent;
 
 // $rdf.convert.convertToJson("@prefix : <#>.\n@prefix c: <https://kezike17/solidtest.space/profile/card#>.\n@prefix n0: <http://xmlns.com/foaf/0.1/>.\n@prefix c0: <https://www.w3.org/People/Berners-Lee/card#>.\nc:me n0:knows c0:i.", (err, res) => {console.log(res);});
 // $rdf.convert.convertToJson("svc.n3", (err, res) => {console.log(res);});
-n3Content = fs.readFile(n3File, 'utf8', function(err, content) {
+fs.readFile(n3File, 'utf8', function(err, content) {
     n3Content = content;
     $rdf.convert.convertToJson(n3Content, (err, res) => {console.log(JSON.parse(res)[0]);});
 });

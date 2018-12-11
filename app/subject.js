@@ -35,20 +35,21 @@ SolidSub = {
     requestCredential: function(event) {
         event.preventDefault();
         var inbox;
-        var issuer = $('#issuer-pubkey').val();
+        var issuerId = $('#issuer-id').val();
+        var issuerPubKey = $('#issuer-pubkey').val();
         console.log('ISSUER ID:');
-        console.log(issuer);
-        /*var inboxExt = SolidSub.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuer));
+        console.log(issuerId);
+        /*var inboxExt = SolidSub.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuerId));
         // var inboxExt = '/inbox';
         console.log('INBOX EXT:');
         console.log(inboxExt);
-        var inbox = $rdf.uri.join(inboxExt, issuer);
+        var inbox = $rdf.uri.join(inboxExt, issuerId);
         console.log('ISSUER INBOX:');
         console.log(inbox);*/
-        SolidSub.fetcher.load(issuer, util.getOptions).then((resp) => {
+        SolidSub.fetcher.load(issuerId, util.getOptions).then((resp) => {
             /*console.log('STORE:');
             console.log(SolidSub.fetcher.store);*/
-            /*var inboxExt = SolidSub.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuer));
+            /*var inboxExt = SolidSub.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuerId));
             console.log('INBOX EXT:');
             console.log(inboxExt);*/
             SolidSub.fetcher.store.statements.forEach((statement) => {
@@ -60,7 +61,7 @@ SolidSub = {
                   return;
                 }
             });
-            // var inbox = $rdf.uri.join(inboxExt, issuer);
+            // var inbox = $rdf.uri.join(inboxExt, issuerId);
             // console.log('ISSUER INBOX:');
             // console.log(inbox);
         }).catch((err) => {

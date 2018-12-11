@@ -104,16 +104,12 @@ SolidVC = {
         SolidVC.fetcher = $rdf.fetcher($rdf.graph());
         console.log("SolidVC.fetcher:", SolidVC.fetcher);
         SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
-        util.getPubKey();
-        util.getPrivKey();
-        console.log("CWD:", process.cwd());
         util.bindKeyValue(util, 'session', SolidVC.session);
         util.bindKeyValue(util, 'fetcher', SolidVC.fetcher);
         util.bindKeyValue(subject, 'session', SolidVC.session);
         util.bindKeyValue(subject, 'fetcher', SolidVC.fetcher);
         util.bindKeyValue(issuer, 'session', SolidVC.session);
         util.bindKeyValue(issuer, 'fetcher', SolidVC.fetcher);
-        console.log("ISSUER FETCHER:", issuer.fetcher);
         util.bindKeyValue(verifier, 'session', SolidVC.session);
         util.bindKeyValue(verifier, 'fetcher', SolidVC.fetcher);
     },

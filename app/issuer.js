@@ -392,18 +392,20 @@ SolidIss = {
     signCredentialDefaultN3: function(credential, options) {
         var signature;
         var cred = $rdf.sym(THIS('cred'));
-        var md = forge.md.sha256.create();
+        // var md = forge.md.sha256.create();
         var proof = $rdf.sym(THIS('proof'));
-        if (!options.type || !options.creator || !options.keyType) {
+        var creator = util.getPubKey();
+        /*if (!options.type || !options.creator || !options.keyType) {
           // TODO: At the moment this is not needed because it is enforced elsewhere
           // This may become necessary in future iterations when users select parameters
-        }
+        }*/
         credential.add(proof, RDF('type'), SEC($rdf.Literal.fromValue(options.type)));
         credential.add(proof, SEC('created'), $rdf.Literal.fromValue(new Date()));
-        credential.add(proof, SEC('creator'), $rdf.Literal.fromValue(options.creator));
+        credential.add(proof, SEC('creator'), $rdf.Literal.fromValue(creator));
         // credential.add(proof, SEC("nonce"), options.nonce);
-        md.update(credential.toCanonical(), 'utf8');
-        signature = SolidIss.privateKey[options.keyType].sign(md);
+        // md.update(credential.toCanonical(), 'utf8');
+        // signature = SolidIss.privateKey[options.keyType].sign(md);
+        $rdf.convert.convertToJson(n3Content, (err, res) => {console.log(JSON.parse(res)[0]);});
         credential.add(proof, SEC('signatureValue'), $rdf.Literal.fromValue(signature));
         credential.add(cred, SVC('proof'), $rdf.Literal.fromValue(proof));
         return credential;
@@ -473,7 +475,8 @@ SolidIss = {
         console.log("signed credential:", SolidIss.signedCredential);
         return SolidIss.signedCredential;*/
         event.preventDefault();
-        var subject = $('#subject-pubkey').val();
+        var subjectId = $('#subject-id').val();
+        var subjectPubKey = $('#subject-pubkey').val();
         var credPlain = $('#cred-plain').val();
         var credContext = $('#cred-context').val();
         // var credSerialization = $('#cred-serialization').val();
@@ -534,8 +537,8 @@ SolidIss = {
                     credStore.add(THIS('cred'), SVC('id'), $rdf.Literal.fromValue(currCredId));
                     credStore.add(THIS('cred'), SVC('plain'), resParse);
                     credStore.add(THIS('cred'), SVC('context'), SolidIss.namespaces[credContext]('ticker'));
-                    credStore.add(THIS('cred'), SVC('subject'), $rdf.Literal.fromValue(subject));
-                    SolidIss.signCredentialN3(credStore, {type: 'RsaSignature2018', creator: myWebId, keyType: 'RSA'});
+                    credStore.add(THIS('cred'), SVC('subject'), $rdf.Literal.fromValue(subjectPubKey));
+                    SolidIss.signCredentialN3(credStore, {type: 'RsaSignature2018', keyType: 'RSA'});
                     $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
                         if (errSer) {
                           var errMsg = errSer.name + ": " + errSer.message;

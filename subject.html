@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Solid VC</title>
+        <title>SolidVC Subject</title>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"/>
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -12,7 +12,7 @@
     </head>
   <body class="container">
       <div>
-          <h1>Solid VC Subject</h1>
+          <h1>SolidVC Subject</h1>
           <!--<button id="login" class="btn">Login</button>-->
           <button id="switch-acct">Switch Accounts</button>
           <button id="switch-role">Switch Roles</button>
@@ -44,8 +44,10 @@
                     </select>
                 </div>
                 <div>
+                    <label for="issuer-id">Provide Credential Issuer Id:</label>
+                    <input type="text" placeholder="eg.: https://ISSUER.solid.community/profile/card#me" size=50 id="issuer-id"><br>
                     <label for="issuer-pubkey">Provide Credential Issuer Id:</label>
-                    <input type="text" placeholder="eg.: https://ISSUER.solid.community/public/svc/keys/1234.txt" size=37 id="issuer-pubkey">
+                    <input type="text" placeholder="eg.: https://ISSUER.solid.community/public/svc/keys/1234.txt" size=60 id="issuer-pubkey">
                 </div>
                 <h4>Upload Required Documents</h4>
                 <i><h5>Use guide above to determine required documents for credential of interest</h5></i>
@@ -59,6 +61,6 @@
   </body>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  <!--<script src="./js/rdflib-ruben.min.js" charset="utf-8"></script>-->
-  <script src="./js/dist/app.bundle.js" charset="utf-8"></script>
+  <!--<script src="./app/rdflib-ruben.min.js" charset="utf-8"></script>-->
+  <script src="./app/dist/app.bundle.js" charset="utf-8"></script>
 </html>

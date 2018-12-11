@@ -27,22 +27,17 @@
           <h3>Review Credential Requests<h3>
           <table style="width:100%">
               <tr>
-                  <td>
-                      <h4 style="color:blue; display:inline">Transportation Request from Alice</h4>
-                      <input type="image" src="./img/review.png" height=25 width=25 style="display:inline; left:50em" />
-                  </td>
+                  <hr>
+                  <td>Transportation Request from Alice</td>
+                  <hr>
               </tr>
               <tr>
-                  <td>
-                      <h4 style="color:blue; display:inline">Education Request from John</h4>
-                      <input type="image" src="./img/review.png" height=25 width=25 style="display:inline;" />
-                  </td>
+                  <td>Education Request from John</td>
+                  <hr>
               </tr>
               <tr>
-                  <td>
-                      <h4 style="color:blue; display:inline">Financial Request from Sally</h4>
-                      <input type="image" src="./img/review.png" height=25 width=25 style="display:inline;" />
-                  </td>
+                  <td>Financial Request from Sally</td>
+                  <hr>
               </tr>
           </table>
       </div>
@@ -88,7 +83,7 @@
                         <label for="subject-pubkey">Provide Credential Subject Public Key:</label>
                         <input type="text" placeholder="eg.: https://SUBJECT.solid.community/public/svc/keys/1234.txt" size=60 id="subject-pubkey">
                     </div>
-                    <textarea id="cred-plain" rows=15 cols=100 form="vcform"></textarea>
+                    <textarea id="cred-plain" rows=25 cols=100 form="vcform"></textarea>
                     <input type="submit" value="Issue Credential" id="issue-cred">
                     <button id="patch-meta">Patch Meta</button>
                   </fieldset>
@@ -96,7 +91,6 @@
           </div>
       </div>
       <div id=stmts></div>
-      <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/"                           title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"                      title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
   </body>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

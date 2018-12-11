@@ -4,7 +4,7 @@
 var $rdf = require('rdflib');
 var $auth = require('solid-auth-client');
 var LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
-var fs = require('fs');
+// var fs = require('fs');
 
 var SolidUtil = SolidUtil || {};
 
@@ -32,9 +32,13 @@ SolidUtil = {
       body: "Testing out inbox discovery..."
     },
 
-    pubKeyPemFile: '../pub.pem',
+    pubKeyType: 'PUB',
 
-    privKeyPemFile: '../priv.pem',
+    privKeyType: 'PRIV',
+
+    pubKeyPemFile: '../auth/pub.pem',
+
+    privKeyPemFile: '../auth/priv.pem',
 
     // Home page of SolidVC app
     homePage: '/',
@@ -80,15 +84,19 @@ SolidUtil = {
         });
     },
     
-    readFile: function (file) {
+    readFile: function (file, keyType) {
         var rawFile = new XMLHttpRequest();
         rawFile.open("GET", file, false);
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
               if (rawFile.status === 200 || rawFile.status == 0) {
                 var content = rawFile.responseText;
-                // console.log(content);
-                return content;
+                switch (keyType) {
+                  case SolidUtil.pubKeyType:
+                    SolidUtil.pubKey = content;
+                  case SolidUtil.privKeyType:
+                    SolidUtil.privKey = content;
+                }
               }
             }
         }
@@ -100,8 +108,9 @@ SolidUtil = {
             console.log(content);
             return content;
         });*/
-        var pubKey = SolidUtil.readFile(SolidUtil.pubKeyPemFile);
-        console.log(pubKey);
+        SolidUtil.readFile(SolidUtil.pubKeyPemFile, SolidUtil.pubKeyType);
+        var pubKey = SolidUtil.pubKey;
+        SolidUtil.pubKey = "";
         return pubKey;
     },
 
@@ -110,8 +119,9 @@ SolidUtil = {
             console.log(content);
             return content;
         });*/
-        var privKey = SolidUtil.readFile(SolidUtil.privKeyPemFile);
-        console.log(privKey);
+        SolidUtil.readFile(SolidUtil.privKeyPemFile, SolidUtil.privKeyType);
+        var privKey = SolidUtil.privKey;
+        SolidUtil.privKey = "";
         return privKey;
     }
 };

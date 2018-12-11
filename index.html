@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Solid VC</title>
+        <title>SolidVC</title>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"/>
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -10,17 +10,22 @@
         <script src="./node_modules/@trust/oidc-web/dist/oidc-web.min.js"></script>
     </head>
   <body class="container">
-      <div>
-          <h1>Solid VC</h1>
-      </div>
-      <div>
-          <h3>Select Your Role</h3>
-              <button id="subject-role">Subject</button>
-              <button id="issuer-role">Issuer</button>
-              <button id="verifier-role">Verifier</button>
-      </div>
+      <center>
+          <div top=50% margin=0 position=absolute>
+              <h1>SolidVC</h1>
+          </div>
+          <div>
+              <img src="./img/favicon.png" alt="Solid logo" height=77 width=77>
+          <div>
+          <div>
+              <h3>Select Your Role</h3>
+                  <button id="subject-role">Subject</button>
+                  <button id="issuer-role">Issuer</button>
+                  <button id="verifier-role">Verifier</button>
+          </div>
+      </center>
   </body>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  <script src="./js/dist/app.bundle.js" charset="utf-8"></script>
+  <script src="./app/dist/app.bundle.js" charset="utf-8"></script>
 </html>

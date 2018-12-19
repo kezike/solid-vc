@@ -13,7 +13,7 @@ var updateManager = new $rdf.UpdateManager(fetcher.store);
 var canonicalizer = require('rdf-canonize');
 var loginOptions = {
   username: 'kezike',
-  password: 'K@yodellesolid2040'
+  password: ''
 };
 var getOptions = {
   method: 'GET',

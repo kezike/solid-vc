@@ -4,13 +4,6 @@
 // Libraries and dependencies
 var $n3 = require('n3');
 var $rdf = require('rdflib');
-// var $auth = require('solid-auth-client');
-var jsonld = require('jsonld');
-var jsig = require('jsonld-signatures');
-jsig.use('jsonld', jsonld);
-/*var forge = require('node-forge');
-var ed25519 = forge.pki.ed25519;
-var rsa = forge.pki.rsa;*/
 var util = require('./util.js');
 
 // Global variables
@@ -215,7 +208,7 @@ SolidIss = {
       "sec": "https://w3id.org/security/v1"
     },
 
-    DefaultSigType: 'RsaSignature2018',
+    DefaultSigType: 'LinkedDataSignature2015', // 'RsaSignature2018'
 
     role: "",
 
@@ -323,7 +316,7 @@ SolidIss = {
         return serializedCredential;
     },
 
-    // Generate (privKey, pubKey) pair
+    /*// Generate (privKey, pubKey) pair
     generateKeyPair: function(options) {
         switch (options.keyType) {
           case 'RSA':
@@ -337,7 +330,7 @@ SolidIss = {
                 SolidIss.publicKey['RSA'] = keypair.publicKey;
             });
         }
-    },
+    },*/
 
     /** Produce JSON-LD signature for credential
      *
@@ -358,16 +351,17 @@ SolidIss = {
      *
      * @returns {Object} Signed JSON-LD credential
      */
-    signCredentialDefaultJsonLD: function(credential, options) {
-        var md = forge.md.sha256.create();
+    signCredentialDefaultJsonLD: async function(credential, options) {
+        /*var md = forge.md.sha256.create();
         md.update(options.serializedCredential, 'utf8');
         var signature = SolidIss.privateKey[options.keyType].sign(md);
         credential["signature"] = {};
         credential["signature"]["@context"] = SolidIss.DefaultContext;
         credential["signature"]["@type"] = SolidIss.DefaultSigType;
         credential["signature"]["creator"] = SolidIss.creator;
-        credential["signature"]["signatureValue"] = signature;
-        return credential;
+        credential["signature"]["signatureValue"] = signature;*/
+        var signedCredential = await SolidUtil.signDocument(credential);
+        return signedCredential;
     },
 
     /** Produce N3 signature for credential
@@ -507,62 +501,56 @@ SolidIss = {
           body: 'Properly populated in POST request below'
         };
 
-        SolidIss.fetcher.load(metaFile, util.getOptions).then((resGetMeta) => {
-            var currCredId = SolidIss.fetcher.store.match(undefined, SVC('length'), undefined)[0].object.value;
-            // var currCredSlugStr = 'credential-' + currCredId;
-            var prevCred = SolidIss.fetcher.store.match(undefined, SVC('head'), undefined)[0].object.value;
-            // var prevCredIdxStr = currCredId - 1;
-            // var prevCredStr = 'credential-' + prevCredIdxStr;
-            // var prevCredId = SolidIss.fetcher.store.match(undefined, SVC('id'), undefined)[0].object.value;
-            // var prevHash = 'Properly populated in GET request below';
-            SolidIss.fetcher.load(prevCred, util.getOptions).then((resGetPrev) => {
-                // THIS = $rdf.Namespace(credentialRepo + currCredSlugStr + '.n3#');
-                THIS = $rdf.Namespace(prevCred + '#');
-                var credStore = $rdf.graph();
-                var credPlainStore = $rdf.graph();
-                var me = $rdf.sym(myWebId);
-                var base = me.value;
-                var type = 'text/n3';
-                // var md = forge.md.sha256.create();
-                // md.update(SolidIss.fetcher.store.toCanonical(), 'utf8');
-                // prevHash = md.digest().data;
-                $rdf.parse(credPlain, credPlainStore, base, type, (errParse, resParse) => {
-                    if (errParse) {
-                      // console.error(errParse.name + ": " + errParse.message);
-                      console.log("errParse:\n", errParse);
-                      return;
-                    }
-                    var cred  = $rdf.sym(THIS('cred'));
-                    credStore.add(THIS('cred'), RDF('type'), SVC('Credential'));
-                    credStore.add(THIS('cred'), SVC('id'), $rdf.Literal.fromValue(currCredId));
-                    credStore.add(THIS('cred'), SVC('plain'), resParse);
-                    credStore.add(THIS('cred'), SVC('context'), SolidIss.namespaces[credContext]('ticker'));
-                    credStore.add(THIS('cred'), SVC('subject'), $rdf.Literal.fromValue(subjectPubKey));
-                    SolidIss.signCredentialN3(credStore, {type: 'RsaSignature2018', keyType: 'RSA'});
-                    $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
-                        if (errSer) {
-                          var errMsg = errSer.name + ": " + errSer.message;
-                          alert(errMsg);
-                          console.error(errMsg);
-                          return;
-                        }
-                        // console.log("resSer:\n", resSer);
-                        SolidIss.credentialN3 = resSer;
-                    }, {});
-                });
-                // util.postOptions.headers.slug = currCredSlugStr;
-                util.postOptions.body = SolidIss.credentialN3;
-                SolidIss.fetcher.load(credentialRepo, util.postOptions).then((resPostCred) => {
-                    console.log(resPostCred);
-                }).catch((err) => {
-                   console.error(err.name + ": " + err.message);
-                });
-            }).catch((err) => {
-               console.error(err.name + ": " + err.message);
-            });
+        // SolidIss.fetcher.load(metaFile, util.getOptions).then((resGetMeta) => {
+        // var currCredId = SolidIss.fetcher.store.match(undefined, SVC('length'), undefined)[0].object.value;
+        // var prevCred = SolidIss.fetcher.store.match(undefined, SVC('head'), undefined)[0].object.value;
+        // SolidIss.fetcher.load(prevCred, util.getOptions).then((resGetPrev) => {
+        // THIS = $rdf.Namespace(credentialRepo + currCredSlugStr + '.n3#');
+        // THIS = $rdf.Namespace(prevCred + '#');
+        var credStore = $rdf.graph();
+        var credPlainStore = $rdf.graph();
+        var me = $rdf.sym(myWebId);
+        var base = me.value;
+        var type = 'text/n3';
+        $rdf.parse(credPlain, credPlainStore, base, type, (errParse, resParse) => {
+            // $rdf.convert.convertToJson
+            if (errParse) {
+              // console.error(errParse.name + ": " + errParse.message);
+              console.log("errParse:\n", errParse);
+              return;
+            }
+            var cred  = $rdf.sym(THIS('cred'));
+            credStore.add(THIS('cred'), RDF('type'), SVC('Credential'));
+            // credStore.add(THIS('cred'), SVC('id'), $rdf.Literal.fromValue(currCredId));
+            credStore.add(THIS('cred'), SVC('plain'), resParse);
+            credStore.add(THIS('cred'), SVC('context'), SolidIss.namespaces[credContext]('ticker'));
+            credStore.add(THIS('cred'), SVC('subject'), $rdf.Literal.fromValue(subjectPubKey));
+            // SolidIss.signCredentialN3(credStore, {type: 'LinkedDataSignature2015' /*'RsaSignature2018'*/, keyType: 'RSA'});
+            SolidIss.signCredentialJsonLD(credStore, {type: 'LinkedDataSignature2015' /*'RsaSignature2018'*/, keyType: 'LD2015'});
+            $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
+                if (errSer) {
+                  var errMsg = errSer.name + ": " + errSer.message;
+                  alert(errMsg);
+                  console.error(errMsg);
+                  return;
+                }
+                // console.log("resSer:\n", resSer);
+                SolidIss.credentialN3 = resSer;
+            }, {});
+        });
+        // util.postOptions.headers.slug = currCredSlugStr;
+        util.postOptions.body = SolidIss.credentialN3;
+        SolidIss.fetcher.load(credentialRepo, util.postOptions).then((resPostCred) => {
+            console.log(resPostCred);
         }).catch((err) => {
            console.error(err.name + ": " + err.message);
         });
+        // }).catch((err) => {
+        //    console.error(err.name + ": " + err.message);
+        // });
+        // }).catch((err) => {
+        //    console.error(err.name + ": " + err.message);
+        // });
         /*$('#subject').val("");
         $('#predicate').val("");
         $('#object').val("");

@@ -32,41 +32,15 @@ SolidSub = {
     },
     
     // Submit request for credential
-    requestCredential: function(event) {
+    requestCredential: async function(event) {
         event.preventDefault();
-        var inbox;
         var issuerId = $('#issuer-id').val();
-        var issuerPubKey = $('#issuer-pubkey').val();
-        console.log('ISSUER ID:');
-        console.log(issuerId);
-        /*var inboxExt = SolidSub.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuerId));
-        // var inboxExt = '/inbox';
-        console.log('INBOX EXT:');
-        console.log(inboxExt);
-        var inbox = $rdf.uri.join(inboxExt, issuerId);
-        console.log('ISSUER INBOX:');
-        console.log(inbox);*/
-        SolidSub.fetcher.load(issuerId, util.getOptions).then((resp) => {
-            /*console.log('STORE:');
-            console.log(SolidSub.fetcher.store);*/
-            /*var inboxExt = SolidSub.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuerId));
-            console.log('INBOX EXT:');
-            console.log(inboxExt);*/
-            SolidSub.fetcher.store.statements.forEach((statement) => {
-                if (statement.predicate.value == LDP('inbox').value) {
-                  // console.log('INBOX:');
-                  // console.log(statement);
-                  inbox = statement.object.value;
-                  SolidSub.fetcher.load(inbox, util.postOptions);
-                  return;
-                }
-            });
-            // var inbox = $rdf.uri.join(inboxExt, issuerId);
-            // console.log('ISSUER INBOX:');
-            // console.log(inbox);
-        }).catch((err) => {
-           console.error(err.name + ": " + err.message);
-        });
+        var credPlain = $('#cred-plain').val();
+        var inbox = await util.getInbox(issuerId);
+        util.body = credPlain;
+        util.postOptions.headers[util.contentTypeKey] = util.contentTypePlain;
+        util.postOptions.body = credPlain;
+        SolidSub.fetcher.load(inbox, util.postOptions);
     }
 };
 

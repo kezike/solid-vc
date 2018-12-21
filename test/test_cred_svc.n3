@@ -1,0 +1,23 @@
+@prefix : <#>.
+@prefix svc: <http://dig.csail.mit.edu/2018/svc#>.
+@prefix kezike: <https://kezike.solid.community/profile/card#me>.
+@prefix lkagal: <https://lkagal.solid.community/profile/card#me>.
+@prefix sec: <https://w3id.org/security#>.
+
+:cred
+    a svc:Credential;
+    svc:plain """
+                  @prefix kezike: <https://kezike.solid.community/profile/card#me>.
+                  @prefix edu: <https://kezike.solid.community/public/svc/edu.n3#>.
+                  @prefix mit: <https://www.mit.edu>
+                  kezike: edu:meng mit.
+              """;
+    svc:context "edu";
+    svc:subject kezike:;
+    svc:proof [
+                  a sec:LinkedDataSignature2015;
+                  sec:created "2018-12-20T09:00:00+00:00";
+                  sec:creator lkagal:;
+                  sec:nonce "LD2015_NONCE";
+                  sec:signatureValue "LD2015_SIGNATURE_VALUE".
+              ].

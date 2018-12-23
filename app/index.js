@@ -104,6 +104,7 @@ SolidVC = {
         SolidVC.fetcher = $rdf.fetcher($rdf.graph());
         console.log("SolidVC.fetcher:", SolidVC.fetcher);
         SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
+        util.bindKeyValue(util, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidVC.session.webId) + '#'));
         util.bindKeyValue(util, 'session', SolidVC.session);
         util.bindKeyValue(util, 'fetcher', SolidVC.fetcher);
         util.bindKeyValue(subject, 'session', SolidVC.session);

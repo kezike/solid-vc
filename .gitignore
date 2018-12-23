@@ -1,4 +1,4 @@
-js/dist
+app/dist
 cookies.txt
 node_modules
 package-lock.json

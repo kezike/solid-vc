@@ -4,6 +4,7 @@
 var $rdf = require('rdflib');
 var $auth = require('solid-auth-client');
 var LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
+var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
 // var fs = require('fs');
 /*var jsonld = require('jsonld');
 var jsig = require('jsonld-signatures');
@@ -12,12 +13,14 @@ jsig.use('jsonld', jsonld);*/
 var SolidUtil = SolidUtil || {};
 
 SolidUtil = {
-    // REST configuration
+    //// BEGIN REST CONFIGURATION ////
     contentTypeKey: 'content-type',
 
     contentTypeN3: 'text/n3',
 
     contentTypePlain: 'text/plain',
+
+    responseTextKey: 'responseText',
 
     headOptions: {
       method: 'HEAD'/*,
@@ -41,21 +44,31 @@ SolidUtil = {
       /*body: "@prefix : <#>.\n@prefix c: <https://kezike17/solidtest.space/profile/card#>.\n@prefix n0: <http://xmlns.com/foaf/0.1/>.\n@prefix     c0: <https://www.w3.org/People/Berners-Lee/card#>.\nc:me n0:knows c0:i.",*/
       body: "REPLACE ME BEFORE USAGE"
     },
+    //// END REST CONFIGURATION ////
 
-    // Key management
-    pubKeyType: 'PUB',
-
-    privKeyType: 'PRIV',
-
+    //// BEGIN KEY MANAGEMENT ////
     pubKeyPemFile: '../auth/pub.pem',
 
     privKeyPemFile: '../auth/priv.pem',
+    //// END KEY MANAGEMENT ////
 
-    // Home page of SolidVC app
-    homePage: '/',
-    
+    //// BEGIN ONTOLOGY METADATA ////
     // Inbox filter for svc messages
     inboxFilter: 'SVC_MSG',
+
+    // SVC ontology public key property
+    svcPubKeyField: 'pubKey',
+
+    // SVC ontology public key property
+    svcPrivKeyField: 'privKey',
+
+    // LDP ontology inbox property
+    ldpInboxField: 'inbox',
+    //// END ONTOLOGY METADATA ////
+
+    //// BEGIN APP ////
+    // Home page of SolidVC app
+    homePage: '/',
 
     // Bind val to key in obj
     bindKeyValue: function(obj, key, val) {
@@ -76,59 +89,84 @@ SolidUtil = {
         window.location.href = SolidUtil.homePage;
     },
 
-    // Retrieve the inbox of a target
-    getInbox: async function(target) {
+    // Discover the inbox of a target via LDN
+    discoverInbox: async function(target) {
         var inboxPromise = new Promise((resolve, reject) => {
             SolidUtil.fetcher.load(target, SolidUtil.getOptions).then((resp) => {
-                var inbox = SolidUtil.fetcher.store.any($rdf.sym(target), LDP('inbox'), undefined);
+                var inbox = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpInboxField), undefined);
                 resolve(inbox);
             }).catch((err) => {
                console.error(err.name + ": " + err.message);
-               return resolve(null);
+               resolve(null);
             });
         });
         var inboxResult = await inboxPromise;
         return inboxResult;
     },
-    
-    readFile: function (file, keyType) {
-        var rawFile = new XMLHttpRequest();
-        rawFile.open("GET", file, false);
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-              if (rawFile.status === 200 || rawFile.status == 0) {
-                var content = rawFile.responseText;
-                switch (keyType) {
-                  case SolidUtil.pubKeyType:
-                    SolidUtil.pubKey = content;
-                  case SolidUtil.privKeyType:
-                    SolidUtil.privKey = content;
-                }
-              }
-            }
-        }
-        rawFile.send(null);
+
+    // Load content of inbox
+    loadInbox: async function(inbox) {
+        // TODO - Implement me
     },
 
-    getPubKey: function() {
-        /*fs.readFile(SolidUtil.pubKeyPemFile, 'utf8', function(err, content) {
-            console.log(content);
-            return content;
-        });*/
-        SolidUtil.readFile(SolidUtil.pubKeyPemFile, SolidUtil.pubKeyType);
-        var pubKey = SolidUtil.pubKey;
-        SolidUtil.pubKey = "";
+    // Retrieve URI of svc public key of a remote target
+    getPubKeyRemoteURI: async function(target) {
+        var pubKeyUriPromise = new Promise((resolve, reject) => {
+            SolidUtil.fetcher.load(target, SolidUtil.getOptions).then((resp) => {
+                var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SVC(SolidUtil.svcPubKeyField), undefined);
+                resolve(pubKeyUri);
+            }).catch((err) => {
+               console.error(err.name + ": " + err.message);
+               resolve(null);
+            });
+        });
+        var pubKeyUriResult = await pubKeyUriPromise;
+        return pubKeyUriResult;
+    },
+
+    // Retrieve content of svc public key of a remote target
+    getPubKeyRemoteContent: async function(target) {
+        var pubKeyUri = await util.getPubKeyRemoteURI(target);
+        var pubKeyPromise = new Promise((resolve, reject) => {
+            SolidUtil.fetcher.load(pubKeyUri, SolidUtil.getOptions).then((resp) => {
+                resolve(resp[SolidUtil.responseTextKey]);
+            }).catch((err) => {
+               console.error(err.name + ": " + err.message);
+               resolve(null);
+            });
+        });
+        var pubKeyResult = await pubKeyPromise;
+        return pubKeyResult;
+    },
+
+    // Retrieve content of local file
+    readKeyFile: async function (keyFile) {
+        var keyPromise = new Promise((resolve, reject) => {
+            var rawFile = new XMLHttpRequest();
+            rawFile.open("GET", keyFile, false);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4) {
+                  if (rawFile.status === 200 || rawFile.status == 0) {
+                    var content = rawFile.responseText;
+                    resolve(content);
+                  }
+                }
+            }
+            rawFile.send(null);
+        });
+        var keyResult = await keyPromise;
+        return keyResult;
+    },
+
+    // Retrieve local svc public key
+    getPubKeyLocal: async function() {
+        var pubKey = await SolidUtil.readKeyFile(SolidUtil.pubKeyPemFile);
         return pubKey;
     },
 
-    getPrivKey: function() {
-        /*fs.readFile(SolidUtil.privKeyPemFile, 'utf8', function(err, content) {
-            console.log(content);
-            return content;
-        });*/
-        SolidUtil.readFile(SolidUtil.privKeyPemFile, SolidUtil.privKeyType);
-        var privKey = SolidUtil.privKey;
-        SolidUtil.privKey = "";
+    // Retrieve local svc private key
+    getPrivKeyLocal: async function() {
+        var privKey = await SolidUtil.readKeyFile(SolidUtil.privKeyPemFile);
         return privKey;
     },
     
@@ -137,7 +175,7 @@ SolidUtil = {
         // Specifying signature configuration
         // TODO - allow specification of creator and algorithm in signConfig
         var signConfig = {
-          privateKeyPem: SolidUtil.getPrivKey(),
+          privateKeyPem: SolidUtil.getPrivKeyLocal(),
           creator: "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
           algorithm: "LinkedDataSignature2015"
         };
@@ -161,7 +199,7 @@ SolidUtil = {
             "@context": jsig.SECURITY_CONTEXT_URL,
             "@id": "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
             owner: "https://kezike.solid.community/profile/card#me",
-            publicKeyPem: SolidUtil.getPubKey()
+            publicKeyPem: SolidUtil.getPubKeyLocal()
         };
         // Specify the public key owner object
         var publicKeyOwner = {
@@ -183,6 +221,7 @@ SolidUtil = {
             return verified;
         });
     }
+    //// END APP ////
 };
 
 module.exports = SolidUtil;

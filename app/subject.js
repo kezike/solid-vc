@@ -30,17 +30,18 @@ SolidSub = {
         $(document).on('click', '#switch-acct', util.switchAccounts);
         $(document).on('click', '#switch-role', util.switchRoles);
     },
-    
+
     // Submit request for credential
     requestCredential: async function(event) {
         event.preventDefault();
         var issuerId = $('#issuer-id').val();
         var credPlain = $('#cred-plain').val();
-        var inbox = await util.getInbox(issuerId);
-        util.body = credPlain;
+        var issuerInbox = await util.discoverInbox(issuerId);
+        console.log("ISSUER ID:", issuerId);
+        console.log("INBOX:", issuerInbox);
         util.postOptions.headers[util.contentTypeKey] = util.contentTypePlain;
         util.postOptions.body = credPlain;
-        SolidSub.fetcher.load(inbox, util.postOptions);
+        SolidSub.fetcher.load(issuerInbox, util.postOptions);
     }
 };
 

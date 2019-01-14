@@ -1,16 +1,14 @@
 // Solid Verifiable Credentials Subject
 
 // Libraries and dependencies
-var $n3 = require('n3');
 var $rdf = require('rdflib');
-var $auth = require('solid-auth-client');
 var util = require('./util.js');
 
 // Global variables
 var provider = 'https://kezike.solid.community/';
 var myWebId = provider + 'profile/card#me';
-var homeURI = 'http://localhost:8080/';
-var popupURI = homeURI + 'popup.html';
+var homeUri = 'http://localhost:8080/';
+var popupUri = homeUri + 'popup.html';
 
 // RDF Namespaces
 var LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
@@ -39,9 +37,10 @@ SolidSub = {
         var issuerInbox = await util.discoverInbox(issuerId);
         console.log("ISSUER ID:", issuerId);
         console.log("INBOX:", issuerInbox);
-        util.postOptions.headers[util.contentTypeKey] = util.contentTypePlain;
+        util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
         util.postOptions.body = credPlain;
-        SolidSub.fetcher.load(issuerInbox, util.postOptions);
+        // SolidSub.fetcher.load(issuerInbox, util.postOptions);
+        util.fetcher.load(issuerInbox, util.postOptions);
     }
 };
 

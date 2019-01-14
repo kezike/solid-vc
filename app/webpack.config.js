@@ -8,30 +8,33 @@ module.exports = {
     filename: 'app.bundle.js'
   },
   module: {
-    loaders: [
+    // loaders: [
+    rules: [
       {
         test: /\.css$/,
         loader: 'style!css!'
       },
-      /*{
-        test: /node_modules\/jsonld/,
+      {
+        test: /^node_modules\/jsonld/,
         loader: 'babel-loader',
         options: {
-          presets: ['env'],
+          presets: ['@babel/preset-env'],
           plugins: [
-            ['transform-object-rest-spread', {useBuiltIns: true}],
+            ['@babel/plugin-proposal-object-rest-spread'],
+            ['@babel/plugin-syntax-object-rest-spread'],
             ['@babel/plugin-transform-runtime'],
           ]
         }
-      },*/
+      },
       {
         test: /\.js?$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
         query: {
-          presets: ['env'],
+          presets: ['@babel/preset-env'],
           plugins: [
-            ['transform-object-rest-spread', {useBuiltIns: true}],
+            ['@babel/plugin-proposal-object-rest-spread'],
+            ['@babel/plugin-syntax-object-rest-spread'],
             ['@babel/plugin-transform-modules-commonjs'],
             ['@babel/plugin-transform-regenerator'],
             ['@babel/plugin-transform-runtime']

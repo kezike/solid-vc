@@ -1,0 +1,12 @@
+{
+  "@context": "https://w3id.org/security/v2",
+  "id": "ctr:kezike@solid.community",
+  "publicKey": [{
+      "@context": "https://w3id.org/security/v2",
+      "id": "pubkey:kezike@solid.community",
+      "type": "RsaVerificationKey2018",
+      "controller": "https://kezike.solid.community/profile/card#me",
+      "publicKeyPem": "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2wCxd0NYIf6iuVTpk/R77LI4vaNWwXy+nwfht4DEchtCXpCoXZG9ceKvusv+Fj8ldjJdRXT3CcXqqz52rkjqF6mZm8lbSzqZnvIhjXGM+1EaDfzEJr7PMPKVgxirb4C25vMpTO8gS4pjdWAgAX3XXmOybWw3fSR7BaiJ6TshZYQ/36hl7ER2qu1VjLNyqQmSGCeZrf3hbMQ09assDip0vhAmEd91MnMMOjQJ/U43bnySOsmVIUQuZCXbZ+tzEa08P8frwpgPiWCjYNyN9jA9Z8Q/PXjcR871mkRS67vlN1auTZQDRr39OFJYgdgRhJgRvV/EMwLrCQZG5tDuZ70xUwIDAQAB-----END PUBLIC KEY-----"
+  }],
+  "assertionMethod": ["pubkey:kezike@solid.community"]
+}

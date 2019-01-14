@@ -3,13 +3,15 @@
 # Setup solid-vc environment
 
 # Enable execution of solid-vc scripts
+chmod +x svc
 chmod +x util/*
 chmod +x auth/*
 chmod +x rest/*
+chmod +x ont/*
 
 # Install requisite Node packages and dependencies
 echo Installing requisite Node packages...
-npm install --save
+npm install
 
 # BEGIN AUTHENTICATION
 cd auth/

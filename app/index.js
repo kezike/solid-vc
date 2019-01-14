@@ -1,17 +1,16 @@
 // Solid Verifiable Credentials Application
 
 // Libraries and dependencies
-var $n3 = require('n3');
-var $rdf = require('rdflib');
 var $auth = require('solid-auth-client');
+var $rdf = require('rdflib');
 var util = require('./util.js');
 var subject = require('./subject.js');
 var issuer = require('./issuer.js');
 var verifier = require('./verifier.js');
 
 // Global variables
-var homeURI = 'http://localhost:8080/';
-var popupURI = homeURI + 'popup.html';
+var homeUri = 'http://localhost:8080/';
+var popupUri = homeUri + 'popup.html';
 
 var SolidVC = SolidVC || {};
 
@@ -26,8 +25,23 @@ SolidVC = {
         SolidVC.fetcher = $rdf.fetcher($rdf.graph(), {fetch: svcFetch});
         console.log("svcSession:\n", svcSession);
         console.log("SolidVC.fetcher._fetch:\n", SolidVC.fetcher._fetch);*/
+        // SolidVC.login();
+        util.login();
         console.log('$auth.fetch:', $auth.fetch);
-        SolidVC.login();
+    },
+
+    // Bind events
+    bindEvents: function() {
+        // $(document).on('click', '#add-stmt', SolidVC.addStatement);
+        // $(document).on('click', '.remove-stmt', SolidVC.removeStatement);
+        // $(document).on('change', '#signature', SolidVC.handleSignatureUpload);
+        // $(document).on('change', '#creator', SolidVC.handleCreatorUpload);
+        // $(document).on('click', '#issue-cred', SolidVC.issueCredential);
+        // $(document).on('click', '#patch-meta', SolidVC.patchMetaFile);
+        // $(document).on('click', '#switch-acct, SolidVC.switchAccounts);
+        $(document).on('click', '#subject-role', SolidVC.loadSubject);
+        $(document).on('click', '#issuer-role', SolidVC.loadIssuer);
+        $(document).on('click', '#verifier-role', SolidVC.loadVerifier);
     },
 
     // Load subject page
@@ -98,9 +112,10 @@ SolidVC = {
         });
     },
 
+    /*// Login helper function
     loginHelper: function(session) {
         SolidVC.session = session;
-        console.log("currentSession:", SolidVC.session);
+        console.log("SolidVC.session:", SolidVC.session);
         SolidVC.fetcher = $rdf.fetcher($rdf.graph());
         console.log("SolidVC.fetcher:", SolidVC.fetcher);
         SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
@@ -117,9 +132,9 @@ SolidVC = {
 
     // Login to app
     login: function() {
-        $auth.currentSession().then((currentSession) => {
+        $auth.currentSession().then(async (currentSession) => {
             if (!currentSession) {
-              $auth.popupLogin({popupUri: popupURI}).then((popupSession) => {
+              $auth.popupLogin({popupUri: popupUri}).then(async (popupSession) => {
                   SolidVC.loginHelper(popupSession);
               }).catch((err) => {
                  console.error(err.name + ": " + err.message);
@@ -132,25 +147,11 @@ SolidVC = {
         });
     },
 
-    // Bind events
-    bindEvents: function() {
-        // $(document).on('click', '#add-stmt', SolidVC.addStatement);
-        // $(document).on('click', '.remove-stmt', SolidVC.removeStatement);
-        // $(document).on('change', '#signature', SolidVC.handleSignatureUpload);
-        // $(document).on('change', '#creator', SolidVC.handleCreatorUpload);
-        // $(document).on('click', '#issue-cred', SolidVC.issueCredential);
-        // $(document).on('click', '#patch-meta', SolidVC.patchMetaFile);
-        // $(document).on('click', '#switch-acct, SolidVC.switchAccounts);
-        $(document).on('click', '#subject-role', SolidVC.loadSubject);
-        $(document).on('click', '#issuer-role', SolidVC.loadIssuer);
-        $(document).on('click', '#verifier-role', SolidVC.loadVerifier);
-    },
-
     logout: function() {
         // localStorage.removeItem("solid-auth-client");
         // localStorage.clear();
         return $auth.logout();
-    },
+    }*/
 };
 
 $(window).on('load', SolidVC.init);

@@ -2,8 +2,8 @@
 // Solid Verifiable Credentials Issuer
 
 // Libraries and dependencies
-var $n3 = require('n3');
 var $rdf = require('rdflib');
+// var $auth_cli = require('solid-auth-cli');
 var util = require('./util.js');
 var forge = require('node-forge');
 var ed25519 = forge.pki.ed25519;
@@ -23,19 +23,19 @@ var myWebId = provider + 'profile/card#me';
 // var myWebId = 'https://kezike17.solidtest.space/profile/card#me';
 // var myWebId = 'https://kezike.solidtest.space/profile/card#me';
 var timWebId = 'https://www.w3.org/People/Berners-Lee/card#i';
-var homeURI = 'http://localhost:8080/';
-var popupURI = homeURI + 'popup.html';
+var homeUri = 'http://localhost:8080/';
+var popupUri = homeUri + 'popup.html';
 
-// RDF Namespaces
+// RDF namespaces
 var SUB = $rdf.Namespace('#'); // Changes to subjects account in `issueCredential`
 var META = $rdf.Namespace(metaFile + '#');
+var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
 var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
 var RDF = $rdf.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#');
 var RDFS = $rdf.Namespace('http://www.w3.org/2000/01/rdf-schema#');
 var WS = $rdf.Namespace('https://www.w3.org/ns/pim/space#');
 var SEC = $rdf.Namespace('https://w3id.org/security#');
 var LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
-var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
 
 var svcSession;
 var svcFetch;
@@ -70,7 +70,7 @@ SolidIss = {
         $(document).on('click', '#switch-acct', util.switchAccounts);
         $(document).on('click', '#switch-role', util.switchRoles);
     },
-    
+
     displayTab: function(event) {
         console.log("event.target.id:", event.target.id);
         // Declare all variables
@@ -101,42 +101,28 @@ SolidIss = {
         }
     },
 
-    loadReviewTab: function() {
-        var inbox;
-        console.log("SolidIss:", SolidIss);
-        SolidIss.fetcher.load(SolidIss.session.webId, util.getOptions).then((respFindInbox) => {
-            var inbox;
-            console.log('STORE:');
-            console.log(SolidIss.fetcher.store);
-            /*var inboxExt = SolidIss.fetcher.store.any(undefined, LDP('inbox'), undefined, $rdf.sym(issuer));
-            console.log('INBOX EXT:');
-            console.log(inboxExt);*/
-            SolidIss.fetcher.store.statements.forEach((stmtFind) => {
-                if (stmtFind.predicate.value == LDP('inbox').value) {
-                  console.log('INBOX:', stmtFind);
-                  inbox = stmtFind.object.value;
-                  console.log('INBOX URI:', inbox);
-                  // console.log('CONTAINED MSGS:');
-                  SolidIss.fetcher.load(inbox, util.getOptions).then((respLoadInbox) => {
-                      console.log("respLoadInbox:", respLoadInbox);
-                      SolidIss.fetcher.store.statements.forEach((stmtLoad) => {
-                          // if (stmtLoad.predicate.value == LDP('contains').value) {
-                          // }
-                          // console.log('MSG:', stmtLoad);
-                      });
-                  });
-                  return;
-                }
-            });
-            // var inbox = $rdf.uri.join(inboxExt, issuer);
-            // console.log('ISSUER INBOX:');
-            // console.log(inbox);
-        }).catch((err) => {
-           console.error(err.name + ": " + err.message);
-        });
+    loadReviewTab: async function() {
+        console.log("WebID:\n" + util.session.webId);
+        // var account = await util.discoverAccount(util.session.webId);
+        var account = util.session.webId.split("profile/card#me")[0];
+        // var account = "https://kezike.solid.community/";
+        console.log("account:", account);
+        var pubKeyRemoteUri = await util.getPubKeyRemoteUri(account);
+        console.log("Public Key URI\n" + pubKeyRemoteUri);
+        var pubKeyContent = await util.getPubKeyRemoteContent(pubKeyRemoteUri);
+        console.log("Public Key Content:\n" + pubKeyContent);
+        // var inbox = await util.discoverInbox(util.session.webId);
+        // var inbox = "https://kezike.solid.community/profile/card#me";
+        // var inbox = "https://kezike.solid.community/inbox/";
+        // var inbox = "https://kezike.solid.community/inbox/6c7eeec0-053e-11e9-a29e-5d8e3e616ac9.txt";
+        var inbox = "https://kezike.solid.community/public/keys/0516d000-1532-11e9-a29e-5d8e3e616ac9.txt";
+        // var inbox = "https://localhost:8443/inbox/93aaa3c0-16bb-11e9-8dd4-05f95e8e77e4.txt";
+        console.log("INBOX:\n" + inbox);
+        var inboxContent = await util.loadInbox(inbox);
+        console.log("INBOX CONTENT:\n" + inboxContent);
     },
 
-    loadIssueTab: function() {
+    loadIssueTab: async function() {
     },
 
     namespaces: {
@@ -370,7 +356,7 @@ SolidIss = {
         credential["signature"]["@type"] = SolidIss.DefaultSigType;
         credential["signature"]["creator"] = SolidIss.creator;
         credential["signature"]["signatureValue"] = signature;*/
-        var signedCredential = await SolidUtil.signDocument(credential);
+        var signedCredential = await util.signDocument(credential);
         return signedCredential;
     },
 
@@ -403,19 +389,11 @@ SolidIss = {
         var pubKeyLen = pubKey.length;
         var pubKeyPrefixSplitIdx = pubKey.indexOf('\n') + 1;
         var pubKeySuffixSplitIdx = pubKey.lastIndexOf('\n');
-        /*var pubKeyPrefix = pubKey.split('\n')[0];
-        var pubKeyValue = pubKey.split('\n')[1];
-        var pubKeySuffix = pubKey.split('\n')[2];*/
-
         var pubKeyPrefix = pubKey.slice(0, pubKeyPrefixSplitIdx);
         var pubKeyValue = pubKey.slice(pubKeyPrefixSplitIdx, pubKeySuffixSplitIdx);
         var pubKeySuffix = pubKey.slice(pubKeySuffixSplitIdx, pubKeyLen);
         pubKey = pubKeyPrefix + pubKeyValue + pubKeySuffix;
         console.log("PUB KEY LOCAL:", pubKey.split('\n'));
-        /*if (!options.type || !options.creator || !options.keyType) {
-          // TODO: At the moment this is not needed because it is enforced elsewhere
-          // This may become necessary in future iterations when users select parameters
-        }*/
         credential.add(proof, RDF('type'), SEC($rdf.Literal.fromValue(options.type)));
         credential.add(proof, SEC('created'), $rdf.Literal.fromValue(new Date()));
         credential.add(proof, SEC('creator'), $rdf.Literal.fromValue(pubKey));
@@ -473,8 +451,8 @@ SolidIss = {
             credStore.add(cred, SVC('plain'), resParse);
             credStore.add(cred, SVC('context'), SolidIss.namespaces[credContext]('ticker'));
             credStore.add(cred, SVC('subject'), $rdf.Literal.fromValue(subjectPubKey));
-            await SolidIss.signCredentialN3(credStore, {type: 'LinkedDataSignature2015' /*'RsaSignature2018'*/, keyType: /*'LD2015'*/ 'RSA'});
-            // SolidIss.signCredentialJsonLD(credStore, {type: 'LinkedDataSignature2015' /*'RsaSignature2018'*/, keyType: /*'LD2015'*/ 'RSA'});
+            // await SolidIss.signCredentialN3(credStore, {type: 'LinkedDataSignature2015' /*'RsaSignature2018'*/, keyType: /*'LD2015'*/ 'RSA'});
+            await SolidIss.signCredentialJsonLD(credStore, {type: /*'LinkedDataSignature2015'*/ 'RsaSignature2018', keyType: /*'LD2015'*/ 'RSA'});
             $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
                 if (errSer) {
                   var errMsg = errSer.name + ": " + errSer.message;
@@ -487,19 +465,13 @@ SolidIss = {
             }, {});
         });
         var subjectInbox = await util.discoverInbox(subjectId);
-        alert("SUBJECT ID:", subjectId);
-        // alert("SUBJECT INBOX:", subjectInbox);
-        util.postOptions.headers[util.contentTypeKey] = util.contentTypeN3;
+        util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
         util.postOptions.body = SolidIss.credentialN3;
         SolidIss.fetcher.load(subjectInbox, util.postOptions).then((resPostCred) => {
             console.log(resPostCred);
         }).catch((err) => {
            console.error(err.name + ": " + err.message);
         });
-        /*$('#subject').val("");
-        $('#predicate').val("");
-        $('#object').val("");
-        SolidIss.statements = [];*/
         $('#cred-plain').val("");
         $('#cred-context').val("");
         // $('#cred-serialization').val("");

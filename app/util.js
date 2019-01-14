@@ -208,21 +208,19 @@ SolidUtil = {
     // Load content of inbox
     loadInbox: async function(inbox) {
         var inboxPromise = new Promise((resolve, reject) => {
-            /*SolidUtil.fetcher.load(inbox, SolidUtil.getOptions).then((resp) => {
-                // resolve(resp);
-                // resolve(resp.body);
+            SolidUtil.fetcher.load(inbox, SolidUtil.getOptions).then((resp) => {
                 resolve(resp[SolidUtil.responseTextField]);
                 // var inboxContent = SolidUtil.fetcher.store.any($rdf.sym(inbox), LDP(SolidUtil.ldpContainsField), undefined);
                 // resolve(inboxContent);
             }).catch((err) => {
                // console.error(err.name + ": " + err.message);
                reject(err);
-            });*/
-            fetch('https://kezike.solid.community/public/keys/0516d000-1532-11e9-a29e-5d8e3e616ac9.txt').then(function(resp) {
+            });
+            /*fetch('https://kezike.solid.community/public/keys/0516d000-1532-11e9-a29e-5d8e3e616ac9.txt').then(function(resp) {
                 return resp.json();
             }).then(function(respJson) {
                console.log(JSON.stringify(respJson));
-            });
+            });*/
         });
         var inboxResult = await inboxPromise;
         return inboxResult;

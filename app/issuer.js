@@ -102,21 +102,14 @@ SolidIss = {
     },
 
     loadReviewTab: async function() {
-        console.log("WebID:\n" + util.session.webId);
         // var account = await util.discoverAccount(util.session.webId);
         var account = util.session.webId.split("profile/card#me")[0];
-        // var account = "https://kezike.solid.community/";
         console.log("account:", account);
-        var pubKeyRemoteUri = await util.getPubKeyRemoteUri(account);
+        /*var pubKeyRemoteUri = await util.getPubKeyRemoteUri(account);
         console.log("Public Key URI\n" + pubKeyRemoteUri);
         var pubKeyContent = await util.getPubKeyRemoteContent(pubKeyRemoteUri);
-        console.log("Public Key Content:\n" + pubKeyContent);
-        // var inbox = await util.discoverInbox(util.session.webId);
-        // var inbox = "https://kezike.solid.community/profile/card#me";
-        // var inbox = "https://kezike.solid.community/inbox/";
-        // var inbox = "https://kezike.solid.community/inbox/6c7eeec0-053e-11e9-a29e-5d8e3e616ac9.txt";
-        var inbox = "https://kezike.solid.community/public/keys/0516d000-1532-11e9-a29e-5d8e3e616ac9.txt";
-        // var inbox = "https://localhost:8443/inbox/93aaa3c0-16bb-11e9-8dd4-05f95e8e77e4.txt";
+        console.log("Public Key Content:\n" + pubKeyContent);*/
+        var inbox = await util.discoverInbox(util.session.webId);
         console.log("INBOX:\n" + inbox);
         var inboxContent = await util.loadInbox(inbox);
         console.log("INBOX CONTENT:\n" + inboxContent);

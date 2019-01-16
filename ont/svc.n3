@@ -133,7 +133,7 @@ svc:subject a rdf:Property ;
 svc:publicKey a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "publicKey"@en ;
-    rdfs:comment "The URI of the public key of the subject of a credential"@en ;
+    rdfs:comment "The URI of the public key of the subject of a credential (same as sec:publicKey)"@en ;
     rdfs:domain foaf:PersonalProfileDocument ;
     rdfs:range rdfs:Literal .
 
@@ -141,7 +141,7 @@ svc:proof a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "proof"@en ;
     rdfs:comment """
-    The digital proof verifying a credential:
+    The digital proof verifying a credential (same as sec:proof):
     - 'type': The proof type (ie. sec:RsaSignature2018)
     - 'created': The timestamp of the creation of a credential
     - 'creator': The public key of the issuer of a credential

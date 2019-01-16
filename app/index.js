@@ -1,7 +1,7 @@
 // Solid Verifiable Credentials Application
 
 // Libraries and dependencies
-var $auth = require('solid-auth-client');
+// var $auth = require('solid-auth-client');
 var $rdf = require('rdflib');
 var util = require('./util.js');
 var subject = require('./subject.js');
@@ -27,7 +27,7 @@ SolidVC = {
         console.log("SolidVC.fetcher._fetch:\n", SolidVC.fetcher._fetch);*/
         // SolidVC.login();
         util.login();
-        console.log('$auth.fetch:', $auth.fetch);
+        // console.log('$auth.fetch:', $auth.fetch);
     },
 
     // Bind events

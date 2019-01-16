@@ -3,12 +3,18 @@
 data=`cat $2`
 echo $data
 OIFS=$IFS
+IFS='/'
+fileNamePartsOne=($2)
+fileNameNumPartsOne=${#fileNamePartsOne[@]}
+fileNameOne=${fileNamePartsOne[fileNameNumPartsOne-1]}
+echo fileNameOne: $fileNameOne
+echo fileNameNumPartsOne: $fileNameNumPartsOne
 IFS='.'
-file=($2)
-fileName="${file[0]}"
-fileExt="${file[1]}"
+fileNamePartsTwo=($fileNameOne)
+fileNameNumPartsTwo=${#fileNamePartsTwo[@]}
+fileName=${fileNamePartsTwo[0]}
+fileExt=${fileNamePartsTwo[1]}
 IFS=$OIFS
-# curl -v -H "Content-Type: application/x-www-form-urlencoded" -H "Slug: $3" -b cookies.txt -d "$data" -X POST $1
-# curl -v -H "Content-Type: text/$fileExt" -H "Slug: $fileName" -b cookies.txt --data-raw "$data" -X POST $1
-curl -v -H "Content-Type: text/plain" -b cookies.txt --data-raw "$data" -X POST $1
-# curl -v -H "Content-Type: application/ld+json" -b cookies.txt --data-raw "$data" -X POST $1
+echo fileName: $fileName
+echo fileExt: $fileExt
+curl -v -H "Content-Type: $3" -H "Slug: $fileName" -b cookies.txt --data-raw "$data" -X POST $1

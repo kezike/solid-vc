@@ -1,6 +1,6 @@
 
 <!-- Processed by Id: cwm.py,v 1.197 2007/12/13 15:38:39 syosi Exp -->
-<!--     using base file:///Users/kayodeezike/Documents/MEng/dig/solid-vc/ontology/svc.n3-->
+<!--     using base file:///Users/kayodeezike/Documents/MEng/dig/solid-vc/ont/svc.n3-->
 
 
 <rdf:RDF xmlns="http://www.w3.org/2000/01/rdf-schema#"
@@ -142,7 +142,7 @@
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#proof">
         <comment xml:lang="en">
-    The digital proof verifying a credential:
+    The digital proof verifying a credential (same as sec:proof):
     - 'type': The proof type (ie. sec:RsaSignature2018)
     - 'created': The timestamp of the creation of a credential
     - 'creator': The public key of the issuer of a credential
@@ -155,8 +155,16 @@
         <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#publicKey">
+        <comment xml:lang="en">The URI of the public key of the subject of a credential (same as sec:publicKey)</comment>
+        <domain rdf:resource="http://xmlns.com/foaf/0.1/PersonalProfileDocument"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">publicKey</label>
+        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    </rdf:Property>
+
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#subject">
-        <comment xml:lang="en">The public key of the subject of a credential</comment>
+        <comment xml:lang="en">The ID of the subject of a credential</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">subject</label>

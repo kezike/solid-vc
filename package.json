@@ -39,6 +39,7 @@
   "dependencies": {
     "@babel/runtime": "^7.2.0",
     "@trust/oidc-web": "^0.2.1",
+    "file-saver": "^2.0.0",
     "get-ssl-certificate": "^2.1.2",
     "glob": "^7.1.2",
     "jsonld": "^1.4.0",

@@ -55,69 +55,6 @@ SolidIss = {
 
     currentTabCnt: '', // {SolidIss.reviewTabCnt, SolidIss.issueTabCnt}
 
-    // Initialize app
-    init: function(event) {
-        SolidIss.bindEvents();
-        $(SolidIss.issueTabLink).click();
-        SolidIss.generateKeyPair({keyType: 'RSA', bits: 2048, workers: 2});
-    },
-
-    // Bind events
-    bindEvents: function() {
-        $(document).on('click', '#issue-cred', SolidIss.issueCredential);
-        $(document).on('click', '#review-tab-link', SolidIss.displayTab);
-        $(document).on('click', '#issue-tab-link', SolidIss.displayTab);
-        $(document).on('click', '#switch-acct', util.switchAccounts);
-        $(document).on('click', '#switch-role', util.switchRoles);
-    },
-
-    displayTab: function(event) {
-        console.log("event.target.id:", event.target.id);
-        // Declare all variables
-        var i, tabcontent, tablinks;
-
-        // Get all elements with class="tabcontent" and hide them
-        $('.tabcontent').css('display', 'none');
-
-        // Get all elements with class="tablinks" and remove the class "active"
-        $('.tablinks').removeClass('active');
-
-        // Show the current tab, and add an "active" class to the button that opened the tab
-        switch('#' + event.target.id) {
-          case SolidIss.reviewTabLink:
-            SolidIss.currentTabLink = SolidIss.reviewTabLink;
-            SolidIss.currentTabCnt = SolidIss.reviewTabCnt;
-            $(SolidIss.currentTabCnt).css('display', 'block');
-            $(event.currentTarget).addClass('active');
-            SolidIss.loadReviewTab();
-            break;
-          case SolidIss.issueTabLink:
-            SolidIss.currentTabLink = SolidIss.issueTabLink;
-            SolidIss.currentTabCnt = SolidIss.issueTabCnt;
-            $(SolidIss.currentTabCnt).css('display', 'block');
-            $(event.currentTarget).addClass('active');
-            SolidIss.loadIssueTab();
-            break;
-        }
-    },
-
-    loadReviewTab: async function() {
-        // var account = await util.discoverAccount(util.session.webId);
-        var account = util.session.webId.split("profile/card#me")[0];
-        console.log("account:", account);
-        /*var pubKeyRemoteUri = await util.getPubKeyRemoteUri(account);
-        console.log("Public Key URI\n" + pubKeyRemoteUri);
-        var pubKeyContent = await util.getPubKeyRemoteContent(pubKeyRemoteUri);
-        console.log("Public Key Content:\n" + pubKeyContent);*/
-        var inbox = await util.discoverInbox(util.session.webId);
-        console.log("INBOX:\n" + inbox);
-        var inboxContent = await util.loadInbox(inbox);
-        console.log("INBOX CONTENT:\n" + inboxContent);
-    },
-
-    loadIssueTab: async function() {
-    },
-
     namespaces: {
         svcEdu: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-edu#'),
         svcFin: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-fin#'),
@@ -189,18 +126,85 @@ SolidIss = {
     DefaultContext: {
       "foaf": "http://xmlns.com/foaf/0.1/",
       "perJsonld": "http://json-ld.org/contexts/person.jsonld",
-      "sec": "https://w3id.org/security/v1"
+      "sec": "https://w3id.org/security/v2"
     },
 
-    DefaultSigType: 'LinkedDataSignature2015', // 'RsaSignature2018'
+    DefaultSigType: 'RsaSignature2018', // 'LinkedDataSignature2015'
 
     role: "",
 
     webPage: "",
 
+    // Initialize app
+    init: function(event) {
+        SolidIss.bindEvents();
+        $(SolidIss.issueTabLink).click();
+        SolidIss.generateKeyPair({keyType: 'RSA', bits: 2048, workers: 2});
+    },
+
+    // Bind events
+    bindEvents: function() {
+        $(document).on('click', '#issue-cred', SolidIss.issueCredential);
+        $(document).on('click', '#review-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#issue-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#switch-acct', util.switchAccounts);
+        $(document).on('click', '#switch-role', util.switchRoles);
+    },
+
+    displayTab: function(event) {
+        console.log("event.target.id:", event.target.id);
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tabcontent" and hide them
+        $('.tabcontent').css('display', 'none');
+
+        // Get all elements with class="tablinks" and remove the class "active"
+        $('.tablinks').removeClass('active');
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        switch('#' + event.target.id) {
+          case SolidIss.reviewTabLink:
+            SolidIss.currentTabLink = SolidIss.reviewTabLink;
+            SolidIss.currentTabCnt = SolidIss.reviewTabCnt;
+            $(SolidIss.currentTabCnt).css('display', 'block');
+            $(event.currentTarget).addClass('active');
+            SolidIss.loadReviewTab();
+            break;
+          case SolidIss.issueTabLink:
+            SolidIss.currentTabLink = SolidIss.issueTabLink;
+            SolidIss.currentTabCnt = SolidIss.issueTabCnt;
+            $(SolidIss.currentTabCnt).css('display', 'block');
+            $(event.currentTarget).addClass('active');
+            SolidIss.loadIssueTab();
+            break;
+        }
+    },
+
+    loadReviewTab: async function() {
+        /*var account = await util.discoverAccount(util.session.webId);
+        // var account = util.session.webId.split("profile/card#me")[0];
+        console.log("account:", account);
+        var pubKeyRemoteUri = await util.getPubKeyRemoteUri(util.session.webId");
+        console.log("Public Key URI\n" + pubKeyRemoteUri);
+        var pubKeyContent = await util.getPubKeyRemoteContent(util.session.webId);
+        console.log("Public Key Content:\n" + pubKeyContent);*/
+        // var inbox = await util.discoverInbox(util.session.webId);
+        // var inbox = "https://kezike.solid.community/inbox/c99155f0-1374-11e9-a29e-5d8e3e616ac9.txt";
+        var inbox = "https://kezike.solid.community/inbox/";
+        console.log("INBOX:\n" + inbox);
+        var inboxContent = await util.loadInbox(inbox);
+        console.log("INBOX CONTENT:\n" + inboxContent);
+    },
+
+    loadIssueTab: async function() {
+        // var writeResult = await util.writeKeyFile("hello_world.txt", ["Hello, world!"]);
+        var session = await util.trackSession();
+        console.log(`Active user session: ${ JSON.stringify(session) }`);
+    },
+
     // Handle credential upload
     handleCredentialUpload: function(event) {
-        console.log("MEEP");
         var files = event.target.files; // FileList object
 
         // use the 1st file from the list
@@ -394,7 +398,7 @@ SolidIss = {
         md.update(credential.toCanonical(), 'utf8');
         signature = SolidIss.privateKey[options.keyType].sign(md);
         credential.add(proof, SEC('signatureValue'), $rdf.Literal.fromValue(signature));
-        credential.add(cred, SVC('proof'), $rdf.Literal.fromValue(proof));
+        credential.add(cred, SEC('proof'), $rdf.Literal.fromValue(proof));
         return credential;
     },
 
@@ -407,7 +411,7 @@ SolidIss = {
         return SolidIss.signedCredential;*/
         event.preventDefault();
         var subjectId = $('#subject-id').val();
-        var subjectPubKey = $('#subject-pubkey').val();
+        // var subjectPubKey = $('#subject-pubkey').val();
         var credPlain = $('#cred-plain').val();
         var credContext = $('#cred-context').val();
         // var credSerialization = $('#cred-serialization').val();
@@ -427,12 +431,12 @@ SolidIss = {
           return;
         }*/
 
+        /* NOTE: Signing n3 document with forge works fine
         var credStore = $rdf.graph();
         var credPlainStore = $rdf.graph();
-        var me = $rdf.sym(myWebId);
+        var me = $rdf.sym(util.session.webId);
         var base = me.value;
         var type = 'text/n3';
-        // TODO - change to $rdf.convert.convertToJson in order to use jsonld-signatures
         $rdf.parse(credPlain, credPlainStore, base, type, async (errParse, resParse) => {
             if (errParse) {
               console.log("errParse:\n", errParse);
@@ -444,8 +448,7 @@ SolidIss = {
             credStore.add(cred, SVC('plain'), resParse);
             credStore.add(cred, SVC('context'), SolidIss.namespaces[credContext]('ticker'));
             credStore.add(cred, SVC('subject'), $rdf.Literal.fromValue(subjectPubKey));
-            // await SolidIss.signCredentialN3(credStore, {type: 'LinkedDataSignature2015' /*'RsaSignature2018'*/, keyType: /*'LD2015'*/ 'RSA'});
-            await SolidIss.signCredentialJsonLD(credStore, {type: /*'LinkedDataSignature2015'*/ 'RsaSignature2018', keyType: /*'LD2015'*/ 'RSA'});
+            await SolidIss.signCredentialN3(credStore, {type: 'RsaSignature2018', keyType: 'RSA'});
             $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
                 if (errSer) {
                   var errMsg = errSer.name + ": " + errSer.message;
@@ -456,11 +459,19 @@ SolidIss = {
                 // console.log("resSer:\n", resSer);
                 SolidIss.credentialN3 = resSer;
             }, {});
-        });
+        });*/
+        var credJsonLdStr = await util.convert(credPlain, util.contentTypeN3, util.contentTypeJsonLd);
+        console.log("credJsonLdStr\n:" + credJsonLdStr);
+        var credJsonLd = JSON.parse(credJsonLdStr)[0];
+        var credSignedJsonLd = await SolidIss.signCredentialJsonLD(credJsonLd, {type: 'RsaSignature2018', keyType: 'RSA'});
+        var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd);
+        var credSignedN3Str = await util.convert(credSignedJsonLdStr, util.contentTypeJsonLd, util.contentTypeN3);
+        console.log("credSignedJsonLd\n:" + credSignedJsonLd);
+        console.log("credSignedN3Str:\n" + credSignedN3Str);
         var subjectInbox = await util.discoverInbox(subjectId);
         util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
-        util.postOptions.body = SolidIss.credentialN3;
-        SolidIss.fetcher.load(subjectInbox, util.postOptions).then((resPostCred) => {
+        util.postOptions.body = credSignedN3Str;
+        util.fetcher.load(subjectInbox, util.postOptions).then((resPostCred) => {
             console.log(resPostCred);
         }).catch((err) => {
            console.error(err.name + ": " + err.message);

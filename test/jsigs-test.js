@@ -81,8 +81,8 @@ async function main() {
     var publicKey = {
         "@context": jsigs.SECURITY_CONTEXT_URL,
         type: "RsaVerificationKey2018",
-        id: "https://kezike.solid.community/public/keys/0516d000-1532-11e9-a29e-5d8e3e616ac9.txt",
-        controller: "https://kezike.solid.community/public/ctr/bf443590-1531-11e9-a29e-5d8e3e616ac9.txt",
+        id: /*"https://kezike.solid.community/public/svc/keys/1f36eb50-18de-11e9-a29e-5d8e3e616ac9.txt"*/"publicKey",
+        controller: /*"https://kezike.solid.community/public/ctr/bf443590-1531-11e9-a29e-5d8e3e616ac9.txt"*/"controller",
         publicKeyPem
     };
 
@@ -117,12 +117,15 @@ async function main() {
       purpose: new AssertionProofPurpose()
     });
     console.log('Signed document:', signed);
+    // console.log('Signer public key:', signed['https://w3id.org/security#proof']['@graph']['https://w3id.org/security#verificationMethod']['@id']);
 
     // Verify the signed document
+    const privVer  = null; // You do not know the private key of the signer
+    const keyPairVer = new RSAKeyPair({...publicKey, privateKeyPem: privVer});
     const result = await jsigs.verify(signed, {
-      documentLoader: jsonld.documentLoader,
-      suite: new RsaSignature2018(/*{key}*/),
-      purpose: new AssertionProofPurpose(/*{controller}*/)
+      // documentLoader: jsonld.documentLoader,
+      suite: new RsaSignature2018({key: keyPairVer}),
+      purpose: new AssertionProofPurpose({controller})
     });
     if (result.verified) {
       console.log('Signature verified.');

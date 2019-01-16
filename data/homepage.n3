@@ -1,0 +1,5 @@
+@prefix : <#>.
+@prefix c: <https://kezike.solid.community/profile/card#>.
+@prefix n0: <http://xmlns.com/foaf/0.1/>.
+@prefix k: <http://kayodeyezike.com/>.
+c:me n0:homepage k:.

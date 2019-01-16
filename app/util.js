@@ -7,7 +7,9 @@ var $auth = require('solid-auth-client');
 // var fs = require('fs');
 var jsonld = require('jsonld');
 var jsigs = require('jsonld-signatures');
+var downloader = require('file-saver');
 var SOLID = $rdf.Namespace('http://www.w3.org/ns/solid/terms#');
+var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
 var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
 var SEC = $rdf.Namespace('https://w3id.org/security#');
 var LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
@@ -21,6 +23,8 @@ SolidUtil = {
     contentTypePlain: 'text/plain',
 
     contentTypeN3: 'text/n3',
+
+    contentTypeN4: 'application/n-quads',
 
     contentTypeJsonLd: 'application/ld+json',
 
@@ -67,8 +71,14 @@ SolidUtil = {
     // Inbox filter for svc messages
     inboxFilter: 'SVC_MSG',
 
-    // SVC ontology public key predicate
-    svcPubKeyField: 'publicKey',
+    // SEC ontology public key predicate
+    secPubKeyField: 'publicKey',
+
+    // SEC ontology owner predicate
+    secOwnerField: 'owner',
+
+    // SEC ontology controller predicate
+    secControllerField: 'controller',
 
     // SOLID ontology account predicate
     solidAccountField: 'account',
@@ -97,22 +107,31 @@ SolidUtil = {
         obj[key] = val;
     },
 
+    trackSession: async function() {
+        var sessionPromise = new Promise((resolve, reject) => {
+            $auth.trackSession((session) => {
+                if (!session) {
+                  resolve(null);
+                } else {
+                  resolve(session);
+                  // console.log(`User logged in with webId ${session.webId}`);
+                }
+            });
+        });
+        var sessionResult = await sessionPromise;
+        return sessionResult;
+    },
+
     // Login helper function
     loginHelper: function(session) {
         SolidUtil.session = session;
         console.log("SolidUtil.session:", SolidUtil.session);
         SolidUtil.fetcher = $rdf.fetcher($rdf.graph());
         console.log("SolidUtil.fetcher:", SolidUtil.fetcher);
-        SolidUtil.updater = new $rdf.UpdateManager(SolidUtil.fetcher.store);
-        SolidUtil.bindKeyValue(SolidUtil, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidUtil.session.webId) + '#'));
+        // SolidUtil.updater = new $rdf.UpdateManager(SolidUtil.fetcher.store);
+        // SolidUtil.bindKeyValue(SolidUtil, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidUtil.session.webId) + '#'));
         SolidUtil.bindKeyValue(SolidUtil, 'session', SolidUtil.session);
         SolidUtil.bindKeyValue(SolidUtil, 'fetcher', SolidUtil.fetcher);
-        /*SolidUtil.bindKeyValue(subject, 'session', SolidUtil.session);
-        SolidUtil.bindKeyValue(subject, 'fetcher', SolidUtil.fetcher);
-        SolidUtil.bindKeyValue(issuer, 'session', SolidUtil.session);
-        SolidUtil.bindKeyValue(issuer, 'fetcher', SolidUtil.fetcher);
-        SolidUtil.bindKeyValue(verifier, 'session', SolidUtil.session);
-        SolidUtil.bindKeyValue(verifier, 'fetcher', SolidUtil.fetcher);*/
     },
 
     // Login to app
@@ -121,22 +140,12 @@ SolidUtil = {
             if (!currentSession) {
               $auth.popupLogin({popupUri: SolidUtil.popupUri}).then(/*async */(popupSession) => {
                   SolidUtil.loginHelper(popupSession);
-                  /*var inbox = "https://kezike.solid.community/inbox/";
-                  console.log("INBOX:\n" + inbox);
-                  var inboxContent = await SolidUtil.loadInbox(inbox);
-                  console.log("INBOX CONTENT:\n" + inboxContent);*/
-                  // $auth.fetch("https://kezike.solid.community/inbox/6c7eeec0-053e-11e9-a29e-5d8e3e616ac9.txt", SolidUtil.getOptions).then(console.log);
               }).catch((err) => {
                  console.error(err.name + ": " + err.message);
               });
               return;
             }
             SolidUtil.loginHelper(currentSession);
-            /*var inbox = "https://kezike.solid.community/inbox/";
-            console.log("INBOX:\n" + inbox);
-            var inboxContent = await SolidUtil.loadInbox(inbox);
-            console.log("INBOX CONTENT:\n" + inboxContent);*/
-            // $auth.fetch("https://kezike.solid.community/inbox/6c7eeec0-053e-11e9-a29e-5d8e3e616ac9.txt", SolidUtil.getOptions).then(console.log);
         }).catch((err) => {
            console.error(err.name + ": " + err.message);
         });
@@ -175,6 +184,59 @@ SolidUtil = {
         });
     },*/
 
+    // Parse raw text of certain type into graph store
+    parse: async function(text, store, base, type) {
+        var parsePromise = new Promise((resolve, reject) => {
+            $rdf.parse(text, store, base, type, (errParse, resParse) => {
+                if (errParse) {
+                  reject(errParse);
+                }
+                resolve(resParse);
+            });
+        });
+        var parseResult = await parsePromise;
+        return parseResult;
+    },
+
+    // Serialize graph store into raw text of certain type
+    serialize: async function(target, store, base, type) {
+        var serializePromise = new Promise((resolve, reject) => {
+            $rdf.serialize(target, store, base, type, (errSer, resSer) => {
+                if (errSer) {
+                  resolve(errSer);
+                }
+                resolve(resSer);
+            }, {produceGeneralizedRdf: true});
+        });
+        var serializeResult = await serializePromise;
+        return serializeResult;
+    },
+
+    // Convert from typeFrom to typeTo
+    convert: async function(text, typeFrom, typeTo) {
+        var store = $rdf.graph();
+        var base = SolidUtil.session.webId;
+        var parsed = await SolidUtil.parse(text, store, base, typeFrom);
+        var target = null;
+        var serialized = await SolidUtil.serialize(target, parsed, base, typeTo);
+        return serialized;
+    },
+
+    // Retrieve generic json content at target
+    genericFetchJson: async function(target) {
+        var promise = new Promise(async (resolve, reject) => {
+            fetch(target).then(function(resp) {
+                return resp.json();
+            }).then(function(respJson) {
+               resolve(JSON.stringify(respJson));
+            }).catch((err) => {
+               reject(err);
+            });
+        });
+        var result = await promise;
+        return result;
+    },
+
     // Discover the account of a target via LDN
     discoverAccount: async function(target) {
         var accountPromise = new Promise((resolve, reject) => {
@@ -182,7 +244,6 @@ SolidUtil = {
                 var account = SolidUtil.fetcher.store.any($rdf.sym(target), SOLID(SolidUtil.solidAccountField), undefined);
                 resolve(account.value);
             }).catch((err) => {
-               // console.error(err.name + ": " + err.message);
                reject(err);
             });
         });
@@ -197,7 +258,6 @@ SolidUtil = {
                 var inbox = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpInboxField), undefined);
                 resolve(inbox.value);
             }).catch((err) => {
-               // console.error(err.name + ": " + err.message);
                reject(err);
             });
         });
@@ -207,16 +267,17 @@ SolidUtil = {
 
     // Load content of inbox
     loadInbox: async function(inbox) {
+        console.log(`Load inbox: ${inbox}`);
         var inboxPromise = new Promise((resolve, reject) => {
             SolidUtil.fetcher.load(inbox, SolidUtil.getOptions).then((resp) => {
-                resolve(resp[SolidUtil.responseTextField]);
+                // resolve(resp[SolidUtil.responseTextField]);
+                resolve(JSON.stringify(resp));
                 // var inboxContent = SolidUtil.fetcher.store.any($rdf.sym(inbox), LDP(SolidUtil.ldpContainsField), undefined);
                 // resolve(inboxContent);
             }).catch((err) => {
-               // console.error(err.name + ": " + err.message);
                reject(err);
             });
-            /*fetch('https://kezike.solid.community/public/keys/0516d000-1532-11e9-a29e-5d8e3e616ac9.txt').then(function(resp) {
+            /*fetch('https://kezike.solid.community/public/svc/keys/1f36eb50-18de-11e9-a29e-5d8e3e616ac9.txt').then(function(resp) {
                 return resp.json();
             }).then(function(respJson) {
                console.log(JSON.stringify(respJson));
@@ -227,25 +288,20 @@ SolidUtil = {
     },
 
     // Retrieve URI of svc public key of a remote target
-    getPubKeyRemoteUri: async function(/*target*/account) {
-        /*var pubKeyUriPromise = new Promise((resolve, reject) => {
+    getPubKeyRemoteUri: async function(target) {
+        var pubKeyUriPromise = new Promise((resolve, reject) => {
             SolidUtil.fetcher.load(target, SolidUtil.getOptions).then((resp) => {
-                var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SEC(SolidUtil.svcPubKeyField), undefined);
-                resolve(pubKeyUri);
+                /*var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SEC(SolidUtil.secPubKeyField), undefined);
+                resolve(pubKeyUri.value);*/
+                var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target/*"https://kezike.solid.community/public/card#me"*/), FOAF("homepage"), undefined);
+                resolve(pubKeyUri.value);
             }).catch((err) => {
-               console.error(err.name + ": " + err.message);
                reject(err);
             });
         });
         var pubKeyUriResult = await pubKeyUriPromise;
-        return pubKeyUriResult;*/
-        var pubKeyUriPromise = new Promise((resolve, reject) => {
-            /*var account = await SolidUtil.discoverAccount(target);
-            console.log("account:", account.value);
-            var accountHardCoded = 'https://kezike.solid.community/';
-            console.log("accountHardCoded:", accountHardCoded);
-            console.log("account == accountHardCoded:", account.value == accountHardCoded);
-            console.log("account === accountHardCoded:", account.value === accountHardCoded);*/
+        return pubKeyUriResult;
+        /*var pubKeyUriPromise = new Promise((resolve, reject) => {
             var pubKeyFolder = account + 'public/keys/';
             console.log("pubKeyFolder:", pubKeyFolder);
             SolidUtil.fetcher.load(pubKeyFolder, SolidUtil.getOptions).then((resp) => {
@@ -255,41 +311,31 @@ SolidUtil = {
             }).catch((err) => {
                reject(err);
             });
-            /*var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(pubKeyFolder), LDP(SolidUtil.ldpContainsField), undefined);
-            console.log("pubKeyUri:", pubKeyUri);
-            resolve(pubKeyUri);*/
-            /*var pubKeyUriSubPromise = new Promise((resolve, reject) => {
-                SolidUtil.fetcher.load(pubKeyFolder, SolidUtil.getOptions).then((resp) => {
-                    var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(pubKeyFolder), LDP(SolidUtil.ldpContainsField), undefined);
-                    console.log("pubKeyUri:", pubKeyUri);
-                    resolve(pubKeyUri);
-                }).catch((err) => {
-                   reject(err);
-                });
-            });
-            var pubKeyUriSubResult = await pubKeyUriSubPromise;
-            resolve(pubKeyUriSubResult);*/
         });
         var pubKeyUriResult = await pubKeyUriPromise;
-        return pubKeyUriResult;
-        // return pubKeyRemoteUri;
+        return pubKeyUriResult;*/
     },
 
     // Retrieve content of svc public key of a remote target
-    getPubKeyRemoteContent: async function(/*target*/pubKeyUri) {
-        /*var pubKeyUri = await SolidUtil.getPubKeyRemoteUri(target);*/
-        var pubKeyPromise = new Promise((resolve, reject) => {
-            SolidUtil.fetcher.load(/*pubKeyUri*/"https://kezike.solid.community/public/keys/0516d000-1532-11e9-a29e-5d8e3e616ac9.txt", SolidUtil.getOptions).then((resp) => {
-                resolve(resp[SolidUtil.responseTextField]);
-                /*var pubKeyContent = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpContainsField), undefined);
-                resolve(pubKeyContent);*/
-                // resolve(resp.body);
-                // var respClone = resp.clone();
-                // return resp.clone();
-            })/*.then((respClone) => {
-               resolve(respClone.text());
-            })*/.catch((err) => {
-               // console.error(err.name + ": " + err.message);
+    getPubKeyRemoteContent: async function(target) {
+        var pubKeyUri = await SolidUtil.getPubKeyRemoteUri(target);
+        var pubKeyPromise = new Promise(async (resolve, reject) => {
+            /*SolidUtil.fetcher.load(pubKeyUri, SolidUtil.getOptions).then((resp) => {
+                // resolve(resp[SolidUtil.responseTextField]);
+                // var pubKeyContent = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpContainsField), undefined);
+                // resolve(pubKeyContent);
+                var respClone = resp.clone();
+                return respClone.json();
+            }).then(function(respJson) {
+               resolve(JSON.stringify(respJson));
+            }).catch((err) => {
+               reject(err);
+            });*/
+            fetch(pubKeyUri).then(function(resp) {
+                return resp.json();
+            }).then(function(respJson) {
+               resolve(JSON.stringify(respJson));
+            }).catch((err) => {
                reject(err);
             });
         });
@@ -316,6 +362,25 @@ SolidUtil = {
         return keyResult;
     },
 
+    // Download content to local file
+    writeKeyFile: async function (keyFile, data) {
+        /*var keyPromise = new Promise((resolve, reject) => {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", keyFile, false);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                  console.log("Ready state has changed");
+                }
+            }
+            xhr.send(data);
+        });
+        var keyResult = await keyPromise;
+        return keyResult;*/
+        var blob = new Blob(data, {type: "text/plain;charset=utf-8"});
+        downloader.saveAs(blob, keyFile);
+    },
+
     // Retrieve local svc public key
     getPubKeyLocal: async function() {
         var pubKey = await SolidUtil.readKeyFile(SolidUtil.pubKeyPemFile);
@@ -340,31 +405,35 @@ SolidUtil = {
         const {RsaSignature2018} = jsigs.suites;
         const {AssertionProofPurpose} = jsigs.purposes;
         const {RSAKeyPair} = jsigs;
-        const publicKey = SolidUtil.getPrivKeyLocal();
-        const privateKeyPem = SolidUtil.getPrivKeyLocal();
+        // const publicKeyStr = await SolidUtil.getPubKeyRemoteContent(SolidUtil.session.webId);
+        // const publicKey = JSON.parse(publicKeyStr);
+        const publicKeyPem = await SolidUtil.getPubKeyLocal();
+        const privateKeyPem = await SolidUtil.getPrivKeyLocal();
+        var publicKey = {
+            "@context": jsigs.SECURITY_CONTEXT_URL,
+            type: "RsaVerificationKey2018",
+            id: "RsaVerification2018",
+            controller: "RsaController2018",
+            publicKeyPem
+        };
         const key = new RSAKeyPair({...publicKey, privateKeyPem});
         var signConfig = {
           // documentLoader: jsonld.documentLoader,
-          suite: "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
-          purpose: "LinkedDataSignature2015"
+          suite: new RsaSignature2018({key}),
+          purpose: new AssertionProofPurpose()
         };
-        jsigs.sign(doc, signConfig, (err, signedDocument) => {
-            if (err) {
-              console.log(err);
-              return;
-            }
-            console.log("SIGNED DOC:");
-            console.log(signedDocument);
-            return signedDocument;
-        });
+        const signed = await jsigs.sign(doc, signConfig);
+        console.log('Signed document:', signed);
+        console.log('Signed document stringified:', JSON.stringify(signed));
+        return signed;
     },
 
     // Verify document
-    verifyDocument: async function(signedDoc, /*verifyConfig*/) {
+    verifyDocument: async function(signedUri, /*verifyConfig*/) {
         // Specifying verification configuration
         // TODO - allow specification of publicKey["@id"], publicKey.owner, and publicKeyOwner["@id"] in verifyConfig
         // Specify the public key owner object
-        var publicKey = {
+        /*var publicKey = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
             "@id": "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
             owner: "https://kezike.solid.community/profile/card#me",
@@ -388,7 +457,29 @@ SolidUtil = {
             console.log("VERIFIED:");
             console.log(verified);
             return verified;
+        });*/
+        const {RsaSignature2018} = jsigs.suites;
+        const {AssertionProofPurpose} = jsigs.purposes;
+        const {RSAKeyPair} = jsigs;
+        const publicKeyStr = await SolidUtil.getPubKeyRemoteContent(/*TODO: after uploading jsigs-signed document inspect it to determine how to load this value*/);
+        const publicKey = JSON.parse(publicKeyStr);
+        const privateKeyPem = null; // You do not know the private key of the signer
+        const key = new RSAKeyPair({...publicKey, privateKeyPem});
+        const controllerUri = publicKey[SolidUtil.secControllerField];
+        const controllerStr = await SolidUtil.genericFetchJson(controllerUri);
+        const controller = JSON.parse(controllerStr);
+        const signedStr = await SolidUtil.genericFetchJson(signedUri);
+        const signed = JSON.parse(signedStr);
+        const result = await jsigs.verify(signed, {
+          // documentLoader: jsonld.documentLoader,
+          suite: new RsaSignature2018({key}),
+          purpose: new AssertionProofPurpose({controller})
         });
+        if (result.verified) {
+          console.log('Signature verified.');
+        } else {
+          console.log('Signature verification error:', result.error);
+        }
     }
     //// END APP ////
 };

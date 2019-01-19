@@ -1,7 +1,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://dublincore.org/2012/06/14/dcterms#> .
 @prefix dcelements: <http://dublincore.org/2012/06/14/dcelements#> .
@@ -116,12 +116,33 @@ svc:plain a rdf:Property ;
     rdfs:domain svc:Credential ;
     rdfs:range rdfs:Resource .
 
-svc:context a rdf:Property ;
+svc:title a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "context"@en ;
-    rdfs:comment "The context of a credential (ie. 'health', 'law', 'travel')"@en ;
+    rdfs:label "title"@en ;
+    rdfs:comment "The title briefly describing a credential (ie. 'health', 'law', 'travel')"@en ;
     rdfs:domain svc:Credential ;
     rdfs:range rdfs:Literal .
+
+svc:domain a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "domain"@en ;
+    rdfs:comment "The domain of a credential (ie. 'health', 'law', 'travel')"@en ;
+    rdfs:domain svc:Credential ;
+    rdfs:range rdfs:Literal .
+
+svc:issuerId a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "issuerId"@en ;
+    rdfs:comment "The ID of the issuer of a credential (ie. 'https://kezike.solid.community/profile/card#me')"@en ;
+    rdfs:domain svc:Credential ;
+    rdfs:range rdfs:Literal .
+
+svc:issuanceDate a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "issuanceDate"@en ;
+    rdfs:comment "The issuance date of a credential"@en ;
+    rdfs:domain svc:Credential ;
+    rdfs:range xsd:dateTime .
 
 svc:subject a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;

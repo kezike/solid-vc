@@ -8,36 +8,23 @@ var subject = require('./subject.js');
 var issuer = require('./issuer.js');
 var verifier = require('./verifier.js');
 
-// Global variables
-var homeUri = 'http://localhost:8080/';
-var popupUri = homeUri + 'popup.html';
+var popupUri = 'popup.html';
 
 var SolidVC = SolidVC || {};
 
 SolidVC = {
     // Initialize app
-    init: function(event) {
+    init: async function(event) {
         SolidVC.bindEvents();
-        // SolidVC.addPrefixes();
-        // SolidVC.displayStatements();
-        /*svcSession = window.session;
-        svcFetch = window.fetch;
-        SolidVC.fetcher = $rdf.fetcher($rdf.graph(), {fetch: svcFetch});
-        console.log("svcSession:\n", svcSession);
-        console.log("SolidVC.fetcher._fetch:\n", SolidVC.fetcher._fetch);*/
         // SolidVC.login();
-        util.login();
-        // console.log('$auth.fetch:', $auth.fetch);
+        await util.login();
     },
 
     // Bind events
     bindEvents: function() {
-        // $(document).on('click', '#add-stmt', SolidVC.addStatement);
-        // $(document).on('click', '.remove-stmt', SolidVC.removeStatement);
         // $(document).on('change', '#signature', SolidVC.handleSignatureUpload);
         // $(document).on('change', '#creator', SolidVC.handleCreatorUpload);
         // $(document).on('click', '#issue-cred', SolidVC.issueCredential);
-        // $(document).on('click', '#patch-meta', SolidVC.patchMetaFile);
         // $(document).on('click', '#switch-acct, SolidVC.switchAccounts);
         $(document).on('click', '#subject-role', SolidVC.loadSubject);
         $(document).on('click', '#issuer-role', SolidVC.loadIssuer);
@@ -69,14 +56,6 @@ SolidVC = {
         SolidVC.webPage = SolidVC.role + '.html';
         window.location.href = SolidVC.webPage;
         // verifier = require('./verifier');
-    },
-
-    addPrefixes: function() {
-        var prefixes = SolidVC.prefixesN3;
-        for (var i = 0; i < SolidVC.prefixesN3.length; i++) {
-          var prefix = prefixes[i];
-          SolidVC.credentialN3 += prefix + "\n";
-        }
     },
 
     // Load user profile
@@ -113,13 +92,15 @@ SolidVC = {
     },
 
     /*// Login helper function
-    loginHelper: function(session) {
+    loginHelper: async function(session) {
         SolidVC.session = session;
         console.log("SolidVC.session:", SolidVC.session);
         SolidVC.fetcher = $rdf.fetcher($rdf.graph());
         console.log("SolidVC.fetcher:", SolidVC.fetcher);
-        SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
-        util.bindKeyValue(util, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidVC.session.webId) + '#'));
+        // SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
+        // util.bindKeyValue(util, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidVC.session.webId) + '#'));
+        var inbox = await util.discoverInbox(util.session.webId);
+        util.bindKeyValue(util, util.ldpInboxField, inbox);
         util.bindKeyValue(util, 'session', SolidVC.session);
         util.bindKeyValue(util, 'fetcher', SolidVC.fetcher);
         util.bindKeyValue(subject, 'session', SolidVC.session);
@@ -135,13 +116,13 @@ SolidVC = {
         $auth.currentSession().then(async (currentSession) => {
             if (!currentSession) {
               $auth.popupLogin({popupUri: popupUri}).then(async (popupSession) => {
-                  SolidVC.loginHelper(popupSession);
+                  await SolidVC.loginHelper(popupSession);
               }).catch((err) => {
                  console.error(err.name + ": " + err.message);
               });
               return;
             }
-            SolidVC.loginHelper(currentSession);
+            await SolidVC.loginHelper(currentSession);
         }).catch((err) => {
            console.error(err.name + ": " + err.message);
         });

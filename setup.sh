@@ -12,6 +12,9 @@ chmod +x ont/*
 # Install requisite Node packages and dependencies
 echo Installing requisite Node packages...
 npm install
+npm install solid-auth-client -g
+solid-auth-client generate-popup "SolidVC"
+# ln -fs node_modules/solid-auth-client/dist-popup/popup.html popup.html
 
 # BEGIN AUTHENTICATION
 cd auth/
@@ -35,7 +38,10 @@ export SOLID_PASS=$pass
 # Generate key pair
 ./generate_keypair.sh
 
-# TODO - Publish public key to svc 'keys' endpoint
+# TODO - Publish public key
+echo Please enter an existing public folder where you would like to store your SolidVC public key \(eg. https://USER.solid.community/public/svc/keys\) \[ENTER\]: 
+read keyFolderRemote
+export SOLID_KEY_FOLDER_REMOTE=$keyFolderRemote
 ./publish_key.sh
 
 cd ../

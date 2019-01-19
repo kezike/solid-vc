@@ -7,14 +7,11 @@
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
         <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
         <link rel="shortcut icon" type="./img/png" href="./img/favicon.png"/>
-        <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/0.4.12/jsonld.min.js"></script>-->
-        <!--<script src="./node_modules/@trust/oidc-web/dist/oidc-web.min.js"></script>-->
-        <!--<script src="./node_modules/oidc-web/src/index.js"></script>-->
+        <link rel="stylesheet" href="./css/styles.css">
     </head>
   <body class="container">
       <div>
           <h1>SolidVC Subject</h1>
-          <!--<button id="login" class="btn">Login</button>-->
           <button id="switch-acct">Switch Accounts</button>
           <button id="switch-role">Switch Roles</button>
       </div>
@@ -29,8 +26,8 @@
                     </div>
                 </div>
                 <div>
-                    <label for="cred-context">Select Credential Context:</label>
-                    <select id="cred-context">
+                    <label for="cred-domain">Select Credential Domain:</label>
+                    <select id="cred-domain">
                         <option value="">Select "General" if unsure</option>
                         <option value="svcEdu">Education</option>
                         <option value="svcFin">Finance</option>
@@ -62,6 +59,5 @@
   </body>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  <!--<script src="./app/rdflib-ruben.min.js" charset="utf-8"></script>-->
   <script src="./app/dist/app.bundle.js" charset="utf-8"></script>
 </html>

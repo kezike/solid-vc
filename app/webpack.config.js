@@ -1,4 +1,4 @@
-// Experimental version of webpack config
+// Webpack Config
 const path = require('path');
 
 module.exports = {

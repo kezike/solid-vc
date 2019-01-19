@@ -1,7 +1,7 @@
 {
   "name": "solid-vc",
   "version": "1.0.0",
-  "description": "Creating verifiable claims on the internet with serverless DLT technologies",
+  "description": "Creating verifiable claims on the internet with decentralized technologies",
   "main": "./app/index.js",
   "scripts": {
     "build": "webpack --config ./app/webpack.config.js --mode production",

@@ -3,32 +3,13 @@
 
 // Libraries and dependencies
 var $rdf = require('rdflib');
-// var $auth_cli = require('solid-auth-cli');
 var util = require('./util.js');
 var forge = require('node-forge');
 var ed25519 = forge.pki.ed25519;
 var rsa = forge.pki.rsa;
 
-// Global variables
-var provider = 'https://kezike.solid.community/';
-// var provider = 'https://kezike17.solid.community/';
-// var provider = 'https://kezike17.solidtest.space/';
-// var provider = 'https://kezike.solidtest.space/';
-var publicRepo = provider + 'public/';
-var svcRepo = publicRepo + 'svc/';
-var credentialRepo = publicRepo + 'credentials/';
-var metaFile = svcRepo + 'meta-gen.n3';
-var myWebId = provider + 'profile/card#me';
-// var myWebId = 'https://kayodeyezike.com/profile/card#me';
-// var myWebId = 'https://kezike17.solidtest.space/profile/card#me';
-// var myWebId = 'https://kezike.solidtest.space/profile/card#me';
-var timWebId = 'https://www.w3.org/People/Berners-Lee/card#i';
-var homeUri = 'http://localhost:8080/';
-var popupUri = homeUri + 'popup.html';
-
 // RDF namespaces
-var SUB = $rdf.Namespace('#'); // Changes to subjects account in `issueCredential`
-var META = $rdf.Namespace(metaFile + '#');
+var SUB = $rdf.Namespace('#'); // Changes to subject account in `issueCredential`
 var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
 var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
 var RDF = $rdf.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#');
@@ -105,12 +86,6 @@ SolidIss = {
 
     publicKey: {},
 
-    session: {},
-
-    // fetch: $auth.fetch,
-
-    accessToken: "",
-
     DefaultCredentialSerializerOptions: {
       claimKey: "claim",
       startToken: "{",
@@ -151,7 +126,7 @@ SolidIss = {
         $(document).on('click', '#switch-role', util.switchRoles);
     },
 
-    displayTab: function(event) {
+    displayTab: async function(event) {
         console.log("event.target.id:", event.target.id);
         // Declare all variables
         var i, tabcontent, tablinks;
@@ -169,38 +144,48 @@ SolidIss = {
             SolidIss.currentTabCnt = SolidIss.reviewTabCnt;
             $(SolidIss.currentTabCnt).css('display', 'block');
             $(event.currentTarget).addClass('active');
-            SolidIss.loadReviewTab();
+            await SolidIss.loadReviewTab();
             break;
           case SolidIss.issueTabLink:
             SolidIss.currentTabLink = SolidIss.issueTabLink;
             SolidIss.currentTabCnt = SolidIss.issueTabCnt;
             $(SolidIss.currentTabCnt).css('display', 'block');
             $(event.currentTarget).addClass('active');
-            SolidIss.loadIssueTab();
+            await SolidIss.loadIssueTab();
             break;
         }
     },
 
+    formatRequestMessageElement: function(messageId) {
+        var header = "<tr>";
+        var bodyLine1 = `<td style="padding:15px"><h4 style="color:blue; display:inline"><a href=${messageId} target="_blank">${messageId}</a></h4></td>`;
+        var bodyLine2 = `<td style="padding:15px"><input type="image" src="./img/review.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var body = `${bodyLine1}${bodyLine2}`;
+        var footer = "</tr>";
+        var message = `${header}${body}${footer}`;
+        return message;
+    },
+
     loadReviewTab: async function() {
-        /*var account = await util.discoverAccount(util.session.webId);
-        // var account = util.session.webId.split("profile/card#me")[0];
-        console.log("account:", account);
-        var pubKeyRemoteUri = await util.getPubKeyRemoteUri(util.session.webId");
-        console.log("Public Key URI\n" + pubKeyRemoteUri);
-        var pubKeyContent = await util.getPubKeyRemoteContent(util.session.webId);
-        console.log("Public Key Content:\n" + pubKeyContent);*/
+        await util.trackSession();
         // var inbox = await util.discoverInbox(util.session.webId);
-        // var inbox = "https://kezike.solid.community/inbox/c99155f0-1374-11e9-a29e-5d8e3e616ac9.txt";
-        var inbox = "https://kezike.solid.community/inbox/";
-        console.log("INBOX:\n" + inbox);
+        // var inbox = "https://kezike.solid.community/inbox/";
+        var inbox = util[util.ldpInboxField];
         var inboxContent = await util.loadInbox(inbox);
-        console.log("INBOX CONTENT:\n" + inboxContent);
+        console.log(`INBOX: ${inbox}`);
+        console.log(`INBOX CONTENT:\n${inboxContent}`);
+        $('#msg-board').empty();
+        inboxContent.map(async (inboxItem) => {
+            // console.log(`INBOX ITEM TYPE: ${typeof inboxItem}`);
+            // console.log(`INBOX ITEM:\n${JSON.stringify(inboxItem)}`);
+            var reqMsgElem = SolidIss.formatRequestMessageElement(inboxItem[util.ldObjField][util.ldTermValueField]);
+            $('#msg-board').append(reqMsgElem);
+        });
     },
 
     loadIssueTab: async function() {
         // var writeResult = await util.writeKeyFile("hello_world.txt", ["Hello, world!"]);
-        var session = await util.trackSession();
-        console.log(`Active user session: ${ JSON.stringify(session) }`);
+        // var session = await util.trackSession();
     },
 
     // Handle credential upload
@@ -413,16 +398,16 @@ SolidIss = {
         var subjectId = $('#subject-id').val();
         // var subjectPubKey = $('#subject-pubkey').val();
         var credPlain = $('#cred-plain').val();
-        var credContext = $('#cred-context').val();
+        var credDomain = $('#cred-domain').val();
         // var credSerialization = $('#cred-serialization').val();
         if (credPlain === "") {
           alert("Please include a credential in the text area");
           $('#cred-plain').focus();
           return;
         }
-        if (credContext === "") {
-          alert("Please select a valid context for the credential");
-          $('#cred-context').focus();
+        if (credDomain === "") {
+          alert("Please select a valid domain for the credential");
+          $('#cred-domain').focus();
           return;
         }
         /*if (credSerialization === "") {
@@ -446,7 +431,7 @@ SolidIss = {
             var cred  = SUB('cred');
             credStore.add(cred, RDF('type'), SVC('Credential'));
             credStore.add(cred, SVC('plain'), resParse);
-            credStore.add(cred, SVC('context'), SolidIss.namespaces[credContext]('ticker'));
+            credStore.add(cred, SVC('domain'), SolidIss.namespaces[credDomain]('ticker'));
             credStore.add(cred, SVC('subject'), $rdf.Literal.fromValue(subjectPubKey));
             await SolidIss.signCredentialN3(credStore, {type: 'RsaSignature2018', keyType: 'RSA'});
             $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
@@ -477,7 +462,7 @@ SolidIss = {
            console.error(err.name + ": " + err.message);
         });
         $('#cred-plain').val("");
-        $('#cred-context').val("");
+        $('#cred-domain').val("");
         // $('#cred-serialization').val("");
     },
 

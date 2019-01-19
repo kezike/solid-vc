@@ -12,7 +12,6 @@
   <body class="container">
       <div>
           <h1>SolidVC Issuer</h1>
-          <!--<button id="login" class="btn">Login</button>-->
           <button id="switch-acct">Switch Accounts</button>
           <button id="switch-role">Switch Roles</button>
       </div>
@@ -20,12 +19,10 @@
           <button class="tablinks" id="issue-tab-link">Issue</button>
           <button class="tablinks" id="review-tab-link">Review</button>
       </div>
-      <!--<div id="active-tab">
-      </div>-->
 
       <div class="tabcontent" id="review-tab-cnt">
           <h3>Review Credential Requests<h3>
-          <table style="width:100%">
+          <!--<table style="width:100%">
               <tr>
                   <td>
                       <h4 style="color:blue; display:inline">Transportation Credential Request from Alice</h4>
@@ -44,7 +41,9 @@
                       <input type="image" src="./img/review.png" height=25 width=25 style="display:inline;" />
                   </td>
               </tr>
-          </table>
+          </table>-->
+
+          <table id="msg-board" border=1 frame=void rules=rows style="width:100%"></table>
       </div>
       <div class="tabcontent" id="issue-tab-cnt">
           <h3>Issue New Credential</h3>
@@ -67,8 +66,8 @@
                         </div>
                     </div>
                     <div>
-                    <label for="cred-context">Select Credential Context:</label>
-                        <select id="cred-context">
+                    <label for="cred-domain">Select Credential Domain:</label>
+                        <select id="cred-domain">
                             <option value="">Select "General" if unsure</option>
                             <option value="svcEdu">Education</option>
                             <option value="svcFin">Finance</option>
@@ -88,7 +87,6 @@
                     </div>
                     <textarea id="cred-plain" rows=15 cols=100 form="vcform"></textarea>
                     <input type="submit" value="Issue Credential" id="issue-cred">
-                    <button id="patch-meta">Patch Meta</button>
                   </fieldset>
               </form>
           </div>
@@ -99,19 +97,4 @@
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   <script src="./app/dist/app.bundle.js" charset="utf-8"></script>
-
-  <!--<script src="https://solid.github.io/solid-auth-client/dist/solid-auth-client.bundle.js"></script>
-  <script>
-      async function popupLogin() {
-          let session = await solid.auth.currentSession();
-          let popupUri = 'https://solid.community/common/popup.html';
-          if (!session)
-            session = await solid.auth.popupLogin({ popupUri });
-          alert(`Logged in as ${session.webId}`);
-          // solid.auth.fetch('https://kezike.solid.community/inbox/c99155f0-1374-11e9-a29e-5d8e3e616ac9.txt').then(console.log);
-          // solid.auth.fetch('https://kezike17.solid.community/inbox/a1d5c4f0-137a-11e9-a29e-5d8e3e616ac9.n3').then(console.log);
-          // solid.auth.fetch('https://kezike1.solid.community/inbox/').then(console.log);
-      }
-      popupLogin();
-  </script>-->
 </html>

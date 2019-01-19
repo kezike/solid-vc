@@ -19,22 +19,15 @@ var SolidUtil = SolidUtil || {};
 SolidUtil = {
     //// BEGIN REST CONFIGURATION ////
     contentTypeField: 'content-type',
-
-    contentTypePlain: 'text/plain',
-
-    contentTypeN3: 'text/n3',
-
-    contentTypeN4: 'application/n-quads',
-
-    contentTypeJsonLd: 'application/ld+json',
-
     responseTextField: 'responseText',
-
+    contentTypePlain: 'text/plain',
+    contentTypeN3: 'text/n3',
+    contentTypeN4: 'application/n-quads',
+    contentTypeJsonLd: 'application/ld+json',
     headOptions: {
       method: 'HEAD',
       clearPreviousData: true
     },
-
     getOptions: {
       method: 'GET',
       mode: 'cors',
@@ -42,52 +35,57 @@ SolidUtil = {
       credentials: 'include',
       clearPreviousData: true
     },
-
     postOptions: {
       method: 'POST',
       headers: {
-        'content-type': 'text/n3'
+        'content-type': 'text/n3' // REPLACE ME BEFORE USAGE
       },
       mode: 'cors',
       credentials: 'include',
-      /*body: "@prefix : <#>.\n@prefix c: <https://kezike17/solidtest.space/profile/card#>.\n@prefix n0: <http://xmlns.com/foaf/0.1/>.\n@prefix     c0: <https://www.w3.org/People/Berners-Lee/card#>.\nc:me n0:knows c0:i.",*/
-      body: "REPLACE ME BEFORE USAGE"
+      body: "" // REPLACE ME BEFORE USAGE
     },
     //// END REST CONFIGURATION ////
 
     //// BEGIN KEY MANAGEMENT ////
     pubKeyPemFile: '../auth/pub.pem',
-
     privKeyPemFile: '../auth/priv.pem',
     //// END KEY MANAGEMENT ////
+
+    //// BEGIN GENERAL SOLID/LD TERMS ////
+    // Statement subject field
+    ldSubField: 'subject',
+    // Statement predicate field
+    ldPredField: 'predicate',
+    // Statement object field
+    ldObjField: 'object',
+    // Statement source field
+    ldSrcField: 'why',
+    // Type of term
+    ldTermTypeField: 'termType',
+    // Value of item
+    ldTermValueField: 'value',
+    //// BEGIN GENERAL SOLID/LD TERMS ////
 
     //// BEGIN ONTOLOGY METADATA ////
     // SVC ontology namespace
     SVC: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#'),
-
     // LDP ontology namespace
     LDP: $rdf.Namespace('http://www.w3.org/ns/ldp#'),
-
     // Inbox filter for svc messages
     inboxFilter: 'SVC_MSG',
-
     // SEC ontology public key predicate
     secPubKeyField: 'publicKey',
-
     // SEC ontology owner predicate
     secOwnerField: 'owner',
-
     // SEC ontology controller predicate
     secControllerField: 'controller',
-
     // SOLID ontology account predicate
     solidAccountField: 'account',
-
     // LDP ontology `inbox` predicate
     ldpInboxField: 'inbox',
-
     // LDP ontology `contains` predicate
     ldpContainsField: 'contains',
+    foafHomepageField: 'homepage',
     //// END ONTOLOGY METADATA ////
 
     //// BEGIN APP ////
@@ -97,7 +95,7 @@ SolidUtil = {
     popupUri: 'popup.html',
 
     // Initialize app
-    init: function(event) {
+    init: async function(event) {
         // SolidUtil.login();
         // console.log('$auth.fetch:', $auth.fetch);
     },
@@ -107,14 +105,17 @@ SolidUtil = {
         obj[key] = val;
     },
 
+    // Track status of user session
     trackSession: async function() {
         var sessionPromise = new Promise((resolve, reject) => {
-            $auth.trackSession((session) => {
+            $auth.trackSession(async (session) => {
                 if (!session) {
-                  resolve(null);
+                  var newSession = await SolidUtil.login();
+                  console.log(`Refreshed session:\n${newSession}`);
+                  resolve(newSession);
                 } else {
+                  console.log(`Same session:\n${session}`);
                   resolve(session);
-                  // console.log(`User logged in with webId ${session.webId}`);
                 }
             });
         });
@@ -123,35 +124,32 @@ SolidUtil = {
     },
 
     // Login helper function
-    loginHelper: function(session) {
+    loginHelper: async function(session) {
         SolidUtil.session = session;
-        console.log("SolidUtil.session:", SolidUtil.session);
+        console.log(`SolidUtil.session:\n${SolidUtil.session}`);
         SolidUtil.fetcher = $rdf.fetcher($rdf.graph());
-        console.log("SolidUtil.fetcher:", SolidUtil.fetcher);
+        console.log(`SolidUtil.fetcher:\n${SolidUtil.fetcher}`);
         // SolidUtil.updater = new $rdf.UpdateManager(SolidUtil.fetcher.store);
         // SolidUtil.bindKeyValue(SolidUtil, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidUtil.session.webId) + '#'));
+        // var inbox = "https://kezike.solid.community/inbox/";
+        var inbox = await SolidUtil.discoverInbox(SolidUtil.session.webId);
+        SolidUtil.bindKeyValue(SolidUtil, SolidUtil.ldpInboxField, inbox);
         SolidUtil.bindKeyValue(SolidUtil, 'session', SolidUtil.session);
         SolidUtil.bindKeyValue(SolidUtil, 'fetcher', SolidUtil.fetcher);
     },
 
     // Login to app
-    login: function() {
-        $auth.currentSession().then(/*async */(currentSession) => {
-            if (!currentSession) {
-              $auth.popupLogin({popupUri: SolidUtil.popupUri}).then(/*async */(popupSession) => {
-                  SolidUtil.loginHelper(popupSession);
-              }).catch((err) => {
-                 console.error(err.name + ": " + err.message);
-              });
-              return;
-            }
-            SolidUtil.loginHelper(currentSession);
-        }).catch((err) => {
-           console.error(err.name + ": " + err.message);
-        });
+    login: async function() {
+        console.log("Logging In...")
+        var session = await $auth.currentSession();
+        if (!session) {
+          session = await $auth.popupLogin({popupUri: SolidUtil.popupUri});
+        }
+        await SolidUtil.loginHelper(session);
     },
 
     logout: function() {
+        console.log("Logging Out...")
         // localStorage.removeItem("solid-auth-client");
         // localStorage.clear();
         return $auth.logout();
@@ -159,10 +157,10 @@ SolidUtil = {
 
     // Login as a different user
     switchAccounts: function(event) {
+        console.log("Switching Accounts...")
         /*SolidUtil.logout().then(() => {
             SolidUtil.login();
         });*/
-        console.log("Switching Accounts...")
     },
 
     // Change role in Verifiable Credentials ecosystem
@@ -173,7 +171,7 @@ SolidUtil = {
 
     /*// Execute shell command
     execShell: async function(cmd) {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             exec(cmd, (err, stdout, stderr) => {
                 if (err) {
                   reject(err);
@@ -206,7 +204,7 @@ SolidUtil = {
                   resolve(errSer);
                 }
                 resolve(resSer);
-            }, {produceGeneralizedRdf: true});
+            }, {});
         });
         var serializeResult = await serializePromise;
         return serializeResult;
@@ -267,33 +265,16 @@ SolidUtil = {
 
     // Load content of inbox
     loadInbox: async function(inbox) {
-        console.log(`Load inbox: ${inbox}`);
-        var inboxPromise = new Promise((resolve, reject) => {
-            SolidUtil.fetcher.load(inbox, SolidUtil.getOptions).then((resp) => {
-                // resolve(resp[SolidUtil.responseTextField]);
-                resolve(JSON.stringify(resp));
-                // var inboxContent = SolidUtil.fetcher.store.any($rdf.sym(inbox), LDP(SolidUtil.ldpContainsField), undefined);
-                // resolve(inboxContent);
-            }).catch((err) => {
-               reject(err);
-            });
-            /*fetch('https://kezike.solid.community/public/svc/keys/1f36eb50-18de-11e9-a29e-5d8e3e616ac9.txt').then(function(resp) {
-                return resp.json();
-            }).then(function(respJson) {
-               console.log(JSON.stringify(respJson));
-            });*/
-        });
-        var inboxResult = await inboxPromise;
-        return inboxResult;
+        var inboxPromise = await SolidUtil.fetcher.load(inbox);
+        var inboxContent = SolidUtil.fetcher.store.match($rdf.sym(inbox), LDP(SolidUtil.ldpContainsField), undefined);
+        return inboxContent;
     },
 
     // Retrieve URI of svc public key of a remote target
     getPubKeyRemoteUri: async function(target) {
         var pubKeyUriPromise = new Promise((resolve, reject) => {
             SolidUtil.fetcher.load(target, SolidUtil.getOptions).then((resp) => {
-                /*var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SEC(SolidUtil.secPubKeyField), undefined);
-                resolve(pubKeyUri.value);*/
-                var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target/*"https://kezike.solid.community/public/card#me"*/), FOAF("homepage"), undefined);
+                var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SEC(SolidUtil.secPubKeyField), undefined);
                 resolve(pubKeyUri.value);
             }).catch((err) => {
                reject(err);
@@ -301,19 +282,6 @@ SolidUtil = {
         });
         var pubKeyUriResult = await pubKeyUriPromise;
         return pubKeyUriResult;
-        /*var pubKeyUriPromise = new Promise((resolve, reject) => {
-            var pubKeyFolder = account + 'public/keys/';
-            console.log("pubKeyFolder:", pubKeyFolder);
-            SolidUtil.fetcher.load(pubKeyFolder, SolidUtil.getOptions).then((resp) => {
-                var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(pubKeyFolder), LDP(SolidUtil.ldpContainsField), undefined);
-                console.log("pubKeyUri:", pubKeyUri);
-                resolve(pubKeyUri.value);
-            }).catch((err) => {
-               reject(err);
-            });
-        });
-        var pubKeyUriResult = await pubKeyUriPromise;
-        return pubKeyUriResult;*/
     },
 
     // Retrieve content of svc public key of a remote target

@@ -4,12 +4,6 @@
 var $rdf = require('rdflib');
 var util = require('./util.js');
 
-// Global variables
-var provider = 'https://kezike.solid.community/';
-var myWebId = provider + 'profile/card#me';
-var homeUri = 'http://localhost:8080/';
-var popupUri = homeUri + 'popup.html';
-
 // RDF Namespaces
 var LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
 

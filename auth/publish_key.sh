@@ -1,4 +1,9 @@
 #!/bin/sh
 
-# TODO - Publish public key to svc 'keys' endpoint
-
+# Publish public key
+cd ../rest
+./post.sh $keyFolderRemote TODO text/plain
+# TODO - Retrieve location of key from previous command
+# TODO - Update profile document to point to public key
+# ./patch.sh
+cd ../auth

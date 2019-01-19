@@ -36,11 +36,11 @@
         <subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
     </Class>
 
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#context">
-        <comment xml:lang="en">The context of a credential (ie. 'health', 'law', 'travel')</comment>
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#domain">
+        <comment xml:lang="en">The domain of a credential (ie. 'health', 'law', 'travel')</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">context</label>
+        <label xml:lang="en">domain</label>
         <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 
@@ -50,6 +50,22 @@
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">id</label>
         <range rdf:resource="http://www.w3.org/2001/XMLSchema#nonNegativeInteger"/>
+    </rdf:Property>
+
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#issuanceDate">
+        <comment xml:lang="en">The issuance date of a credential</comment>
+        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">issuanceDate</label>
+        <range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    </rdf:Property>
+
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#issuer">
+        <comment xml:lang="en">The ID of the issuer of a credential (ie. 'https://kezike.solid.community/profile/card#me')</comment>
+        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">issuer</label>
+        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaEdu">
@@ -168,6 +184,14 @@
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">subject</label>
+        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    </rdf:Property>
+
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#title">
+        <comment xml:lang="en">The title briefly describing a credential (ie. 'health', 'law', 'travel')</comment>
+        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">title</label>
         <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 </rdf:RDF>

@@ -15,36 +15,27 @@
           <button id="switch-acct">Switch Accounts</button>
           <button id="switch-role">Switch Roles</button>
       </div>
+      <!-- Tab Template -->
       <div class="tab">
           <button class="tablinks" id="issue-tab-link">Issue</button>
           <button class="tablinks" id="review-tab-link">Review</button>
       </div>
 
+      <!-- Modal Template -->
+      <div id="msg-modal" class="modal">
+          <!-- Modal content -->
+          <div class="msg-modal-content">
+              <span class="close">&times;</span>
+              <div id="msg-modal-text" style="white-space: pre-wrap"></div>
+          </div>
+      </div>
+
+      <!-- Credential Request Review Tab -->
       <div class="tabcontent" id="review-tab-cnt">
           <h3>Review Credential Requests<h3>
-          <!--<table style="width:100%">
-              <tr>
-                  <td>
-                      <h4 style="color:blue; display:inline">Transportation Credential Request from Alice</h4>
-                      <input type="image" src="./img/review.png" height=25 width=25 style="display:inline; left:50em" />
-                  </td>
-              </tr>
-              <tr>
-                  <td>
-                      <h4 style="color:blue; display:inline">Education Credential Request from John</h4>
-                      <input type="image" src="./img/review.png" height=25 width=25 style="display:inline;" />
-                  </td>
-              </tr>
-              <tr>
-                  <td>
-                      <h4 style="color:blue; display:inline">Financial Credential Request from Sally</h4>
-                      <input type="image" src="./img/review.png" height=25 width=25 style="display:inline;" />
-                  </td>
-              </tr>
-          </table>-->
-
           <table id="msg-board" border=1 frame=void rules=rows style="width:100%"></table>
       </div>
+      <!-- Credential Issuance Tab -->
       <div class="tabcontent" id="issue-tab-cnt">
           <h3>Issue New Credential</h3>
           <div>
@@ -92,7 +83,7 @@
           </div>
       </div>
       <div id=stmts></div>
-      <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/"                           title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"                      title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+      <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons" target="_blank">Smashicons</a> from <a href="https://www.flaticon.com/"                           title="Flaticon" target="_blank">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"                      title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
   </body>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

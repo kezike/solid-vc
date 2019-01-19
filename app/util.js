@@ -221,6 +221,12 @@ SolidUtil = {
     },
 
     // Retrieve generic json content at target
+    genericFetch: async function(target) {
+        var fetchPromise = await SolidUtil.fetcher.load(target);
+        return JSON.stringify(fetchPromise[SolidUtil.responseTextField]);
+    },
+
+    // Retrieve generic json content at target
     genericFetchJson: async function(target) {
         var promise = new Promise(async (resolve, reject) => {
             fetch(target).then(function(resp) {
@@ -265,7 +271,7 @@ SolidUtil = {
 
     // Load content of inbox
     loadInbox: async function(inbox) {
-        var inboxPromise = await SolidUtil.fetcher.load(inbox);
+        await SolidUtil.fetcher.load(inbox);
         var inboxContent = SolidUtil.fetcher.store.match($rdf.sym(inbox), LDP(SolidUtil.ldpContainsField), undefined);
         return inboxContent;
     },

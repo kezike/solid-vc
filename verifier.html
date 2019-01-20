@@ -10,29 +10,32 @@
         <link rel="stylesheet" href="./css/styles.css">
     </head>
     <body class="container">
+        <!-- Body Header -->
         <div>
             <h1>SolidVC Verifier</h1>
             <button id="switch-acct">Switch Accounts</button>
             <button id="switch-role">Switch Roles</button>
         </div>
+
+        <!-- Personal Profile -->
+        <div id="profile" class="hidden">
+            <h3 id="name"></h3>
+            <div>
+                <img id="image" height="100" width="100">
+            </div>
+        </div>
+
+        <!-- Credential Verification Form -->
         <div>
             <h3>Verify Credential</h3>
             <form>
                 <fieldset>
-                  <div id="profile" class="hidden">
-                      <h3 id="name"></h3>
-                      <div>
-                          <img id="image" height="100" width="100">
-                      </div>
-                  </div>
-                  <div>
-                      <label for="verify-cred-uri">Provide Credential URI:</label>
-                      <input type="text" placeholder="eg.: https://VERIFIER.solid.community/inbox/cred-4.n3" size=50 id="verify-cred-uri">
-                      <input type="submit" value="Verify Credential" id="verify-cred">
-                  </div>
-                  <div id=verified-cred class="hidden" style="border:1px solid black; white-space: pre-wrap;">
-                      <!--<p id=fetched-doc></p>-->
-                  </div>
+                    <div>
+                        <label for="verify-cred-uri">Provide Credential URI:</label>
+                        <input type="text" placeholder="e.g., https://VERIFIER.solid.community/inbox/cred-4.n3" size=50 id="verify-cred-uri">
+                        <input type="submit" value="Verify Credential" id="verify-cred">
+                    </div>
+                    <div id=verified-cred class="hidden" style="border:1px solid black; white-space: pre-wrap;"></div>
                 </fieldset>
             </form>
         </div>

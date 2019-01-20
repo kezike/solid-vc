@@ -105,6 +105,16 @@ SolidUtil = {
         obj[key] = val;
     },
 
+    // Get personal WebID
+    getWebId: function() {
+        return SolidUtil.session.webId;
+    },
+
+    // Get personal inbox
+    getInbox: function() {
+        return SolidUtil[SolidUtil.ldpInboxField];
+    },
+
     // Track status of user session
     trackSession: async function() {
         var sessionPromise = new Promise((resolve, reject) => {
@@ -130,9 +140,9 @@ SolidUtil = {
         SolidUtil.fetcher = $rdf.fetcher($rdf.graph());
         console.log(`SolidUtil.fetcher:\n${SolidUtil.fetcher}`);
         // SolidUtil.updater = new $rdf.UpdateManager(SolidUtil.fetcher.store);
-        // SolidUtil.bindKeyValue(SolidUtil, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidUtil.session.webId) + '#'));
+        // SolidUtil.bindKeyValue(SolidUtil, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidUtil.getWebId()) + '#'));
         // var inbox = "https://kezike.solid.community/inbox/";
-        var inbox = await SolidUtil.discoverInbox(SolidUtil.session.webId);
+        var inbox = await SolidUtil.discoverInbox(SolidUtil.getWebId());
         SolidUtil.bindKeyValue(SolidUtil, SolidUtil.ldpInboxField, inbox);
         SolidUtil.bindKeyValue(SolidUtil, 'session', SolidUtil.session);
         SolidUtil.bindKeyValue(SolidUtil, 'fetcher', SolidUtil.fetcher);
@@ -213,7 +223,7 @@ SolidUtil = {
     // Convert from typeFrom to typeTo
     convert: async function(text, typeFrom, typeTo) {
         var store = $rdf.graph();
-        var base = SolidUtil.session.webId;
+        var base = SolidUtil.getWebId();
         var parsed = await SolidUtil.parse(text, store, base, typeFrom);
         var target = null;
         var serialized = await SolidUtil.serialize(target, parsed, base, typeTo);
@@ -223,7 +233,7 @@ SolidUtil = {
     // Retrieve generic json content at target
     genericFetch: async function(target) {
         var fetchPromise = await SolidUtil.fetcher.load(target);
-        return JSON.stringify(fetchPromise[SolidUtil.responseTextField]);
+        return fetchPromise[SolidUtil.responseTextField];
     },
 
     // Retrieve generic json content at target
@@ -243,30 +253,16 @@ SolidUtil = {
 
     // Discover the account of a target via LDN
     discoverAccount: async function(target) {
-        var accountPromise = new Promise((resolve, reject) => {
-            SolidUtil.fetcher.load(target, SolidUtil.getOptions).then((resp) => {
-                var account = SolidUtil.fetcher.store.any($rdf.sym(target), SOLID(SolidUtil.solidAccountField), undefined);
-                resolve(account.value);
-            }).catch((err) => {
-               reject(err);
-            });
-        });
-        var accountResult = await accountPromise;
-        return accountResult;
+        await SolidUtil.fetcher.load(target);
+        var account = SolidUtil.fetcher.store.any($rdf.sym(target), SOLID(SolidUtil.solidAccountField), undefined);
+        return account;
     },
 
     // Discover the inbox of a target via LDN
     discoverInbox: async function(target) {
-        var inboxPromise = new Promise((resolve, reject) => {
-            SolidUtil.fetcher.load(target, SolidUtil.getOptions).then((resp) => {
-                var inbox = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpInboxField), undefined);
-                resolve(inbox.value);
-            }).catch((err) => {
-               reject(err);
-            });
-        });
-        var inboxResult = await inboxPromise;
-        return inboxResult;
+        await SolidUtil.fetcher.load(target);
+        var inbox = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpInboxField), undefined);
+        return inbox;
     },
 
     // Load content of inbox
@@ -278,16 +274,9 @@ SolidUtil = {
 
     // Retrieve URI of svc public key of a remote target
     getPubKeyRemoteUri: async function(target) {
-        var pubKeyUriPromise = new Promise((resolve, reject) => {
-            SolidUtil.fetcher.load(target, SolidUtil.getOptions).then((resp) => {
-                var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SEC(SolidUtil.secPubKeyField), undefined);
-                resolve(pubKeyUri.value);
-            }).catch((err) => {
-               reject(err);
-            });
-        });
-        var pubKeyUriResult = await pubKeyUriPromise;
-        return pubKeyUriResult;
+        await SolidUtil.fetcher.load(inbox);
+        var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SEC(SolidUtil.secPubKeyField), undefined);
+        return pubKeyUri;
     },
 
     // Retrieve content of svc public key of a remote target
@@ -379,7 +368,7 @@ SolidUtil = {
         const {RsaSignature2018} = jsigs.suites;
         const {AssertionProofPurpose} = jsigs.purposes;
         const {RSAKeyPair} = jsigs;
-        // const publicKeyStr = await SolidUtil.getPubKeyRemoteContent(SolidUtil.session.webId);
+        // const publicKeyStr = await SolidUtil.getPubKeyRemoteContent(SolidUtil.getWebId());
         // const publicKey = JSON.parse(publicKeyStr);
         const publicKeyPem = await SolidUtil.getPubKeyLocal();
         const privateKeyPem = await SolidUtil.getPrivKeyLocal();

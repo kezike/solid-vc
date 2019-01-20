@@ -10,11 +10,21 @@
         <link rel="stylesheet" href="./css/styles.css">
     </head>
   <body class="container">
+      <!-- Body Header -->
       <div>
           <h1>SolidVC Issuer</h1>
           <button id="switch-acct">Switch Accounts</button>
           <button id="switch-role">Switch Roles</button>
       </div>
+
+      <!-- Personal Profile -->
+      <div id="profile" class="hidden">
+          <h3 id="name"></h3>
+          <div>
+              <img id="image" height="100" width="100">
+          </div>
+      </div>
+
       <!-- Tab Template -->
       <div class="tab">
           <button class="tablinks" id="issue-tab-link">Issue</button>
@@ -35,49 +45,44 @@
           <h3>Review Credential Requests<h3>
           <table id="msg-board" border=1 frame=void rules=rows style="width:100%"></table>
       </div>
+
       <!-- Credential Issuance Tab -->
       <div class="tabcontent" id="issue-tab-cnt">
           <h3>Issue New Credential</h3>
           <div>
               <form>
                   <fieldset>
-                    <!--Credential: <input type="file" accept=".json" id="credential" required><br>
-                    <input type="submit" value="Issue Credential" id="issue-cred">-->
-                    <!--Public Key: <input type="file" placeholder="ie. http://example.com/people/peter/keys/23" size="40" id="creator" required><br>-->
-                    <!--Signature: <input type="file" id="signature" required><br>-->
+                      <!--Credential: <input type="file" accept=".json" id="credential" required><br>
+                      <input type="submit" value="Issue Credential" id="issue-cred">-->
+                      <!--Public Key: <input type="file" placeholder="e.g., http://example.com/people/peter/keys/23" size="40" id="creator" required><br>-->
+                      <!--Signature: <input type="file" id="signature" required><br>-->
 
-                    <!--<input type="text" id="subject"><br>
-                    <input type="text" id="predicate"><br>
-                    <input type="text" id="object"><br>
-                    <button id="add-stmt">Add Statement</button>-->
-                    <div id="profile" class="hidden">
-                        <h3 id="name"></h3>
-                        <div>
-                            <img id="image" height="100" width="100">
-                        </div>
-                    </div>
-                    <div>
-                    <label for="cred-domain">Select Credential Domain:</label>
-                        <select id="cred-domain">
-                            <option value="">Select "General" if unsure</option>
-                            <option value="svcEdu">Education</option>
-                            <option value="svcFin">Finance</option>
-                            <option value="svcGen">General</option>
-                            <!--<option value="svcGov">Government</option>
-                            <option value="svcHealth">Health</option>
-                            <option value="svcLaw">Law</option>
-                            <option value="svcMed">Medicine</option>
-                            <option value="svcOcc">Occupation</option>-->
-                            <option value="svcTrans">Transportation</option>
-                            <!--<option value="svcTravel">Travel</option>-->
-                        </select>
-                    </div>
-                    <div>
-                        <label for="subject-id">Provide Credential Subject Id:</label>
-                        <input type="text" placeholder="eg.: https://SUBJECT.solid.community/profile/card#me" size=50 id="subject-id"><br>
-                    </div>
-                    <textarea id="cred-plain" rows=15 cols=100 form="vcform"></textarea>
-                    <input type="submit" value="Issue Credential" id="issue-cred">
+                      <!--<input type="text" id="subject"><br>
+                      <input type="text" id="predicate"><br>
+                      <input type="text" id="object"><br>
+                      <button id="add-stmt">Add Statement</button>-->
+                      <div>
+                      <label for="cred-domain">Select Credential Domain:</label>
+                          <select id="cred-domain">
+                              <option value="">Select "General" if unsure</option>
+                              <option value="EDUCATION">Education</option>
+                              <option value="FINANCE">Finance</option>
+                              <option value="GENERAL">General</option>
+                              <option value="GOVERNMENT">Government</option>
+                              <option value="HEALTH">Health</option>
+                              <option value="LAW">Law</option>
+                              <option value="MEDICINE">Medicine</option>
+                              <option value="PROFESSION">Profession</option>
+                              <option value="TRANSPORTATION">Transportation</option>
+                              <option value="TRAVEL">Travel</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label for="subject-id">Provide Credential Subject ID:</label>
+                          <input type="text" placeholder="e.g., https://SUBJECT.solid.community/profile/card#me" size=50 id="subject-id"><br>
+                      </div>
+                      <textarea id="cred-plain" rows=15 cols=100 form="vcform"></textarea>
+                      <input type="submit" value="Issue Credential" id="issue-cred">
                   </fieldset>
               </form>
           </div>

@@ -75,10 +75,10 @@ svc:metaMed a rdf:Property ;
     rdfs:domain svc:Metadata ;
     rdfs:range rdfs:Literal .
 
-svc:metaOcc a rdf:Property ;
+svc:metaProf a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "metaOcc"@en ;
-    rdfs:comment "The URI of the occupation ledger metadata document"@en ;
+    rdfs:label "metaProf"@en ;
+    rdfs:comment "The URI of the profession ledger metadata document"@en ;
     rdfs:domain svc:Metadata ;
     rdfs:range rdfs:Literal .
 
@@ -116,24 +116,45 @@ svc:plain a rdf:Property ;
     rdfs:domain svc:Credential ;
     rdfs:range rdfs:Resource .
 
-svc:title a rdf:Property ;
-    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "title"@en ;
-    rdfs:comment "The title briefly describing a credential (ie. 'health', 'law', 'travel')"@en ;
-    rdfs:domain svc:Credential ;
-    rdfs:range rdfs:Literal .
-
 svc:domain a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "domain"@en ;
-    rdfs:comment "The domain of a credential (ie. 'health', 'law', 'travel')"@en ;
+    rdfs:comment "The domain of a credential (e.g., 'HEALTH', 'LAW', 'TRAVEL')"@en ;
     rdfs:domain svc:Credential ;
     rdfs:range rdfs:Literal .
 
+svc:title a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "title"@en ;
+    rdfs:comment "The title briefly describing a credential (e.g., 'MEng. Credential Request for Kayode Ezike')"@en ;
+    rdfs:domain svc:Credential ;
+    rdfs:range rdfs:Literal .
+
+svc:description a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "description"@en ;
+    rdfs:comment "An optional description of a credential request"@en ;
+    rdfs:domain svc:Credential ;
+    rdfs:range rdfs:Literal .
+
+svc:messageStatus a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "messageStatus"@en ;
+    rdfs:comment "Status of message (e.g., 'APPROVED', 'DECLINED')"@en ;
+    rdfs:domain svc:Credential ;
+    rdfs:range rdfs:Literal .
+
+svc:messageType a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "messageType"@en ;
+    rdfs:comment "Type of message (e.g., 'REQUEST', 'ISSUANCE', 'INQUIRY', 'GENERAL')"@en ;
+    rdfs:domain svc:Credential ;
+    rdfs:range rdfs:Literal .
+    
 svc:issuerId a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "issuerId"@en ;
-    rdfs:comment "The ID of the issuer of a credential (ie. 'https://kezike.solid.community/profile/card#me')"@en ;
+    rdfs:comment "The ID of the issuer of a credential (e.g., 'https://kezike.solid.community/profile/card#me')"@en ;
     rdfs:domain svc:Credential ;
     rdfs:range rdfs:Literal .
 
@@ -144,10 +165,10 @@ svc:issuanceDate a rdf:Property ;
     rdfs:domain svc:Credential ;
     rdfs:range xsd:dateTime .
 
-svc:subject a rdf:Property ;
+svc:subjectId a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "subject"@en ;
-    rdfs:comment "The ID of the subject of a credential"@en ;
+    rdfs:label "subjectId"@en ;
+    rdfs:comment "The ID of the subject of a credential (e.g., 'https://kezike.solid.community/profile/card#me')"@en ;
     rdfs:domain svc:Credential ;
     rdfs:range rdfs:Literal .
 
@@ -163,7 +184,7 @@ svc:proof a rdf:Property ;
     rdfs:label "proof"@en ;
     rdfs:comment """
     The digital proof verifying a credential (same as sec:proof):
-    - 'type': The proof type (ie. sec:RsaSignature2018)
+    - 'type': The proof type (e.g., sec:RsaSignature2018)
     - 'created': The timestamp of the creation of a credential
     - 'creator': The public key of the issuer of a credential
     - 'nonce': Optional value proving effort in proof creation

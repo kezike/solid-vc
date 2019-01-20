@@ -23,7 +23,6 @@ var svcFetch;
 var SolidIss = SolidIss || {};
 
 SolidIss = {
-
     credential: {},
     credentialN3: "",
     namespaces: {
@@ -34,7 +33,7 @@ SolidIss = {
         svcHealth: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-health#'),
         svcLaw: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-law#'),
         svcMed: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-med#'),
-        svcOcc: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-occ#'),
+        svcProf: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-prof#'),
         svcTrans: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-trans#'),
         svcTravel: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc-travel#')
     },
@@ -52,7 +51,7 @@ SolidIss = {
                   "@prefix svcHealth: <http://dig.csail.mit.edu/2018/svc-health#> .",
                   "@prefix svcLaw: <http://dig.csail.mit.edu/2018/svc-law#> .",
                   "@prefix svcMed: <http://dig.csail.mit.edu/2018/svc-med#> .",
-                  "@prefix svcOcc: <http://dig.csail.mit.edu/2018/svc-occ#> .",
+                  "@prefix svcProf: <http://dig.csail.mit.edu/2018/svc-prof#> .",
                   "@prefix svcTrans: <http://dig.csail.mit.edu/2018/svc-trans#> .",
                   "@prefix svcTravel: <http://dig.csail.mit.edu/2018/svc-travel#> ."
     ],
@@ -82,12 +81,12 @@ SolidIss = {
 
     //// BEGIN APP ////
     // Tab links and content
-    reviewTabLink: '#review-tab-link',
-    reviewTabCnt: '#review-tab-cnt',
     issueTabLink: '#issue-tab-link',
     issueTabCnt: '#issue-tab-cnt',
-    currentTabLink: '', // {SolidIss.reviewTabLink, SolidIss.issueTabLink}
-    currentTabCnt: '', // {SolidIss.reviewTabCnt, SolidIss.issueTabCnt}
+    reviewTabLink: '#review-tab-link',
+    reviewTabCnt: '#review-tab-cnt',
+    currentTabLink: '', // { SolidIss.issueTabLink, SolidIss.reviewTabLink }
+    currentTabCnt: '', // { SolidIss.issueTabCnt, SolidIss.reviewTabCnt }
     
     // Message element ids
     messageIds: [],
@@ -103,14 +102,14 @@ SolidIss = {
     init: function(event) {
         SolidIss.bindEvents();
         $(SolidIss.issueTabLink).click();
-        SolidIss.generateKeyPair({keyType: 'RSA', bits: 2048, workers: 2});
+        // SolidIss.generateKeyPair({keyType: 'RSA', bits: 2048, workers: 2});
     },
 
     // Bind events
     bindEvents: function() {
         $(document).on('click', '#issue-cred', SolidIss.issueCredential);
-        $(document).on('click', '#review-tab-link', SolidIss.displayTab);
         $(document).on('click', '#issue-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#review-tab-link', SolidIss.displayTab);
         $(document).on('click', '.inspect-cred', SolidIss.inspectCredential);
         $(document).on('click', '.approve-cred', SolidIss.approveCredential);
         $(document).on('click', '.decline-cred', SolidIss.declineCredential);
@@ -118,10 +117,9 @@ SolidIss = {
         $(document).on('click', '#switch-role', util.switchRoles);
     },
 
+    // Display tab
     displayTab: async function(event) {
         console.log("event.target.id:", $(event.target).attr('id'));
-        // Declare all variables
-        var i, tabcontent, tablinks;
 
         // Get all elements with class="tabcontent" and hide them
         $('.tabcontent').css('display', 'none');
@@ -131,13 +129,6 @@ SolidIss = {
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         switch('#' + $(event.target).attr('id')) {
-          case SolidIss.reviewTabLink:
-            SolidIss.currentTabLink = SolidIss.reviewTabLink;
-            SolidIss.currentTabCnt = SolidIss.reviewTabCnt;
-            $(SolidIss.currentTabCnt).css('display', 'block');
-            $(event.currentTarget).addClass('active');
-            await SolidIss.loadReviewTab();
-            break;
           case SolidIss.issueTabLink:
             SolidIss.currentTabLink = SolidIss.issueTabLink;
             SolidIss.currentTabCnt = SolidIss.issueTabCnt;
@@ -145,35 +136,20 @@ SolidIss = {
             $(event.currentTarget).addClass('active');
             await SolidIss.loadIssueTab();
             break;
+          case SolidIss.reviewTabLink:
+            SolidIss.currentTabLink = SolidIss.reviewTabLink;
+            SolidIss.currentTabCnt = SolidIss.reviewTabCnt;
+            $(SolidIss.currentTabCnt).css('display', 'block');
+            $(event.currentTarget).addClass('active');
+            await SolidIss.loadReviewTab();
+            break;
         }
     },
 
-    formatActionElementIdx: function(actionId, idx) {
-        return parseInt(actionId.split(SolidIss.actionElemIdDelim)[1]);
-    },
-
-    formatActionElementId: function(action, idx) {
-        return action + SolidIss.actionElemIdDelim + idx;
-    },
-
-    formatRequestMessageElement: function(messageId, messageIdx) {
-        var inspectId = SolidIss.formatActionElementId("inspect", messageIdx);
-        var approveId = SolidIss.formatActionElementId("approve", messageIdx);
-        var declineId = SolidIss.formatActionElementId("decline", messageIdx);
-        var header = "<tr>";
-        var bodyLine1 = `<td style="padding:15px"><h4 style="color:blue; display:inline"><a href=${messageId} target="_blank">${messageId}</a></h4></td>`;
-        var bodyLine2 = `<td id=${inspectId} class=inspect-cred style="padding:15px"><input type="image" src="./img/inspect.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
-        var bodyLine3 = `<td id=${approveId} class=approve-cred style="padding:15px"><input type="image" src="./img/approve.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
-        var bodyLine4 = `<td id=${declineId} class=decline-cred style="padding:15px"><input type="image" src="./img/decline.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
-        var body = `${bodyLine1}${bodyLine2}${bodyLine3}${bodyLine4}`;
-        var footer = "</tr>";
-        var message = `${header}${body}${footer}`;
-        return message;
-    },
-
+    // Load content of review tab
     loadReviewTab: async function() {
         await util.trackSession();
-        var inbox = util[util.ldpInboxField];
+        var inbox = util.getInbox();
         var inboxContent = await util.loadInbox(inbox);
         console.log(`INBOX: ${inbox}`);
         console.log(`INBOX CONTENT:\n${inboxContent}`);
@@ -187,36 +163,65 @@ SolidIss = {
         }
     },
 
+    // Load content of issue tab
     loadIssueTab: async function() {
         await util.trackSession();
         // var writeResult = await util.writeKeyFile("hello_world.txt", ["Hello, world!"]);
         // var session = await util.trackSession();
     },
 
+    formatActionElementIdx: function(actionId, idx) {
+        return parseInt(actionId.split(SolidIss.actionElemIdDelim)[1]);
+    },
+
+    formatActionElementId: function(action, idx) {
+        return action + SolidIss.actionElemIdDelim + idx;
+    },
+
+    formatRequestMessageElement: function(messageId, messageIdx) {
+        var credReqMsgLabel = `Credential Request ${messageIdx + 1}`;
+        var inspectId = SolidIss.formatActionElementId("inspect", messageIdx);
+        var approveId = SolidIss.formatActionElementId("approve", messageIdx);
+        var declineId = SolidIss.formatActionElementId("decline", messageIdx);
+        var header = "<tr>";
+        var bodyLine1 = `<td style="padding:15px"><h4 style="color:blue; display:inline"><a href=${messageId} target="_blank">${credReqMsgLabel}</a></h4></td>`;
+        var bodyLine2 = `<td id=${inspectId} class=inspect-cred style="padding:15px"><input type="image" src="./img/inspect.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var bodyLine3 = `<td id=${approveId} class=approve-cred style="padding:15px"><input type="image" src="./img/approve.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var bodyLine4 = `<td id=${declineId} class=decline-cred style="padding:15px"><input type="image" src="./img/decline.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var body = `${bodyLine1}${bodyLine2}${bodyLine3}${bodyLine4}`;
+        var footer = "</tr>";
+        var message = `${header}${body}${footer}`;
+        return message;
+    },
+
     inspectCredential: async function(event) {
         // Retrieve relevant DOM elements
         var actionElem = $(event.target).closest(".inspect-cred");
         var actionElemId = actionElem.attr('id');
-        var msgModal = $("#msg-modal");
+        var messageModal = $("#msg-modal");
         var closeButton = $(event.target).closest(".close");
         var closeButtonId = closeButton.attr('id');
         console.log(`Inspect Credential Target: ${actionElemId}`);
+        
         // Fetch credential request message
         var actionElemIdx = SolidIss.formatActionElementIdx(actionElemId);
         var messageUri = SolidIss.messageIds[actionElemIdx];
-        var messagePromise = await util.genericFetch(messageUri);
+        var message = await util.genericFetch(messageUri);
+        
         // Populate and display credential request message modal
-        var msgModalTextContainer = $("#msg-modal-text");
-        msgModalTextContainer.text(messagePromise);
-        msgModal.css("display","block");
+        var messageModalText = $("#msg-modal-text");
+        messageModalText.text(message);
+        messageModal.css("display","block");
+        
         // Close credential inpection modal when button pressed
         $(document).on('click', closeButtonId, () => {
-            msgModal.css("display","none");
+            messageModal.css("display","none");
         });
+        
         // Close credential inpection modal when click scope is out of modal bounds
         $(document).on('click', (event) => {
-            if (event.target == msgModal) {
-              msgModal.css("display","none");
+            if (event.target == messageModal) {
+              messageModal.css("display","none");
             }
         });
     },
@@ -436,19 +441,31 @@ SolidIss = {
         console.log("signed credential:", SolidIss.signedCredential);
         return SolidIss.signedCredential;*/
         event.preventDefault();
-        var subjectId = $('#subject-id').val();
-        // var subjectPubKey = $('#subject-pubkey').val();
-        var credPlain = $('#cred-plain').val();
-        var credDomain = $('#cred-domain').val();
-        // var credSerialization = $('#cred-serialization').val();
+        await util.trackSession();
+        // Retrieve relevant credential  elements
+        var subjectIdElem = $('#subject-id');
+        var credPlainElem = $('#cred-plain');
+        var credDomainElem = $('#cred-domain');
+        // var credSerializationElem = $('#cred-serialization');
+        var subjectId = subjectIdElem.val();
+        var credPlain = credPlainElem.val();
+        var credDomain = credDomainElem.val();
+        // var credSerialization = credDomainElem.val();
+
+        // Validate inputs
+        if (subjectId === "") {
+          alert("Please provide a valid subject ID");
+          subjectIdElem.focus();
+          return;
+        }
         if (credPlain === "") {
-          alert("Please include a credential in the text area");
-          $('#cred-plain').focus();
+          alert("Please provide a valid credential");
+          credPlainElem.focus();
           return;
         }
         if (credDomain === "") {
           alert("Please select a valid domain for the credential");
-          $('#cred-domain').focus();
+          credDomainElem.focus();
           return;
         }
         /*if (credSerialization === "") {
@@ -460,7 +477,7 @@ SolidIss = {
         /* NOTE: Signing n3 document with forge works fine
         var credStore = $rdf.graph();
         var credPlainStore = $rdf.graph();
-        var me = $rdf.sym(util.session.webId);
+        var me = $rdf.sym(util.getWebId());
         var base = me.value;
         var type = 'text/n3';
         $rdf.parse(credPlain, credPlainStore, base, type, async (errParse, resParse) => {
@@ -497,18 +514,17 @@ SolidIss = {
         var subjectInbox = await util.discoverInbox(subjectId);
         util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
         util.postOptions.body = credSignedN3Str;
-        util.fetcher.load(subjectInbox, util.postOptions).then((resPostCred) => {
+        util.fetcher.load(subjectInbox, util.postOptions);/*.then((resPostCred) => {
             console.log(resPostCred);
         }).catch((err) => {
            console.error(err.name + ": " + err.message);
-        });
-        $('#cred-plain').val("");
-        $('#cred-domain').val("");
-        // $('#cred-serialization').val("");
-    },
+        });*/
 
-    // Verify credential has proper signature
-    verifyCredential: function(credential, pubKey, sig) {
+        // Clear input fields
+        subjectIdElem.val("");
+        credPlainElem.val("");
+        credDomainElem.val("");
+        // credSerializationElem.val("");
     }
     //// END APP ////
 };

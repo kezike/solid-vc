@@ -89,7 +89,8 @@ async function main() {
     // Specify the public key owner object
     var controller = {
         "@context": jsigs.SECURITY_CONTEXT_URL,
-        id: "https://kezike.solid.community/profile/card#me",
+        // id: "https://kezike.solid.community/profile/card#me",
+        id: "controller",
         publicKey: [publicKey],
         assertionMethod: [publicKey.id]
     };

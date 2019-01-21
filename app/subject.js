@@ -140,7 +140,7 @@ SolidSub = {
           return;
         }
         if (credTitle === "") {
-          credTitle = `${credDomain} Credential Request for Subject with ID "${subjectId}"`;
+          credTitle = `${credDomain} Credential Request for Subject with ID '${subjectId}'`;
         }
         if (issuerId === "") { // TODO - Add condition for validating proper URI format
           alert("Please provide a valid issuer ID");
@@ -148,7 +148,7 @@ SolidSub = {
           return;
         }
         if (credDesc === "") {
-          credDesc = `Hello there! I am requesting issuer with ID "${issuerId}" to grant subject with ID "${subjectId}" a credential of type ${credDomain}`;
+          credDesc = `Hello there! I am requesting issuer with ID '${issuerId}' to grant subject with ID '${subjectId}' a credential of type ${credDomain}`;
         }
 
         // Discover issuer's inbox location

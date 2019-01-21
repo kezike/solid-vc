@@ -1,4 +1,5 @@
 app/dist
+data/*
 cookies.txt
 node_modules
 package-lock.json

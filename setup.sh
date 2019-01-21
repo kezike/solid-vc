@@ -25,8 +25,11 @@ cd auth/
 
 # Login to Solid account
 echo To get started, please provide your Solid account info in the following section. If you do not own a Solid account, please quit this script and register for one here: https://solid.inrupt.com
-echo Please enter your Solid account domain \(eg. https://USER.solid.community\) \[ENTER\]: 
-read account
+echo Please enter your Solid WebID \(eg. https://USER.solid.community/profile/card#me\) \[ENTER\]: 
+read webId
+uriApi=$PWD/../api/uri.js
+account=`node $uriApi --host=$webId` # NOTE: $PWD == solid-vc/auth at this point
+profile=`node $uriApi --doc=$webId` # NOTE: $PWD == solid-vc/auth at this point
 echo Please enter your Solid account username \[ENTER\]: 
 read uname
 echo Please enter your Solid account password \[ENTER\]: 
@@ -44,7 +47,7 @@ pubKeyFile=$PWD/pub.pem # NOTE: $PWD == solid-vc/auth at this point
 echo Please enter an existing and EMPTY public folder where you would like to store your SolidVC public key \(eg. https://USER.solid.community/public/svc/keys\) \[ENTER\]: 
 read keyFolderRemote
 pubKeyQueryFile=$PWD/../query/pub.sparql # NOTE: $PWD == solid-vc/auth at this point
-./publish_key.sh $keyFolderRemote $pubKeyFile $pubKeyQueryFile
+./publish_key.sh $keyFolderRemote $pubKeyFile $pubKeyQueryFile $profile
 
 cd ../
 # END AUTHENTICATION
@@ -53,9 +56,9 @@ cd ../
 
 # Store revocation list in local file
 # TODO - Publish revocation list
-echo Please enter an empty, existing public folder where you would like to store your SolidVC revocation list \(eg. https://USER.solid.community/public/svc/rev\) \[ENTER\]: 
+echo Please enter an existing EMPTY public folder where you would like to store your SolidVC revocation list \(eg. https://USER.solid.community/public/svc/rev\) \[ENTER\]: 
 read revFolderRemote
-revListFile=$PWD/data/rev # NOTE: $PWD == solid-vc at this point
+revListFile=$PWD/data/rev.txt # NOTE: $PWD == solid-vc at this point
 echo $revFolderRemote > $revListFile
 
 # END REVOCATION LIST CONFIGURATION

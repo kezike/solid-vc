@@ -20,7 +20,19 @@ SolidVer = {
     },
 
     // Verify credential has proper signature
-    verifyCredential: function(event) {
+    verifyCredential: async function(event) {
+        event.preventDefault();
+        await util.trackSession();
+
+        // Retrieve relevant verification elements
+        var verifyCredUriElem = $('#verify-cred-uri');
+        var verifyCredUri = verifyCredUriElem.val();
+        var result = await util.verifyDocument(verifyCredUri);
+        if (result.verified) {
+          console.log(`Signature verified:\n${result.verified}`);
+        } else {
+          console.error(`Signature verification error:\n${result.error}`);
+        }
     }
     //// END APP ////
 };

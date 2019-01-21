@@ -11,6 +11,7 @@ var rsa = forge.pki.rsa;
 // RDF namespaces
 var SUB = $rdf.Namespace('#'); // Changes to subject account in `issueCredential`
 var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
+var VC = $rdf.Namespace('https://w3id.org/credentials/v1#');
 var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
 var RDF = $rdf.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#');
 var RDFS = $rdf.Namespace('http://www.w3.org/2000/01/rdf-schema#');
@@ -166,8 +167,6 @@ SolidIss = {
     // Load content of issue tab
     loadIssueTab: async function() {
         await util.trackSession();
-        // var writeResult = await util.writeKeyFile("hello_world.txt", ["Hello, world!"]);
-        // var session = await util.trackSession();
     },
 
     formatActionElementIdx: function(actionId, idx) {
@@ -442,15 +441,23 @@ SolidIss = {
         return SolidIss.signedCredential;*/
         event.preventDefault();
         await util.trackSession();
-        // Retrieve relevant credential  elements
-        var subjectIdElem = $('#subject-id');
+
+        // Retrieve relevant credential elements
         var credPlainElem = $('#cred-plain');
         var credDomainElem = $('#cred-domain');
         // var credSerializationElem = $('#cred-serialization');
-        var subjectId = subjectIdElem.val();
+        var subjectIdElem = $('#subject-id');
         var credPlain = credPlainElem.val();
         var credDomain = credDomainElem.val();
         // var credSerialization = credDomainElem.val();
+        var subjectId = subjectIdElem.val();
+        var issuerId = util.getWebId();
+        var revList = await util.getRevListLocal();
+        var credId = new Date().getUTCMilliseconds();
+        var credStatus = revList + '/' + credId;
+        var credTitle = `${credDomain} Credential for Subject with ID '${subjectId}'`;
+        var credDesc = `Congratualations! By the powers vested in me as issuer with ID '${issuerId}', I hereby grant subject with ID '${subjectId}' a credential of type ${credDomain}`;
+        var messageType = 'ISSUANCE';
 
         // Validate inputs
         if (subjectId === "") {
@@ -503,22 +510,42 @@ SolidIss = {
                 SolidIss.credentialN3 = resSer;
             }, {});
         });*/
-        var credJsonLdStr = await util.convert(credPlain, util.contentTypeN3, util.contentTypeJsonLd);
+        
+        // Parse n3 credential into rdf graph
+        var credStore = await util.parse(credPlain, $rdf.graph(), issuerId, util.contentTypeN3);
+
+        // Add issuance statements to graph
+        var ME = $rdf.Namespace($rdf.uri.docpart(issuerId) + '#');
+        var cred = ME('cred');
+        var credMetaStore = $rdf.graph();
+        credMetaStore.add(cred, RDF('type'), SVC('Credential'));
+        credMetaStore.add(cred, SVC('domain'), $rdf.Literal.fromValue(credDomain));
+        credMetaStore.add(cred, SVC('title'), $rdf.Literal.fromValue(credTitle));
+        credMetaStore.add(cred, SVC('description'), $rdf.Literal.fromValue(credDesc));
+        credMetaStore.add(cred, SVC('subjectId'), $rdf.Literal.fromValue(subjectId));
+        credMetaStore.add(cred, SVC('issuerId'), $rdf.Literal.fromValue(issuerId));
+        credMetaStore.add(cred, SVC('messageType'), $rdf.Literal.fromValue(messageType));
+        credMetaStore.add(cred, VC('credentialStatus'), $rdf.Literal.fromValue(credStatus));
+
+        // Merge credential store with credential metadata store
+        credStore = util.merge(credStore, credMetaStore);
+
+        // Convert credential into JSON-LD for jsonld-signatures
+        // var credJsonLdStr = await util.convert(credPlain, util.contentTypeN3, util.contentTypeJsonLd);
+        var credJsonLdStr = await util.serialize(null, credStore, issuerId, util.contentTypeJsonLd);
         console.log("credJsonLdStr\n:" + credJsonLdStr);
         var credJsonLd = JSON.parse(credJsonLdStr)[0];
         var credSignedJsonLd = await SolidIss.signCredentialJsonLD(credJsonLd, {type: 'RsaSignature2018', keyType: 'RSA'});
         var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd);
-        var credSignedN3Str = await util.convert(credSignedJsonLdStr, util.contentTypeJsonLd, util.contentTypeN3);
+        /*var credSignedN3Str = await util.convert(credSignedJsonLdStr, util.contentTypeJsonLd, util.contentTypeN3);
         console.log("credSignedJsonLd\n:" + credSignedJsonLd);
-        console.log("credSignedN3Str:\n" + credSignedN3Str);
+        console.log("credSignedN3Str:\n" + credSignedN3Str);*/
         var subjectInbox = await util.discoverInbox(subjectId);
-        util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
-        util.postOptions.body = credSignedN3Str;
-        util.fetcher.load(subjectInbox, util.postOptions);/*.then((resPostCred) => {
-            console.log(resPostCred);
-        }).catch((err) => {
-           console.error(err.name + ": " + err.message);
-        });*/
+        // util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
+        // util.postOptions.body = credSignedN3Str;
+        util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
+        util.postOptions.body = credSignedJsonLdStr;
+        util.fetcher.load(subjectInbox, util.postOptions);
 
         // Clear input fields
         subjectIdElem.val("");

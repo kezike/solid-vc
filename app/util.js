@@ -51,6 +51,10 @@ SolidUtil = {
     privKeyPemFile: '../auth/priv.pem',
     //// END KEY MANAGEMENT ////
 
+    //// BEGIN REVOCATION LIST CONFIGURATION ////
+    revListFile: '../data/rev.txt',
+    //// END REVOCATION LIST CONFIGURATION ////
+
     //// BEGIN GENERAL SOLID/LD TERMS ////
     // Statement subject field
     ldSubField: 'subject',
@@ -71,8 +75,8 @@ SolidUtil = {
     SVC: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#'),
     // LDP ontology namespace
     LDP: $rdf.Namespace('http://www.w3.org/ns/ldp#'),
-    // Inbox filter for svc messages
-    inboxFilter: 'SVC_MSG',
+    // SVC issuer id predicate
+    svcIssuerId: 'issuerId',
     // SEC ontology public key predicate
     secPubKeyField: 'publicKey',
     // SEC ontology owner predicate
@@ -230,6 +234,18 @@ SolidUtil = {
         return serialized;
     },
 
+    // Merge two graph stores
+    merge: function(store1, store2) {
+        var outStore = $rdf.graph();
+        store1.statements.forEach((statement) => {
+            outStore.add(statement);
+        });
+        store2.statements.forEach((statement) => {
+            outStore.add(statement);
+        });
+        return outStore;
+    },
+
     // Retrieve generic json content at target
     genericFetch: async function(target) {
         var fetchPromise = await SolidUtil.fetcher.load(target);
@@ -274,7 +290,7 @@ SolidUtil = {
 
     // Retrieve URI of svc public key of a remote target
     getPubKeyRemoteUri: async function(target) {
-        await SolidUtil.fetcher.load(inbox);
+        await SolidUtil.fetcher.load(target);
         var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SEC(SolidUtil.secPubKeyField), undefined);
         return pubKeyUri;
     },
@@ -282,7 +298,7 @@ SolidUtil = {
     // Retrieve content of svc public key of a remote target
     getPubKeyRemoteContent: async function(target) {
         var pubKeyUri = await SolidUtil.getPubKeyRemoteUri(target);
-        var pubKeyPromise = new Promise(async (resolve, reject) => {
+        // var pubKeyPromise = new Promise(async (resolve, reject) => {
             /*SolidUtil.fetcher.load(pubKeyUri, SolidUtil.getOptions).then((resp) => {
                 // resolve(resp[SolidUtil.responseTextField]);
                 // var pubKeyContent = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpContainsField), undefined);
@@ -294,16 +310,18 @@ SolidUtil = {
             }).catch((err) => {
                reject(err);
             });*/
-            fetch(pubKeyUri).then(function(resp) {
+            /*fetch(pubKeyUri).then(function(resp) {
                 return resp.json();
             }).then(function(respJson) {
                resolve(JSON.stringify(respJson));
             }).catch((err) => {
                reject(err);
-            });
-        });
-        var pubKeyResult = await pubKeyPromise;
-        return pubKeyResult;
+            });*/
+        // });
+        // var pubKeyResult = await pubKeyPromise;
+        // return pubKeyResult;
+        var pubKeyPromise = await SolidUtil.fetcher.load(pubKeyUri);
+        return pubKeyPromise[SolidUtil.responseTextField];
     },
 
     // Retrieve content of local file
@@ -356,20 +374,19 @@ SolidUtil = {
         return privKey;
     },
     
+    // Retrieve local svc revocation list
+    getRevListLocal: async function() {
+        var revList = await SolidUtil.readKeyFile(SolidUtil.revListFile);
+        return revList;
+    },
+
     // Sign document
     signDocument: async function(doc, /*signConfig*/) {
         // Specifying signature configuration
         // TODO - allow specification of creator and algorithm in signConfig
-        /*var signConfig = {
-          privateKeyPem: SolidUtil.getPrivKeyLocal(),
-          creator: "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
-          algorithm: "LinkedDataSignature2015"
-        };*/
         const {RsaSignature2018} = jsigs.suites;
         const {AssertionProofPurpose} = jsigs.purposes;
         const {RSAKeyPair} = jsigs;
-        // const publicKeyStr = await SolidUtil.getPubKeyRemoteContent(SolidUtil.getWebId());
-        // const publicKey = JSON.parse(publicKeyStr);
         const publicKeyPem = await SolidUtil.getPubKeyLocal();
         const privateKeyPem = await SolidUtil.getPrivKeyLocal();
         var publicKey = {
@@ -381,68 +398,59 @@ SolidUtil = {
         };
         const key = new RSAKeyPair({...publicKey, privateKeyPem});
         var signConfig = {
-          // documentLoader: jsonld.documentLoader,
           suite: new RsaSignature2018({key}),
           purpose: new AssertionProofPurpose()
         };
-        const signed = await jsigs.sign(doc, signConfig);
-        console.log('Signed document:', signed);
-        console.log('Signed document stringified:', JSON.stringify(signed));
-        return signed;
+        const signedDoc = await jsigs.sign(doc, signConfig);
+        console.log('Signed document:', signedDoc);
+        console.log('Signed document stringified:', JSON.stringify(signedDoc));
+        return signedDoc;
     },
 
     // Verify document
-    verifyDocument: async function(signedUri, /*verifyConfig*/) {
+    verifyDocument: async function(signedDocUri, /*verifyConfig*/) {
         // Specifying verification configuration
         // TODO - allow specification of publicKey["@id"], publicKey.owner, and publicKeyOwner["@id"] in verifyConfig
         // Specify the public key owner object
-        /*var publicKey = {
+        // Fetch signed doc
+        const signedDocPromise = await SolidUtil.genericFetch(signedDocUri);
+        const signedDoc = JSON.parse(signedDocPromise);
+        const svcIssuerIdProperty = SVC(SolidUtil.svcIssuerId).value;
+        const issuerId = signedDoc[svcIssuerIdProperty][0]["@value"];
+        console.log(`Issuer ID: ${JSON.stringify(issuerId)}`);
+        const issuerPubKey = await SolidUtil.getPubKeyRemoteContent(issuerId);
+        console.log(`Issuer Pub Key:\n${issuerPubKey}`);
+
+        // Specify the public key object
+        const publicKey = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
-            "@id": "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
-            owner: "https://kezike.solid.community/profile/card#me",
-            publicKeyPem: SolidUtil.getPubKeyLocal()
+            type: "RsaVerificationKey2018",
+            id: "RsaVerification2018",
+            controller: "RsaController2018",
+            publicKeyPem: issuerPubKey
         };
+
+        console.log(`publicKey.publicKeyPem:\n${publicKey.publicKeyPem}`);
+
         // Specify the public key owner object
-        var publicKeyOwner = {
+        const controller = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
-            "@id": "https://kezike.solid.community/profile/card#me",
-            publicKey: [publicKey]
+            id: "RsaController2018",
+            publicKey: [publicKey],
+            assertionMethod: [publicKey.id]
         };
-        var verifyConfig = {
-          publicKey: publicKey,
-          publicKeyOwner: publicKeyOwner
-        };
-        jsigs.verify(signedDoc, verifyConfig, (err, verified) => {
-            if (err) {
-              console.log(err);
-              return;
-            }
-            console.log("VERIFIED:");
-            console.log(verified);
-            return verified;
-        });*/
+
+        // Setup jsonld-signaures verification
         const {RsaSignature2018} = jsigs.suites;
         const {AssertionProofPurpose} = jsigs.purposes;
         const {RSAKeyPair} = jsigs;
-        const publicKeyStr = await SolidUtil.getPubKeyRemoteContent(/*TODO: after uploading jsigs-signed document inspect it to determine how to load this value*/);
-        const publicKey = JSON.parse(publicKeyStr);
         const privateKeyPem = null; // You do not know the private key of the signer
         const key = new RSAKeyPair({...publicKey, privateKeyPem});
-        const controllerUri = publicKey[SolidUtil.secControllerField];
-        const controllerStr = await SolidUtil.genericFetchJson(controllerUri);
-        const controller = JSON.parse(controllerStr);
-        const signedStr = await SolidUtil.genericFetchJson(signedUri);
-        const signed = JSON.parse(signedStr);
-        const result = await jsigs.verify(signed, {
-          // documentLoader: jsonld.documentLoader,
+        const result = await jsigs.verify(signedDoc, {
           suite: new RsaSignature2018({key}),
           purpose: new AssertionProofPurpose({controller})
         });
-        if (result.verified) {
-          console.log('Signature verified.');
-        } else {
-          console.log('Signature verification error:', result.error);
-        }
+        return result.verified;
     }
     //// END APP ////
 };

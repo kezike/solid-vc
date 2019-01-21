@@ -182,7 +182,7 @@
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#proof">
         <comment xml:lang="en">
-    The digital proof verifying a credential (same as sec:proof):
+    The digital proof verifying a credential (similar to sec:proof):
     - 'type': The proof type (e.g., sec:RsaSignature2018)
     - 'created': The timestamp of the creation of a credential
     - 'creator': The public key of the issuer of a credential
@@ -196,10 +196,18 @@
     </rdf:Property>
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#publicKey">
-        <comment xml:lang="en">The URI of the public key of the subject of a credential (same as sec:publicKey)</comment>
+        <comment xml:lang="en">The URI of the public key of the subject of a credential (similar to sec:publicKey)</comment>
         <domain rdf:resource="http://xmlns.com/foaf/0.1/PersonalProfileDocument"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">publicKey</label>
+        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    </rdf:Property>
+
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#revocationList">
+        <comment xml:lang="en">The URI of the revocation list of a user (similar to vc:credentialStatus)</comment>
+        <domain rdf:resource="http://xmlns.com/foaf/0.1/PersonalProfileDocument"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">revocationList</label>
         <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 

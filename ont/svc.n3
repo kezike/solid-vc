@@ -119,7 +119,7 @@ svc:plain a rdf:Property ;
 svc:domain a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "domain"@en ;
-    rdfs:comment "The domain of a credential (e.g., 'HEALTH', 'LAW', 'TRAVEL')"@en ;
+    rdfs:comment "The domain of a credential (e.g., 'HEALTH', 'LAW', 'TRAVEL', 'GENERAL')"@en ;
     rdfs:domain svc:Credential ;
     rdfs:range rdfs:Literal .
 
@@ -147,7 +147,7 @@ svc:messageStatus a rdf:Property ;
 svc:messageType a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "messageType"@en ;
-    rdfs:comment "Type of message (e.g., 'REQUEST', 'ISSUANCE', 'INQUIRY', 'GENERAL')"@en ;
+    rdfs:comment "Type of message (e.g., 'REQUEST', 'ISSUANCE', 'ASSERTION', 'VERIFICATION', 'INQUIRY', 'MISCELLANEOUS')"@en ;
     rdfs:domain svc:Credential ;
     rdfs:range rdfs:Literal .
     

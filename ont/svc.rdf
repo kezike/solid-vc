@@ -45,7 +45,7 @@
     </rdf:Property>
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#domain">
-        <comment xml:lang="en">The domain of a credential (e.g., 'HEALTH', 'LAW', 'TRAVEL')</comment>
+        <comment xml:lang="en">The domain of a credential (e.g., 'HEALTH', 'LAW', 'TRAVEL', 'GENERAL')</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">domain</label>
@@ -85,7 +85,7 @@
     </rdf:Property>
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#messageType">
-        <comment xml:lang="en">Type of message (e.g., 'REQUEST', 'ISSUANCE', 'INQUIRY', 'GENERAL')</comment>
+        <comment xml:lang="en">Type of message (e.g., 'REQUEST', 'ISSUANCE', 'ASSERTION', 'VERIFICATION', 'INQUIRY', 'MISCELLANEOUS')</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">messageType</label>

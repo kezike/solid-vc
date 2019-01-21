@@ -2,6 +2,10 @@
 
 # Setup solid-vc environment
 
+# BEGIN SETUP
+
+# BEGIN DEPENDENCY INSTALLATION
+
 # Enable execution of solid-vc scripts
 chmod +x svc
 chmod +x util/*
@@ -12,9 +16,9 @@ chmod +x ont/*
 # Install requisite Node packages and dependencies
 echo Installing requisite Node packages...
 npm install
-npm install solid-auth-client -g
-solid-auth-client generate-popup "SolidVC"
-# ln -fs node_modules/solid-auth-client/dist-popup/popup.html popup.html
+# TODO - Follow up on issue that enables configuration of popup.html app name
+ln -fs node_modules/solid-auth-client/dist-popup/popup.html popup.html
+# END DEPENDENCY INSTALLATION
 
 # BEGIN AUTHENTICATION
 cd auth/
@@ -31,18 +35,31 @@ export SOLID_UNAME=$uname
 export SOLID_PASS=$pass
 ./login.sh $account
 
-# TODO - Setup necessary svc folders
-# Including:
-# - /public/svc/keys
-
 # Generate key pair
-./generate_keypair.sh
+privKeyFile=$PWD/priv.pem # NOTE: $PWD == solid-vc/auth at this point
+pubKeyFile=$PWD/pub.pem # NOTE: $PWD == solid-vc/auth at this point
+./generate_keypair.sh $privKeyFile $pubKeyFile
 
 # TODO - Publish public key
-echo Please enter an existing public folder where you would like to store your SolidVC public key \(eg. https://USER.solid.community/public/svc/keys\) \[ENTER\]: 
+echo Please enter an existing and EMPTY public folder where you would like to store your SolidVC public key \(eg. https://USER.solid.community/public/svc/keys\) \[ENTER\]: 
 read keyFolderRemote
-export SOLID_KEY_FOLDER_REMOTE=$keyFolderRemote
-./publish_key.sh
+pubKeyQueryFile=$PWD/../query/pub.sparql # NOTE: $PWD == solid-vc/auth at this point
+./publish_key.sh $keyFolderRemote $pubKeyFile $pubKeyQueryFile
 
 cd ../
 # END AUTHENTICATION
+
+# BEGIN REVOCATION LIST CONFIGURATION
+
+# Store revocation list in local file
+# TODO - Publish revocation list
+echo Please enter an empty, existing public folder where you would like to store your SolidVC revocation list \(eg. https://USER.solid.community/public/svc/rev\) \[ENTER\]: 
+read revFolderRemote
+revListFile=$PWD/data/rev # NOTE: $PWD == solid-vc at this point
+echo $revFolderRemote > $revListFile
+
+# END REVOCATION LIST CONFIGURATION
+
+# END MISCELLANEOUS
+
+# END SETUP

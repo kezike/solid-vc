@@ -27,11 +27,11 @@ SolidVer = {
         // Retrieve relevant verification elements
         var verifyCredUriElem = $('#verify-cred-uri');
         var verifyCredUri = verifyCredUriElem.val();
-        var result = await util.verifyDocument(verifyCredUri);
-        if (result.verified) {
-          console.log(`Signature verified:\n${result.verified}`);
+        var verifyResult = await util.verifyDocument(verifyCredUri);
+        if (verifyResult.verified) {
+          console.log(`Signature verified: ${verifyResult.verified}`);
         } else {
-          console.error(`Signature verification error:\n${result.error}`);
+          console.log(`Signature verification error:\n${verifyResult.error}`);
         }
     }
     //// END APP ////

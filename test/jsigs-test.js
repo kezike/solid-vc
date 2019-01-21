@@ -12,39 +12,8 @@ var privateKeyPem = fs.readFileSync(privateKeyPemFile, 'utf8');
 console.log(publicKeyPem);
 console.log(privateKeyPem);
 
-/*
-// Specify the public key owner object
-var publicKey = {
-    "@context": jsigs.SECURITY_CONTEXT_URL,
-    "@id": "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
-    owner: "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
-    // owner: "https://kezike.solid.community/profile/card#me",
-    publicKeyPem: publicKeyPem
-};
-
-// Specify the public key owner object
-var publicKeyOwner = {
-    "@context": jsigs.SECURITY_CONTEXT_URL,
-    // "@id": "https://kezike.solid.community/profile/card#me",
-    "@id": "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
-    publicKey: [publicKey]
-};
-
-// Specifying signature configuration
-var signConfig = {
-  privateKeyPem: privateKeyPem,
-  creator: "https://kezike.solid.community/public/svc/keys/8770fc10-f31d-11e8-a29e-5d8e3e616ac9.txt",
-  algorithm: "LinkedDataSignature2015"
-};
-
-// Specifying verification configuration
-var verifyConfig = {
-  publicKey: publicKey,
-  publicKeyOwner: publicKeyOwner
-};
-
-// Sample document to be signed
-var doc = {
+// Sample credential similar to credential in jsonld-signautures README.md
+var doc1 = {
     "@context": {
       schema: "http://schema.org",
       name: "schema:name",
@@ -52,73 +21,93 @@ var doc = {
       image: "schema:image"
     },
     name: "Kayode Ezike",
-    homepage: "https://kayodeezike.com",
+    homepage: "https://kayodeyezike.com",
     image: "https://cdn-images-1.medium.com/max/1600/1*io_TxFEasErhkypxUUo8gQ.jpeg"
 };
 
-// Sign document
-jsigs.sign(doc, signConfig, (err, signedDoc) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log("SIGNED DOC:");
-    console.log(signedDoc);
-    // Verify document
-    jsigs.verify(signedDoc, verifyConfig, (err, verified) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        console.log("VERIFIED:");
-        console.log(verified);
-    });
-});*/
+// Credential created by platform
+var doc2 = {
+    "@context": {
+      vc: "https://w3id.org/credentials/v1",
+      svc: "http://dig.csail.mit.edu/2018/svc",
+      credentialStatus: "vc:credentialStatus",
+      description: "svc:description",
+      domain: "svc:domain",
+      issuerId: "svc:issuerId",
+      messageType: "svc:messageType",
+      subjectId: "svc:subjectId",
+      title: "svc:title"
+    },
+    "@type": "svc:Credential",
+    description: "Congratualations! By the powers vested in me as issuer with ID 'https://kezike17.solid.community/profile/card#me', I hereby grant subject with ID 'https://kezike.solid.community/profile/card#me' a credential of type HEALTH",
+    domain: "HEALTH",
+    issuerId: "https://kezike17.solid.community/profile/card#me",
+    messageType: "ISSUANCE",
+    subjectId: "https://kezike.solid.community/profile/card#me",
+    title: "HEALTH Credential for Subject with ID 'https://kezike.solid.community/profile/card#me'",
+    credentialStatus: "https://kezike.solid.community/public/svc/rev/112"
+};
 
-// Main program
-async function main() {
-    // Specify the public key owner object
-    var publicKey = {
-        "@context": jsigs.SECURITY_CONTEXT_URL,
-        type: "RsaVerificationKey2018",
-        id: /*"https://kezike.solid.community/public/svc/keys/1f36eb50-18de-11e9-a29e-5d8e3e616ac9.txt"*/"publicKey",
-        controller: /*"https://kezike.solid.community/public/ctr/bf443590-1531-11e9-a29e-5d8e3e616ac9.txt"*/"controller",
-        publicKeyPem
-    };
 
-    // Specify the public key owner object
-    var controller = {
-        "@context": jsigs.SECURITY_CONTEXT_URL,
-        // id: "https://kezike.solid.community/profile/card#me",
-        id: "controller",
-        publicKey: [publicKey],
-        assertionMethod: [publicKey.id]
-    };
+// Specify the public key
+var publicKey = {
+    "@context": jsigs.SECURITY_CONTEXT_URL,
+    type: "RsaVerificationKey2018",
+    id: "publicKey",
+    controller: "controller",
+    publicKeyPem
+};
 
-    // Sample document to be signed
-    var doc = {
-        "@context": {
-          schema: "http://schema.org",
-          name: "schema:name",
-          homepage: "schema:url",
-          image: "schema:image"
-        },
-        name: "Kayode Ezike",
-        homepage: "https://kayodeyezike.com",
-        image: "https://cdn-images-1.medium.com/max/1600/1*io_TxFEasErhkypxUUo8gQ.jpeg"
-    };
+// Specify the public key controller
+var controller = {
+    "@context": jsigs.SECURITY_CONTEXT_URL,
+    id: "controller",
+    publicKey: [publicKey],
+    assertionMethod: [publicKey.id]
+};
 
+// Specify signature suite and purpose and setup key pair
+const {RsaSignature2018} = jsigs.suites;
+const {AssertionProofPurpose} = jsigs.purposes;
+const {RSAKeyPair} = jsigs;
+const key = new RSAKeyPair({...publicKey, privateKeyPem});
+
+// Test 1
+async function Test1() {
+    console.log("BEGIN TEST 1");
     // Sign the document as a simple assertion
-    const {RsaSignature2018} = jsigs.suites;
-    const {AssertionProofPurpose} = jsigs.purposes;
-    const {RSAKeyPair} = jsigs;
-    const key = new RSAKeyPair({...publicKey, privateKeyPem});
-    const signed = await jsigs.sign(doc, {
+    const signed = await jsigs.sign(doc1, {
       suite: new RsaSignature2018({key}),
       purpose: new AssertionProofPurpose()
     });
-    console.log('Signed document:', signed);
-    // console.log('Signer public key:', signed['https://w3id.org/security#proof']['@graph']['https://w3id.org/security#verificationMethod']['@id']);
+    console.log("Signed document:");
+    console.log(signed);
+
+    // Verify the signed credential
+    const privVer  = null; // You do not know the private key of the signer
+    const keyPairVer = new RSAKeyPair({...publicKey, privateKeyPem: privVer});
+    const result = await jsigs.verify(signed, {
+      suite: new RsaSignature2018({key: keyPairVer}),
+      purpose: new AssertionProofPurpose({controller})
+    });
+    if (result.verified) {
+      console.log(`Signature verified: ${result.verified}`);
+    } else {
+      console.error(`Signature verification error:\n${result.error}`);
+    }
+    console.log("END TEST 1\n");
+}
+
+// Test 2
+async function Test2() {
+    console.log("BEGIN TEST 2");
+    // Sign the document as a simple assertion
+    const signed = await jsigs.sign(doc2, {
+      suite: new RsaSignature2018({key}),
+      purpose: new AssertionProofPurpose()
+    });
+    console.log("Signed document:");
+    console.log(signed);
 
     // Verify the signed document
     const privVer  = null; // You do not know the private key of the signer
@@ -129,10 +118,17 @@ async function main() {
       purpose: new AssertionProofPurpose({controller})
     });
     if (result.verified) {
-      console.log('Signature verified.');
+      console.log(`Signature verified: ${result.verified}`);
     } else {
-      console.log('Signature verification error:', result.error);
+      console.error(`Signature verification error:\n${result.error}`);
     }
+    console.log("END TEST 2\n");
+}
+
+// Main program
+async function main() {
+    await Test1();
+    await Test2();
 }
 
 main();

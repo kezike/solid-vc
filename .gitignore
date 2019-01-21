@@ -3,5 +3,6 @@ data/*
 cookies.txt
 node_modules
 package-lock.json
+push.sh
 *.DS_Store
 *.pem

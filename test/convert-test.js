@@ -32,6 +32,7 @@ async function serialize(target, store, base, type) {
 
 // Test 1: Convert JSON-LD to N3
 async function Test1() {
+    console.log("BEGIN TEST 1");
     // Parse Text
     var file = "../data/age_1.json";
     var text = fs.readFileSync(file, 'utf8');
@@ -46,10 +47,12 @@ async function Test1() {
     var target = null;
     var serialized = await serialize(target, parsed, base, type);
     console.log("Serialized Raw Text:\n" + serialized);
+    console.log("END TEST 1\n");
 }
 
 // Test 2: Convert N3 to JSON-LD
 async function Test2() {
+    console.log("BEGIN TEST 2");
     // Parse Text
     var file = "../data/homepage.n3";
     var text = fs.readFileSync(file, 'utf8');
@@ -64,6 +67,7 @@ async function Test2() {
     var target = null;
     var serialized = await serialize(target, parsed, base, type);
     console.log("Serialized Raw Text:\n" + serialized);
+    console.log("END TEST 2\n");
 }
 
 async function main() {

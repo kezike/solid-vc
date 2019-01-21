@@ -382,7 +382,7 @@ SolidUtil = {
 
     // Sign document
     signDocument: async function(doc, /*signConfig*/) {
-        // Specifying signature configuration
+        // Specify signature configuration (ie., suite and purpose and setup key pair)
         // TODO - allow specification of creator and algorithm in signConfig
         const {RsaSignature2018} = jsigs.suites;
         const {AssertionProofPurpose} = jsigs.purposes;
@@ -401,9 +401,11 @@ SolidUtil = {
           suite: new RsaSignature2018({key}),
           purpose: new AssertionProofPurpose()
         };
+
+        // Sign the document as a simple assertion
         const signedDoc = await jsigs.sign(doc, signConfig);
-        console.log('Signed document:', signedDoc);
-        console.log('Signed document stringified:', JSON.stringify(signedDoc));
+        console.log("Signed document:");
+        console.log(signedDoc);
         return signedDoc;
     },
 
@@ -412,16 +414,16 @@ SolidUtil = {
         // Specifying verification configuration
         // TODO - allow specification of publicKey["@id"], publicKey.owner, and publicKeyOwner["@id"] in verifyConfig
         // Specify the public key owner object
-        // Fetch signed doc
+        // Fetch signed credential
         const signedDocPromise = await SolidUtil.genericFetch(signedDocUri);
         const signedDoc = JSON.parse(signedDocPromise);
         const svcIssuerIdProperty = SVC(SolidUtil.svcIssuerId).value;
-        const issuerId = signedDoc[svcIssuerIdProperty][0]["@value"];
-        console.log(`Issuer ID: ${JSON.stringify(issuerId)}`);
-        const issuerPubKey = await SolidUtil.getPubKeyRemoteContent(issuerId);
-        console.log(`Issuer Pub Key:\n${issuerPubKey}`);
 
-        // Specify the public key object
+        // Discover credential issuer ID
+        const issuerId = signedDoc[svcIssuerIdProperty][0]["@value"];
+        const issuerPubKey = await SolidUtil.getPubKeyRemoteContent(issuerId);
+
+        // Specify the public key
         const publicKey = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
             type: "RsaVerificationKey2018",
@@ -430,9 +432,7 @@ SolidUtil = {
             publicKeyPem: issuerPubKey
         };
 
-        console.log(`publicKey.publicKeyPem:\n${publicKey.publicKeyPem}`);
-
-        // Specify the public key owner object
+        // Specify the public key controller
         const controller = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
             id: "RsaController2018",
@@ -450,7 +450,7 @@ SolidUtil = {
           suite: new RsaSignature2018({key}),
           purpose: new AssertionProofPurpose({controller})
         });
-        return result.verified;
+        return result;
     }
     //// END APP ////
 };

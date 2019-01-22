@@ -26,10 +26,12 @@ SolidVer = {
         var verifySuccessRes = $("#verifiy-success-res");
         var verifyErrorImg = $("#verifiy-error-img");
         var verifyErrorRes = $("#verifiy-error-res");
+        var verifyCredUriElem = $('#verify-cred-uri');
         verifySuccessImg.addClass('hidden');
         verifySuccessRes.addClass('hidden');
         verifyErrorImg.addClass('hidden');
         verifyErrorRes.addClass('hidden');
+        verifyCredUriElem.focus();
     },
 
     // Verify credential has proper signature
@@ -39,26 +41,36 @@ SolidVer = {
         SolidVer.refreshVerificationElements();
 
         // Retrieve relevant verification elements
-        var verifyCredUriElem = $('#verify-cred-uri');
-        var verifyCredUri = verifyCredUriElem.val();
         var verifySuccessImg = $("#verifiy-success-img");
         var verifySuccessRes = $("#verifiy-success-res");
         var verifyErrorImg = $("#verifiy-error-img");
         var verifyErrorRes = $("#verifiy-error-res");
+        var verifyCredUriElem = $('#verify-cred-uri');
+        var verifyCredUri = verifyCredUriElem.val();
+
+        // Validate inputs
+        if (verifyCredUri === "") {
+          alert("Please provide a valid credential URI");
+          SolidVer.refreshVerificationElements();
+          return;
+        }
 
         // Verify credential and display appropriate feedback
         var verifyResult = await util.verifyDocument(verifyCredUri);
         if (verifyResult.verified) {
-          verifySuccessRes.text(JSON.stringify(verifyResult));
+          verifySuccessRes.text(JSON.stringify(verifyResult, null, 4));
           verifySuccessImg.removeClass('hidden');
           verifySuccessRes.removeClass('hidden');
           console.log(`Signature verified: ${verifyResult.verified}`);
         } else {
-          verifyErrorRes.text(JSON.stringify(verifyResult));
+          verifyErrorRes.text(JSON.stringify(verifyResult, null, 4));
           verifyErrorImg.removeClass('hidden');
           verifyErrorRes.removeClass('hidden');
           console.log(`Signature verification error:\n${verifyResult.error}`);
         }
+
+        // Clear input fields
+        verifyCredUriElem.val("");
     }
     //// END APP ////
 };

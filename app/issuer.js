@@ -291,20 +291,6 @@ SolidIss = {
         reader.readAsText(file);
     },
 
-    /*createCredential: function (event) {
-        // TODO: pick out inputs of credential form and populate credential with it
-        event.preventDefault();
-        var credential = {};
-        credential = SolidIss.credential;
-        credential["signature"] = {};
-        credential["signature"]["@context"] = SolidIss.DefaultContext;
-        credential["signature"]["@type"] = SolidIss.DefaultSigType;
-        credential["signature"]["creator"] = SolidIss.creator;
-        credential["signature"]["signatureValue"] = SolidIss.signature; // TODO: Load from browser
-        console.log("credential:", credential);
-        return credential;
-    },*/
-
     // Serialize credential for purposes of verifying at a later point in time
     // - 'credential' is a credential in json
     // - 'options' is a set of parameters also in
@@ -434,11 +420,6 @@ SolidIss = {
 
     // Serialize and sign credential prior to issuance
     issueCredential: async function(event) {
-        /*SolidIss.serializedCredential = SolidIss.serializeCredential(SolidIss.credential);
-        SolidIss.DefaultCredentialSignerOptions.serializedCredential = SolidIss.serializedCredential;
-        SolidIss.signedCredential = SolidIss.signCredential(SolidIss.credential);
-        console.log("signed credential:", SolidIss.signedCredential);
-        return SolidIss.signedCredential;*/
         event.preventDefault();
         await util.trackSession();
 
@@ -481,68 +462,29 @@ SolidIss = {
           return;
         }*/
 
-        /* NOTE: Signing n3 document with forge works fine
-        var credStore = $rdf.graph();
-        var credPlainStore = $rdf.graph();
-        var me = $rdf.sym(util.getWebId());
-        var base = me.value;
-        var type = 'text/n3';
-        $rdf.parse(credPlain, credPlainStore, base, type, async (errParse, resParse) => {
-            if (errParse) {
-              console.log("errParse:\n", errParse);
-              return;
-            }
-            SUB = $rdf.Namespace($rdf.uri.docpart(subjectId) + '#');
-            var cred  = SUB('cred');
-            credStore.add(cred, RDF('type'), SVC('Credential'));
-            credStore.add(cred, SVC('plain'), resParse);
-            credStore.add(cred, SVC('domain'), SolidIss.namespaces[credDomain]('ticker'));
-            credStore.add(cred, SVC('subject'), $rdf.Literal.fromValue(subjectPubKey));
-            await SolidIss.signCredentialN3(credStore, {type: 'RsaSignature2018', keyType: 'RSA'});
-            $rdf.serialize(null, credStore, base, type, (errSer, resSer) => {
-                if (errSer) {
-                  var errMsg = errSer.name + ": " + errSer.message;
-                  alert(errMsg);
-                  console.error(errMsg);
-                  return;
-                }
-                // console.log("resSer:\n", resSer);
-                SolidIss.credentialN3 = resSer;
-            }, {});
-        });*/
-        
         // Parse n3 credential into rdf graph
         var credStore = await util.parse(credPlain, $rdf.graph(), issuerId, util.contentTypeN3);
+        console.log(`credStore: ${credStore}`);
 
         // Add issuance statements to graph
-        var ME = $rdf.Namespace($rdf.uri.docpart(issuerId) + '#');
-        var cred = ME('cred');
-        var credMetaStore = $rdf.graph();
-        credMetaStore.add(cred, RDF('type'), SVC('Credential'));
-        credMetaStore.add(cred, SVC('domain'), $rdf.Literal.fromValue(credDomain));
-        credMetaStore.add(cred, SVC('title'), $rdf.Literal.fromValue(credTitle));
-        credMetaStore.add(cred, SVC('description'), $rdf.Literal.fromValue(credDesc));
-        credMetaStore.add(cred, SVC('subjectId'), $rdf.Literal.fromValue(subjectId));
-        credMetaStore.add(cred, SVC('issuerId'), $rdf.Literal.fromValue(issuerId));
-        credMetaStore.add(cred, SVC('messageType'), $rdf.Literal.fromValue(messageType));
-        credMetaStore.add(cred, VC('credentialStatus'), $rdf.Literal.fromValue(credStatus));
-
-        // Merge credential store with credential metadata store
-        credStore = util.merge(credStore, credMetaStore);
+        var cred = credStore.statements[0].subject;
+        credStore.add(cred, RDF('type'), SVC('Credential'));
+        credStore.add(cred, SVC('domain'), $rdf.Literal.fromValue(credDomain));
+        credStore.add(cred, SVC('title'), $rdf.Literal.fromValue(credTitle));
+        credStore.add(cred, SVC('description'), $rdf.Literal.fromValue(credDesc));
+        credStore.add(cred, SVC('subjectId'), $rdf.Literal.fromValue(subjectId));
+        credStore.add(cred, SVC('issuerId'), $rdf.Literal.fromValue(issuerId));
+        credStore.add(cred, SVC('messageType'), $rdf.Literal.fromValue(messageType));
+        credStore.add(cred, VC('credentialStatus'), $rdf.Literal.fromValue(credStatus));
 
         // Convert credential into JSON-LD for jsonld-signatures
-        // var credJsonLdStr = await util.convert(credPlain, util.contentTypeN3, util.contentTypeJsonLd);
         var credJsonLdStr = await util.serialize(null, credStore, issuerId, util.contentTypeJsonLd);
         console.log("credJsonLdStr\n:" + credJsonLdStr);
         var credJsonLd = JSON.parse(credJsonLdStr)[0];
         var credSignedJsonLd = await SolidIss.signCredentialJsonLD(credJsonLd, {type: 'RsaSignature2018', keyType: 'RSA'});
         var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd);
-        /*var credSignedN3Str = await util.convert(credSignedJsonLdStr, util.contentTypeJsonLd, util.contentTypeN3);
-        console.log("credSignedJsonLd\n:" + credSignedJsonLd);
-        console.log("credSignedN3Str:\n" + credSignedN3Str);*/
+        console.log(`credSignedJsonLdStr:\n${credSignedJsonLdStr}`);
         var subjectInbox = await util.discoverInbox(subjectId);
-        // util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
-        // util.postOptions.body = credSignedN3Str;
         util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
         util.postOptions.body = credSignedJsonLdStr;
         util.fetcher.load(subjectInbox, util.postOptions);

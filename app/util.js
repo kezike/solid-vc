@@ -76,7 +76,7 @@ SolidUtil = {
     // LDP ontology namespace
     LDP: $rdf.Namespace('http://www.w3.org/ns/ldp#'),
     // SVC issuer id predicate
-    svcIssuerId: 'issuerId',
+    svcIssuerIdField: 'issuerId',
     // SEC ontology public key predicate
     secPubKeyField: 'publicKey',
     // SEC ontology owner predicate
@@ -340,26 +340,7 @@ SolidUtil = {
             rawFile.send(null);
         });
         var keyResult = await keyPromise;
-        return keyResult;
-    },
-
-    // Download content to local file
-    writeKeyFile: async function (keyFile, data) {
-        /*var keyPromise = new Promise((resolve, reject) => {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", keyFile, false);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-                  console.log("Ready state has changed");
-                }
-            }
-            xhr.send(data);
-        });
-        var keyResult = await keyPromise;
-        return keyResult;*/
-        var blob = new Blob(data, {type: "text/plain;charset=utf-8"});
-        downloader.saveAs(blob, keyFile);
+        return keyResult.trim();
     },
 
     // Retrieve local svc public key
@@ -413,15 +394,17 @@ SolidUtil = {
     verifyDocument: async function(signedDocUri, /*verifyConfig*/) {
         // Specifying verification configuration
         // TODO - allow specification of publicKey["@id"], publicKey.owner, and publicKeyOwner["@id"] in verifyConfig
-        // Specify the public key owner object
-        // Fetch signed credential
-        const signedDocPromise = await SolidUtil.genericFetch(signedDocUri);
-        const signedDoc = JSON.parse(signedDocPromise);
-        const svcIssuerIdProperty = SVC(SolidUtil.svcIssuerId).value;
+        // Fetch signed credential into local store
+        const signedDocStr = await SolidUtil.genericFetch(signedDocUri);
+        const signedDocStore = await SolidUtil.parse(signedDocStr, $rdf.graph(), SolidUtil.getWebId(), SolidUtil.contentTypeJsonLd);
 
         // Discover credential issuer ID
-        const issuerId = signedDoc[svcIssuerIdProperty][0]["@value"];
+        const issuerId = signedDocStore.match(undefined, SVC(SolidUtil.svcIssuerIdField), undefined)[0].object.value;
+        console.log(`Issuer ID: ${issuerId}`);
         const issuerPubKey = await SolidUtil.getPubKeyRemoteContent(issuerId);
+
+        // Parse JSON-LD string into JSON in preparation for verification
+        const signedDoc = JSON.parse(signedDocStr);
 
         // Specify the public key
         const publicKey = {

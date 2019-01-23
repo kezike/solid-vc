@@ -7,7 +7,7 @@
 # $4 - profile document card (without fragments like '#me')
 
 # Read appropriate configuration parameters
-configFile=../config.json
+configFile=$1
 pubKeyFolderRemoteKey=PUB_FOLDER_REMOTE
 pubKeyFileLocalKey=PUB_FILE_LOCAL
 pubKeyQueryFileKey=PUB_QUERY_FILE
@@ -39,6 +39,6 @@ pubKeyUri=$pubKeyFolderRemote/$fileName
 
 # TODO - Update profile document to point to public key
 printf "INSERT DATA { <> <https://w3id.org/security#publicKey> " > $pubKeyQueryFile
-printf "'$pubKeyUri' }" >> $pubKeyQueryFile
+printf "\"$pubKeyUri\" }" >> $pubKeyQueryFile
 ./patch.sh $profile $pubKeyQueryFile
 cd ../auth

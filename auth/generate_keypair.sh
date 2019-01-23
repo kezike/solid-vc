@@ -3,7 +3,7 @@
 # Generate key pair
 
 # Read appropriate configuration parameters
-configFile=../config.json
+configFile=$1
 pubKeyFileLocLocalKey=PUB_FILE_LOCAL
 privKeyFileLocLocalKey=PRIV_FILE_LOCAL
 pubKeyFileLocal=`node $jsonApi --read --key=$pubKeyFileLocLocalKey --json=$configFile`

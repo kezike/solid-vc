@@ -60,14 +60,14 @@ node $jsonApi --write --key=$webidKey --value=$webid --json=$configFile
 node $jsonApi --write --key=$accountKey --value=$account --json=$configFile
 node $jsonApi --write --key=$unameKey --value=$uname --json=$configFile
 node $jsonApi --write --key=$passKey --value=$pass --json=$configFile
-./login.sh
+./login.sh $configFile
 node $jsonApi --delete --key=$unameKey --json=$configFile
 node $jsonApi --delete --key=$passKey --json=$configFile
 
 # Generate key pair
 node $jsonApi --write --key=$pubKeyFileLocalKey --value=$pubKeyFileLocal --json=$configFile
 node $jsonApi --write --key=$privKeyFileLocalKey --value=$privKeyFileLocal --json=$configFile
-./generate_keypair.sh
+./generate_keypair.sh $configFile
 node $jsonApi --delete --key=$privKeyFileLocalKey --json=$configFile
 
 # TODO - Publish public key
@@ -76,7 +76,7 @@ read pubKeyFolderRemote
 node $jsonApi --write --key=$pubKeyFolderRemoteKey --value=$pubKeyFolderRemote --json=$configFile
 node $jsonApi --write --key=$pubKeyQueryFileKey --value=$pubKeyQueryFile --json=$configFile
 node $jsonApi --write --key=$profileKey --value=$profile --json=$configFile
-./publish_key.sh
+./publish_key.sh $configFile
 node $jsonApi --delete --key=$ --json=$pubKeyFileLocal
 node $jsonApi --delete --key=$pubKeyQueryFileKey --json=$configFile
 

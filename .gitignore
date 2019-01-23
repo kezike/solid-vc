@@ -4,6 +4,7 @@ config.json
 cookies.txt
 node_modules
 package-lock.json
+popup.html
 push.sh
 *.DS_Store
 *.pem

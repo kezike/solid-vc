@@ -1,3 +1,5 @@
+// Shell-Node API for various URI functions
+
 const args = require('minimist')(process.argv.slice(2));
 const $rdf = require('rdflib');
 

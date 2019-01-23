@@ -1,5 +1,6 @@
 app/dist/
 data/
+config.json
 cookies.txt
 node_modules
 package-lock.json

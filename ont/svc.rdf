@@ -36,6 +36,14 @@
         <subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
     </Class>
 
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#credentialStatus">
+        <comment xml:lang="en">Status of credential (e.g., 'ACTIVE', 'EXPIRED', 'REVOKED')</comment>
+        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">credentialStatus</label>
+        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    </rdf:Property>
+
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#description">
         <comment xml:lang="en">An optional description of a credential request</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>

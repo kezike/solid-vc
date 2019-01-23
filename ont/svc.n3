@@ -187,6 +187,13 @@ svc:revocationList a rdf:Property ;
     rdfs:domain foaf:PersonalProfileDocument ;
     rdfs:range rdfs:Literal .
 
+svc:credentialStatus a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "credentialStatus"@en ;
+    rdfs:comment "Status of credential (e.g., 'ACTIVE', 'EXPIRED', 'REVOKED')"@en ;
+    rdfs:domain svc:Credential ;
+    rdfs:range rdfs:Literal .
+
 svc:proof a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "proof"@en ;

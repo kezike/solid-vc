@@ -11,6 +11,7 @@ var downloader = require('file-saver');
 var SOLID = $rdf.Namespace('http://www.w3.org/ns/solid/terms#');
 var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
 var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
+var VC = $rdf.Namespace('https://w3id.org/credentials/v1#');
 var SEC = $rdf.Namespace('https://w3id.org/security#');
 var LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
 
@@ -20,6 +21,7 @@ SolidUtil = {
     //// BEGIN REST CONFIGURATION ////
     contentTypeField: 'content-type',
     responseTextField: 'responseText',
+    slugField: 'slug',
     contentTypePlain: 'text/plain',
     contentTypeN3: 'text/n3',
     contentTypeN4: 'application/n-quads',
@@ -46,14 +48,52 @@ SolidUtil = {
     },
     //// END REST CONFIGURATION ////
 
+    //// BEGIN APP CONFIGURATION  ////
+    configFile: '../config.json',
+    //// END APP CONFIGURATION ////
+
     //// BEGIN KEY MANAGEMENT ////
     pubKeyPemFile: '../auth/pub.pem',
     privKeyPemFile: '../auth/priv.pem',
     //// END KEY MANAGEMENT ////
 
     //// BEGIN REVOCATION LIST CONFIGURATION ////
-    revListFile: '../data/rev.txt',
+    revListField: 'REV_FOLDER_REMOTE',
     //// END REVOCATION LIST CONFIGURATION ////
+
+    //// BEGIN ONTOLOGY METADATA ////
+    // SVC ontology namespace
+    SVC: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#'),
+    // LDP ontology namespace
+    LDP: $rdf.Namespace('http://www.w3.org/ns/ldp#'),
+    // SVC issuer id predicate
+    svcIssuerIdField: 'issuerId',
+    // SVC revocation list predicate
+    svcRevListField: 'revocationList',
+    // SVC credential status predicate
+    svcCredStatusField: 'credentialStatus',
+    // SVC credential active status
+    svcCredStatusActive: 'ACTIVE',
+    // SVC credential active status
+    svcCredStatusExpired: 'EXPIRED',
+    // SVC credential revoked status
+    svcCredStatusRevoked: 'REVOKED',
+    // VC credential status predicate
+    vcCredStatus: 'credentialStatus',
+    // SEC public key predicate
+    secPubKeyField: 'publicKey',
+    // SEC owner predicate
+    secOwnerField: 'owner',
+    // SEC controller predicate
+    secControllerField: 'controller',
+    // SOLID account predicate
+    solidAccountField: 'account',
+    // LDP inbox predicate
+    ldpInboxField: 'inbox',
+    // LDP contains predicate
+    ldpContainsField: 'contains',
+    foafHomepageField: 'homepage',
+    //// END ONTOLOGY METADATA ////
 
     //// BEGIN GENERAL SOLID/LD TERMS ////
     // Statement subject field
@@ -68,35 +108,22 @@ SolidUtil = {
     ldTermTypeField: 'termType',
     // Value of item
     ldTermValueField: 'value',
-    //// BEGIN GENERAL SOLID/LD TERMS ////
-
-    //// BEGIN ONTOLOGY METADATA ////
-    // SVC ontology namespace
-    SVC: $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#'),
-    // LDP ontology namespace
-    LDP: $rdf.Namespace('http://www.w3.org/ns/ldp#'),
-    // SVC issuer id predicate
-    svcIssuerIdField: 'issuerId',
-    // SEC ontology public key predicate
-    secPubKeyField: 'publicKey',
-    // SEC ontology owner predicate
-    secOwnerField: 'owner',
-    // SEC ontology controller predicate
-    secControllerField: 'controller',
-    // SOLID ontology account predicate
-    solidAccountField: 'account',
-    // LDP ontology `inbox` predicate
-    ldpInboxField: 'inbox',
-    // LDP ontology `contains` predicate
-    ldpContainsField: 'contains',
-    foafHomepageField: 'homepage',
-    //// END ONTOLOGY METADATA ////
+    // Serializations
+    n3: 'n3',
+    jsonld: 'ttl',
+    jsonld: 'jsonld',
+    //// END GENERAL SOLID/LD TERMS ////
 
     //// BEGIN APP ////
     // Home page of SolidVC app
     homePage: '/',
-
     popupUri: 'popup.html',
+
+    // Minimum credential ID
+    minCredId: 0,
+
+    // Maximum credential ID
+    maxCredId: 1000000000000000,
 
     // Initialize app
     init: async function(event) {
@@ -117,6 +144,20 @@ SolidUtil = {
     // Get personal inbox
     getInbox: function() {
         return SolidUtil[SolidUtil.ldpInboxField];
+    },
+
+    // Get new credential ID
+    getCredId: function() {
+        var min = Math.ceil(SolidUtil.minCredId);
+        var max = Math.floor(SolidUtil.maxCredId);
+        return Math.floor(Math.random() * (max - min)) + min;
+    },
+
+    // Retrieve status of credential
+    getCredStatus: async function(credStatusUri) {
+        await SolidUtil.fetcher.load(credStatusUri);
+        const credStatus = SolidUtil.fetcher.store.match(undefined, SVC(SolidUtil.svcCredStatusField), undefined)[0].object.value;
+        return credStatus;
     },
 
     // Track status of user session
@@ -148,6 +189,12 @@ SolidUtil = {
         // var inbox = "https://kezike.solid.community/inbox/";
         var inbox = await SolidUtil.discoverInbox(SolidUtil.getWebId());
         SolidUtil.bindKeyValue(SolidUtil, SolidUtil.ldpInboxField, inbox);
+        var configStr = await SolidUtil.readFile(SolidUtil.configFile);
+        var configObj = JSON.parse(configStr);
+        var revListFolder = configObj[SolidUtil.revListField];
+        console.log(`CONFIG OBJ:\n${configObj}`);
+        console.log(`REV LIST FOLDER:\n${revListFolder}`);
+        SolidUtil.bindKeyValue(SolidUtil, SolidUtil.revListField, revListFolder);
         SolidUtil.bindKeyValue(SolidUtil, 'session', SolidUtil.session);
         SolidUtil.bindKeyValue(SolidUtil, 'fetcher', SolidUtil.fetcher);
     },
@@ -325,7 +372,7 @@ SolidUtil = {
     },
 
     // Retrieve content of local file
-    readKeyFile: async function (keyFile) {
+    readFile: async function (keyFile) {
         var keyPromise = new Promise((resolve, reject) => {
             var rawFile = new XMLHttpRequest();
             rawFile.open("GET", keyFile, false);
@@ -345,20 +392,21 @@ SolidUtil = {
 
     // Retrieve local svc public key
     getPubKeyLocal: async function() {
-        var pubKey = await SolidUtil.readKeyFile(SolidUtil.pubKeyPemFile);
+        var pubKey = await SolidUtil.readFile(SolidUtil.pubKeyPemFile);
         return pubKey;
     },
 
     // Retrieve local svc private key
     getPrivKeyLocal: async function() {
-        var privKey = await SolidUtil.readKeyFile(SolidUtil.privKeyPemFile);
+        var privKey = await SolidUtil.readFile(SolidUtil.privKeyPemFile);
         return privKey;
     },
     
     // Retrieve local svc revocation list
     getRevListLocal: async function() {
-        var revList = await SolidUtil.readKeyFile(SolidUtil.revListFile);
-        return revList;
+        /*var revList = await SolidUtil.readFile(SolidUtil.revListFile);
+        return revList;*/
+        return SolidUtil[SolidUtil.revListField];
     },
 
     // Sign document
@@ -394,6 +442,9 @@ SolidUtil = {
     verifyDocument: async function(signedDocUri, /*verifyConfig*/) {
         // Specifying verification configuration
         // TODO - allow specification of publicKey["@id"], publicKey.owner, and publicKeyOwner["@id"] in verifyConfig
+        // Verification result
+        var result = { verified: false, error: {} };
+
         // Fetch signed credential into local store
         const signedDocStr = await SolidUtil.genericFetch(signedDocUri);
         const signedDocStore = await SolidUtil.parse(signedDocStr, $rdf.graph(), SolidUtil.getWebId(), SolidUtil.contentTypeJsonLd);
@@ -402,6 +453,27 @@ SolidUtil = {
         const issuerId = signedDocStore.match(undefined, SVC(SolidUtil.svcIssuerIdField), undefined)[0].object.value;
         console.log(`Issuer ID: ${issuerId}`);
         const issuerPubKey = await SolidUtil.getPubKeyRemoteContent(issuerId);
+
+        // Discover credential issuer revocation list
+        const credStatusUri = signedDocStore.match(undefined, VC(SolidUtil.vcCredStatus), undefined)[0].object.value;
+        console.log(`Issuer ID: ${credStatusUri}`);
+        const credStatus = SolidUtil.getCredStatus(credStatusUri);
+        switch(credStatus) {
+            case SolidUtil.svcCredStatusActive:
+              break;
+            case SolidUtil.svcCredStatusExpired:
+              result.verified = false;
+              result.error.message = 'This credential has expired';
+              return result;
+            case SolidUtil.svcCredStatusRevoked:
+              result.verified = false;
+              result.error.message `This credential has been revoked by issuer with ID '${issuerId}'`;
+              return result;
+            default:
+              result.verified = false;
+              result.error.message = 'Cannot properly verify this this credential because it does not include a valid status';
+              return result;
+        }
 
         // Parse JSON-LD string into JSON in preparation for verification
         const signedDoc = JSON.parse(signedDocStr);
@@ -429,7 +501,7 @@ SolidUtil = {
         const {RSAKeyPair} = jsigs;
         const privateKeyPem = null; // You do not know the private key of the signer
         const key = new RSAKeyPair({...publicKey, privateKeyPem});
-        const result = await jsigs.verify(signedDoc, {
+        result = await jsigs.verify(signedDoc, {
           suite: new RsaSignature2018({key}),
           purpose: new AssertionProofPurpose({controller})
         });

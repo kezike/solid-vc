@@ -167,6 +167,8 @@ SolidIss = {
     // Load content of issue tab
     loadIssueTab: async function() {
         await util.trackSession();
+        var revList = await util.getRevListLocal();
+        console.log(`Rev List: ${revList}`);
     },
 
     formatActionElementIdx: function(actionId, idx) {
@@ -434,8 +436,10 @@ SolidIss = {
         var subjectId = subjectIdElem.val();
         var issuerId = util.getWebId();
         var revList = await util.getRevListLocal();
-        var credId = new Date().getUTCMilliseconds();
-        var credStatus = revList + '/' + credId;
+        var credId = util.getCredId();
+        var credIdFile = `${credId}.${util.n3}`;
+        var svcCredStatus = 'ACTIVE';
+        var vcCredStatus = `${revList}/${credIdFile}`;
         var credTitle = `${credDomain} Credential for Subject with ID '${subjectId}'`;
         var credDesc = `Congratualations! By the powers vested in me as issuer with ID '${issuerId}', I hereby grant subject with ID '${subjectId}' a credential of type ${credDomain}`;
         var messageType = 'ISSUANCE';
@@ -466,7 +470,7 @@ SolidIss = {
         var credStore = await util.parse(credPlain, $rdf.graph(), issuerId, util.contentTypeN3);
         console.log(`credStore: ${credStore}`);
 
-        // Add issuance statements to graph
+        // Add credential metadata statements to graph
         var cred = credStore.statements[0].subject;
         credStore.add(cred, RDF('type'), SVC('Credential'));
         credStore.add(cred, SVC('domain'), $rdf.Literal.fromValue(credDomain));
@@ -475,7 +479,7 @@ SolidIss = {
         credStore.add(cred, SVC('subjectId'), $rdf.Literal.fromValue(subjectId));
         credStore.add(cred, SVC('issuerId'), $rdf.Literal.fromValue(issuerId));
         credStore.add(cred, SVC('messageType'), $rdf.Literal.fromValue(messageType));
-        credStore.add(cred, VC('credentialStatus'), $rdf.Literal.fromValue(credStatus));
+        credStore.add(cred, VC('credentialStatus'), $rdf.Literal.fromValue(vcCredStatus));
 
         // Convert credential into JSON-LD for jsonld-signatures
         var credJsonLdStr = await util.serialize(null, credStore, issuerId, util.contentTypeJsonLd);
@@ -487,7 +491,20 @@ SolidIss = {
         var subjectInbox = await util.discoverInbox(subjectId);
         util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
         util.postOptions.body = credSignedJsonLdStr;
-        util.fetcher.load(subjectInbox, util.postOptions);
+        await util.fetcher.load(subjectInbox, util.postOptions);
+
+        // Update revocation list with credential status
+        var revStore = $rdf.graph();
+        var REV = $rdf.Namespace(revList);
+        var rev = REV('status'); 
+        revStore.add(rev, RDF('type'), SVC('Credential'));
+        revStore.add(rev, SVC('credentialStatus'), $rdf.Literal.fromValue(svcCredStatus));
+        revStore.add(rev, SVC('subjectId'), $rdf.Literal.fromValue(subjectId));
+        var revN3Str = await util.serialize(null, revStore, issuerId, util.contentTypeN3);
+        util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
+        util.postOptions.headers[util.slugField] = credId;
+        util.postOptions.body = revN3Str;
+        util.fetcher.load(revList, util.postOptions);
 
         // Clear input fields
         subjectIdElem.val("");

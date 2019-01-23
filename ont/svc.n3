@@ -108,7 +108,7 @@ svc:id a rdf:Property ;
     rdfs:label "id"@en ;
     rdfs:comment "The ID (likely URI; may be superfluous) of a credential"@en ;
     rdfs:domain svc:Credential ;
-    rdfs:range xsd:nonNegativeInteger .
+    rdfs:range rdfs:Literal .
 
 svc:plain a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
@@ -187,13 +187,6 @@ svc:revocationList a rdf:Property ;
     rdfs:domain foaf:PersonalProfileDocument ;
     rdfs:range rdfs:Literal .
 
-svc:credentialStatus a rdf:Property ;
-    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
-    rdfs:label "credentialStatus"@en ;
-    rdfs:comment "Status of credential (e.g., 'ACTIVE', 'EXPIRED', 'REVOKED')"@en ;
-    rdfs:domain svc:Credential ;
-    rdfs:range rdfs:Literal .
-
 svc:proof a rdf:Property ;
     rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
     rdfs:label "proof"@en ;
@@ -206,4 +199,24 @@ svc:proof a rdf:Property ;
     - 'signatureValue': The creator's signature of plain
     """@en ;
     rdfs:domain svc:Credential ;
+    rdfs:range rdfs:Literal .
+
+svc:CredentialStatusList a rdfs:Class ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:subClassOf svc:Credential ;
+    rdfs:label "CredentialStatusList"@en ;
+    rdfs:comment "The class representing a credential status in the form of groups of statements and attestations about a credential (similar to vc:CredentialStatusList2017)"@en .
+
+svc:credentialStatus a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "credentialStatus"@en ;
+    rdfs:comment "Status of a credential (e.g., 'ACTIVE', 'EXPIRED', 'REVOKED')"@en ;
+    rdfs:domain svc:CredentialStatusList ;
+    rdfs:range rdfs:Literal .
+
+svc:credentialId a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "credentialId"@en ;
+    rdfs:comment "ID of a credential"@en ;
+    rdfs:domain svc:CredentialStatusList ;
     rdfs:range rdfs:Literal .

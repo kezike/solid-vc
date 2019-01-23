@@ -2,7 +2,7 @@ app/dist/
 data/
 config.json
 cookies.txt
-node_modules
+node_modules/
 package-lock.json
 popup.html
 push.sh

@@ -436,10 +436,10 @@ SolidIss = {
         var subjectId = subjectIdElem.val();
         var issuerId = util.getWebId();
         var revList = await util.getRevListLocal();
-        var credId = util.getCredId();
-        var credIdFile = `${credId}.${util.n3}`;
+        var uniqueNum = util.getUniqueNumber();
         var svcCredStatus = 'ACTIVE';
-        var vcCredStatus = `${revList}/${credIdFile}`;
+        var credId = `${revList}/${uniqueNum}`;
+        var vcCredStatus = `${credId}.${util.n3}`;
         var credTitle = `${credDomain} Credential for Subject with ID '${subjectId}'`;
         var credDesc = `Congratualations! By the powers vested in me as issuer with ID '${issuerId}', I hereby grant subject with ID '${subjectId}' a credential of type ${credDomain}`;
         var messageType = 'ISSUANCE';
@@ -473,6 +473,7 @@ SolidIss = {
         // Add credential metadata statements to graph
         var cred = credStore.statements[0].subject;
         credStore.add(cred, RDF('type'), SVC('Credential'));
+        credStore.add(cred, SVC('id'), $rdf.Literal.fromValue(credId));
         credStore.add(cred, SVC('domain'), $rdf.Literal.fromValue(credDomain));
         credStore.add(cred, SVC('title'), $rdf.Literal.fromValue(credTitle));
         credStore.add(cred, SVC('description'), $rdf.Literal.fromValue(credDesc));
@@ -486,7 +487,7 @@ SolidIss = {
         console.log("credJsonLdStr\n:" + credJsonLdStr);
         var credJsonLd = JSON.parse(credJsonLdStr)[0];
         var credSignedJsonLd = await SolidIss.signCredentialJsonLD(credJsonLd, {type: 'RsaSignature2018', keyType: 'RSA'});
-        var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd);
+        var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd, null, 4);
         console.log(`credSignedJsonLdStr:\n${credSignedJsonLdStr}`);
         var subjectInbox = await util.discoverInbox(subjectId);
         util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
@@ -498,8 +499,8 @@ SolidIss = {
         var REV = $rdf.Namespace(revList);
         var rev = REV('status'); 
         revStore.add(rev, RDF('type'), SVC('Credential'));
+        revStore.add(rev, SVC('credentialId'), $rdf.Literal.fromValue(credId));
         revStore.add(rev, SVC('credentialStatus'), $rdf.Literal.fromValue(svcCredStatus));
-        revStore.add(rev, SVC('subjectId'), $rdf.Literal.fromValue(subjectId));
         var revN3Str = await util.serialize(null, revStore, issuerId, util.contentTypeN3);
         util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
         util.postOptions.headers[util.slugField] = credId;

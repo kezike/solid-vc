@@ -29,6 +29,13 @@
         <subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
     </Class>
 
+    <Class rdf:about="http://dig.csail.mit.edu/2018/svc#CredentialStatusList">
+        <comment xml:lang="en">The class representing a credential status in the form of groups of statements and attestations about a credential (similar to vc:CredentialStatusList2017)</comment>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">CredentialStatusList</label>
+        <subClassOf rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
+    </Class>
+
     <Class rdf:about="http://dig.csail.mit.edu/2018/svc#Metadata">
         <comment xml:lang="en">The class representing metadata about various ledgers</comment>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
@@ -36,9 +43,17 @@
         <subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
     </Class>
 
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#credentialId">
+        <comment xml:lang="en">ID of a credential</comment>
+        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#CredentialStatusList"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">credentialId</label>
+        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    </rdf:Property>
+
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#credentialStatus">
-        <comment xml:lang="en">Status of credential (e.g., 'ACTIVE', 'EXPIRED', 'REVOKED')</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
+        <comment xml:lang="en">Status of a credential (e.g., 'ACTIVE', 'EXPIRED', 'REVOKED')</comment>
+        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#CredentialStatusList"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">credentialStatus</label>
         <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
@@ -65,7 +80,7 @@
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">id</label>
-        <range rdf:resource="http://www.w3.org/2001/XMLSchema#nonNegativeInteger"/>
+        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#issuanceDate">

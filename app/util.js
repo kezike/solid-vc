@@ -119,11 +119,11 @@ SolidUtil = {
     homePage: '/',
     popupUri: 'popup.html',
 
-    // Minimum credential ID
-    minCredId: 0,
+    // Minimum unique number
+    minUniqueNum: 0,
 
-    // Maximum credential ID
-    maxCredId: 1000000000000000,
+    // Maximum unique number
+    maxUniqueNum: 1000000000000000,
 
     // Initialize app
     init: async function(event) {
@@ -146,10 +146,10 @@ SolidUtil = {
         return SolidUtil[SolidUtil.ldpInboxField];
     },
 
-    // Get new credential ID
-    getCredId: function() {
-        var min = Math.ceil(SolidUtil.minCredId);
-        var max = Math.floor(SolidUtil.maxCredId);
+    // Get new unique number
+    getUniqueNumber: function() {
+        var min = Math.ceil(SolidUtil.minUniqueNum);
+        var max = Math.floor(SolidUtil.maxUniqueNum);
         return Math.floor(Math.random() * (max - min)) + min;
     },
 
@@ -457,7 +457,8 @@ SolidUtil = {
         // Discover credential issuer revocation list
         const credStatusUri = signedDocStore.match(undefined, VC(SolidUtil.vcCredStatus), undefined)[0].object.value;
         console.log(`Issuer ID: ${credStatusUri}`);
-        const credStatus = SolidUtil.getCredStatus(credStatusUri);
+        const credStatus = await SolidUtil.getCredStatus(credStatusUri);
+        console.log(`Cred Status: ${credStatus}`);
         switch(credStatus) {
             case SolidUtil.svcCredStatusActive:
               break;

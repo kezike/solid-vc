@@ -70,7 +70,7 @@ node $jsonApi --write --key=$privKeyFileLocalKey --value=$privKeyFileLocal --jso
 ./generate_keypair.sh $configFile
 node $jsonApi --delete --key=$privKeyFileLocalKey --json=$configFile
 
-# TODO - Publish public key
+# Publish public key
 echo "Please enter an existing and EMPTY public folder where you would like to store your SolidVC public key \(eg. https://USER.solid.community/public/svc/keys\) \[ENTER\]:\n>>> "
 read pubKeyFolderRemote
 node $jsonApi --write --key=$pubKeyFolderRemoteKey --value=$pubKeyFolderRemote --json=$configFile
@@ -86,7 +86,6 @@ cd ../
 # BEGIN REVOCATION LIST CONFIGURATION
 
 # Store revocation list in local file
-# TODO - Publish revocation list
 echo "Please enter an existing EMPTY public folder where you would like to store your SolidVC revocation list \(eg. https://USER.solid.community/public/svc/rev\) \[ENTER\]:\n>>> "
 read revFolderRemote
 node $jsonApi --write --key=$revFolderRemoteKey --value=$revFolderRemote --json=$configFile

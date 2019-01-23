@@ -21,7 +21,6 @@ profile=`node $jsonApi --read --key=$profileKey --json=$configFile`
 cd ../rest
 ./post.sh $pubKeyFolderRemote $pubKeyFileLocal
 
-# TODO - Retrieve location of key from previous command
 # Extract relative file name
 IFS='/'
 fileNamePartsOne=($pubKeyFileLocal)
@@ -37,8 +36,7 @@ fileExt=${fileNamePartsTwo[1]}
 IFS=$OIFS
 pubKeyUri=$pubKeyFolderRemote/$fileName
 
-# TODO - Update profile document to point to public key
-printf "INSERT DATA { <> <https://w3id.org/security#publicKey> " > $pubKeyQueryFile
-printf "\"$pubKeyUri\" }" >> $pubKeyQueryFile
+# Update profile document to point to public key
+echo "INSERT DATA { <> <https://w3id.org/security#publicKey> \"$pubKeyUri\" }" > $pubKeyQueryFile
 ./patch.sh $profile $pubKeyQueryFile
 cd ../auth

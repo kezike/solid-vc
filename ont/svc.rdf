@@ -234,6 +234,14 @@
         <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#revocationReason">
+        <comment xml:lang="en">Reasoning behind credential revocation</comment>
+        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#CredentialStatusList"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">revocationReason</label>
+        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    </rdf:Property>
+
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#subjectId">
         <comment xml:lang="en">The ID of the subject of a credential (e.g., 'https://kezike.solid.community/profile/card#me')</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>

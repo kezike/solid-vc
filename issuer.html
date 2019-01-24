@@ -29,6 +29,7 @@
       <div class="tab">
           <button class="tablinks" id="issue-tab-link">Issue</button>
           <button class="tablinks" id="review-tab-link">Review</button>
+          <button class="tablinks" id="revoke-tab-link">Revoke</button>
       </div>
 
       <!-- Modal Template -->
@@ -42,15 +43,35 @@
 
       <!-- Credential Request Review Tab -->
       <div class="tabcontent" id="review-tab-cnt">
-          <h3>Review Credential Requests<h3>
+          <h3>Review Credential Requests</h3>
           <table id="msg-board" border=1 frame=void rules=rows style="width:100%"></table>
+      </div>
+
+      <!-- Credential Revocation Tab -->
+      <div class="tabcontent" id="revoke-tab-cnt">
+          <h3>Revoke Credential</h3>
+          <form id="revoke-form">
+              <fieldset>
+                  <div>
+                      <label for="revoke-cred-id">Provide Credential ID:</label>
+                      <input type="text" placeholder="e.g., https://VERIFIER.solid.community/public/svc/rev/cred-4" style="width: 50%" id="revoke-cred-id">
+                      <div id="revoke-cred-id-note" style="white-space:nowrap" style="width:30">
+                          <pre>
+                              NOTE: This does not necessarily have to be a dereferenceable URL
+                          </pre>
+                      </div>
+                      <textarea id="revoke-cred-reason" rows=15 cols=100 form="revoke-form"></textarea>
+                      <input type="submit" value="Revoke Credential" id="revoke-cred">
+                  </div>
+              </fieldset>
+          </form>
       </div>
 
       <!-- Credential Issuance Tab -->
       <div class="tabcontent" id="issue-tab-cnt">
           <h3>Issue New Credential</h3>
           <div>
-              <form>
+              <form id="issue-form">
                   <fieldset>
                       <!--Credential: <input type="file" accept=".json" id="credential" required><br>
                       <input type="submit" value="Issue Credential" id="issue-cred">-->
@@ -81,7 +102,7 @@
                           <label for="subject-id">Provide Credential Subject ID:</label>
                           <input type="text" placeholder="e.g., https://SUBJECT.solid.community/profile/card#me" style="width: 46%" id="subject-id"><br>
                       </div>
-                      <textarea id="cred-plain" rows=15 cols=100 form="vcform"></textarea>
+                      <textarea id="cred-plain" rows=15 cols=100 form="issue-form"></textarea>
                       <input type="submit" value="Issue Credential" id="issue-cred">
                   </fieldset>
               </form>

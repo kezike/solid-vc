@@ -220,3 +220,10 @@ svc:credentialId a rdf:Property ;
     rdfs:comment "ID of a credential"@en ;
     rdfs:domain svc:CredentialStatusList ;
     rdfs:range rdfs:Literal .
+
+svc:revocationReason a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "revocationReason"@en ;
+    rdfs:comment "Reasoning behind credential revocation"@en ;
+    rdfs:domain svc:CredentialStatusList ;
+    rdfs:range rdfs:Literal .

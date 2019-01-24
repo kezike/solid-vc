@@ -48,20 +48,19 @@ var doc2 = {
     credentialStatus: "https://kezike.solid.community/public/svc/rev/112"
 };
 
-
 // Specify the public key
 var publicKey = {
     "@context": jsigs.SECURITY_CONTEXT_URL,
     type: "RsaVerificationKey2018",
-    id: "publicKey",
-    controller: "controller",
+    id: "RsaVerificationKey2018",
+    controller: "RsaVerificationKey2018",
     publicKeyPem
 };
 
 // Specify the public key controller
 var controller = {
     "@context": jsigs.SECURITY_CONTEXT_URL,
-    id: "controller",
+    id: "RsaVerificationKey2018",
     publicKey: [publicKey],
     assertionMethod: [publicKey.id]
 };
@@ -84,7 +83,7 @@ async function Test1() {
     console.log(signed);
 
     // Verify the signed credential
-    const privVer  = null; // You do not know the private key of the signer
+    const privVer  = null; // We do not know the private key of the signer
     const keyPairVer = new RSAKeyPair({...publicKey, privateKeyPem: privVer});
     const result = await jsigs.verify(signed, {
       suite: new RsaSignature2018({key: keyPairVer}),
@@ -110,7 +109,7 @@ async function Test2() {
     console.log(signed);
 
     // Verify the signed document
-    const privVer  = null; // You do not know the private key of the signer
+    const privVer  = null; // We do not know the private key of the signer
     const keyPairVer = new RSAKeyPair({...publicKey, privateKeyPem: privVer});
     const result = await jsigs.verify(signed, {
       // documentLoader: jsonld.documentLoader,

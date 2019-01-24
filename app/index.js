@@ -99,7 +99,7 @@ SolidVC = {
         console.log("SolidVC.fetcher:", SolidVC.fetcher);
         // SolidVC.updater = new $rdf.UpdateManager(SolidVC.fetcher.store);
         // util.bindKeyValue(util, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidVC.session.webId) + '#'));
-        var inbox = await util.discoverInbox(util.getWebId());
+        var inbox = await util.discoverInbox(util.getMyWebId());
         util.bindKeyValue(util, util.ldpInboxField, inbox);
         util.bindKeyValue(util, 'session', SolidVC.session);
         util.bindKeyValue(util, 'fetcher', SolidVC.fetcher);

@@ -48,36 +48,36 @@ cd auth/
 
 # Login to Solid account
 echo To get started, please provide your Solid account info in the following section. If you do not own a Solid account, please quit this script and register for one here: https://solid.inrupt.com
-echo "Please enter your Solid WebID \(eg. https://USER.solid.community/profile/card#me\) \[ENTER\]:\n>>> "
+echo "Please enter your Solid WebID \(eg. https://USER.solid.community/profile/card#me\) \[ENTER\]:\n---> "
 read webid
 account=`node $uriApi --host=$webid`
 profile=`node $uriApi --doc=$webid`
-echo "Please enter your Solid account username \[ENTER\]:\n>>> "
+echo "Please enter your Solid account username \[ENTER\]:\n---> "
 read uname
-echo "Please enter your Solid account password \[ENTER\]:\n>>> "
+echo "Please enter your Solid account password \[ENTER\]:\n---> "
 read pass
 node $jsonApi --write --key=$webidKey --value=$webid --json=$configFile
 node $jsonApi --write --key=$accountKey --value=$account --json=$configFile
 node $jsonApi --write --key=$unameKey --value=$uname --json=$configFile
 node $jsonApi --write --key=$passKey --value=$pass --json=$configFile
-./login.sh $configFile
+./login.sh
 node $jsonApi --delete --key=$unameKey --json=$configFile
 node $jsonApi --delete --key=$passKey --json=$configFile
 
 # Generate key pair
 node $jsonApi --write --key=$pubKeyFileLocalKey --value=$pubKeyFileLocal --json=$configFile
 node $jsonApi --write --key=$privKeyFileLocalKey --value=$privKeyFileLocal --json=$configFile
-./generate_keypair.sh $configFile
+./generate_keypair.sh
 node $jsonApi --delete --key=$privKeyFileLocalKey --json=$configFile
 
 # Publish public key
-echo "Please enter an existing and EMPTY public folder where you would like to store your SolidVC public key \(eg. https://USER.solid.community/public/svc/keys\) \[ENTER\]:\n>>> "
+echo "Please enter an existing and EMPTY public folder where you would like to store your SolidVC public key \(eg. https://USER.solid.community/public/svc/keys\) \[ENTER\]:\n---> "
 read pubKeyFolderRemote
 node $jsonApi --write --key=$pubKeyFolderRemoteKey --value=$pubKeyFolderRemote --json=$configFile
 node $jsonApi --write --key=$pubKeyQueryFileKey --value=$pubKeyQueryFile --json=$configFile
 node $jsonApi --write --key=$profileKey --value=$profile --json=$configFile
-./publish_key.sh $configFile
-node $jsonApi --delete --key=$ --json=$pubKeyFileLocal
+./publish_key.sh
+node $jsonApi --delete --key=$pubKeyFileLocalKey --json=$configFile
 node $jsonApi --delete --key=$pubKeyQueryFileKey --json=$configFile
 
 cd ../
@@ -86,12 +86,12 @@ cd ../
 # BEGIN REVOCATION LIST CONFIGURATION
 
 # Store revocation list in local file
-echo "Please enter an existing EMPTY public folder where you would like to store your SolidVC revocation list \(eg. https://USER.solid.community/public/svc/rev\) \[ENTER\]:\n>>> "
+echo "Please enter an existing EMPTY public folder where you would like to store your SolidVC revocation list \(eg. https://USER.solid.community/public/svc/rev\) \[ENTER\]:\n---> "
 read revFolderRemote
-node $jsonApi --write --key=$revFolderRemoteKey --value=$revFolderRemote --json=$configFile
+node $jsonApi --write --key=$revFolderRemoteKey --value=$revFolderRemote/ --json=$configFile
 
 # END REVOCATION LIST CONFIGURATION
 
-# END MISCELLANEOUS
+echo SolidVC setup is complete. Run 'npm start' to get started!
 
 # END SETUP

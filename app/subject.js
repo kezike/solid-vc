@@ -130,7 +130,7 @@ SolidSub = {
         var credTitle = credTitleElem.val();
         var credDesc = credDescElem.val();
         var issuerId = issuerIdElem.val();
-        var subjectId = util.getWebId();
+        var subjectId = util.getMyWebId();
         var messageType = 'REQUEST';
 
         // Validate inputs

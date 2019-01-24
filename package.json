@@ -4,6 +4,10 @@
   "description": "Creating verifiable claims on the internet with decentralized technologies",
   "main": "./app/index.js",
   "scripts": {
+    "setup": "chmod +x setup.sh; ./setup.sh",
+    "login": "cd auth/; chmod +x login; ./login.sh; cd ../",
+    "publish-key": "cd auth/; chmod +x publish_key.sh; ./publish_key.sh; cd ../",
+    "generate-key": "cd auth/; chmod +x generate_keypair.sh; ./generate_keypair.sh; cd ../",
     "build": "webpack --config ./app/webpack.config.js --mode production",
     "dev": "webpack --config ./app/webpack.config.js --mode development",
     "start": "webpack-dev-server --config ./app/webpack.config.js --mode production"

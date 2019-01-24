@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Read appropriate configuration parameters
-configFile=$1
-jsonApi=../api/json.js
+configFile=$PWD/../config.json
+jsonApi=$PWD/../api/json.js
 accountKey=SOLID_ACCOUNT
 unameKey=SOLID_UNAME
 passKey=SOLID_PASS

@@ -66,7 +66,8 @@ SolidVer = {
           verifyErrorRes.text(JSON.stringify(verifyResult, null, 4));
           verifyErrorImg.removeClass('hidden');
           verifyErrorRes.removeClass('hidden');
-          console.log(`Signature verification error:\n${verifyResult.error}`);
+          console.error("Signature verification error:\n");
+          console.error(verifyResult.error);
         }
 
         // Clear input fields

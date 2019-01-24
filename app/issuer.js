@@ -86,6 +86,8 @@ SolidIss = {
     issueTabCnt: '#issue-tab-cnt',
     reviewTabLink: '#review-tab-link',
     reviewTabCnt: '#review-tab-cnt',
+    revokeTabLink: '#revoke-tab-link',
+    revokeTabCnt: '#revoke-tab-cnt',
     currentTabLink: '', // { SolidIss.issueTabLink, SolidIss.reviewTabLink }
     currentTabCnt: '', // { SolidIss.issueTabCnt, SolidIss.reviewTabCnt }
     
@@ -108,13 +110,15 @@ SolidIss = {
 
     // Bind events
     bindEvents: function() {
-        $(document).on('click', '#issue-cred', SolidIss.issueCredential);
-        $(document).on('click', '#issue-tab-link', SolidIss.displayTab);
-        $(document).on('click', '#review-tab-link', SolidIss.displayTab);
         $(document).on('click', '.inspect-cred', SolidIss.inspectCredential);
         $(document).on('click', '.approve-cred', SolidIss.approveCredential);
         $(document).on('click', '.decline-cred', SolidIss.declineCredential);
-        $(document).on('click', '#-acct', util.switchAccounts);
+        $(document).on('click', '#issue-cred', SolidIss.issueCredential);
+        $(document).on('click', '#revoke-cred', SolidIss.revokeCredential);
+        $(document).on('click', '#issue-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#review-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#revoke-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#switch-acct', util.switchAccounts);
         $(document).on('click', '#switch-role', util.switchRoles);
     },
 
@@ -144,13 +148,30 @@ SolidIss = {
             $(event.currentTarget).addClass('active');
             await SolidIss.loadReviewTab();
             break;
+          case SolidIss.revokeTabLink:
+            SolidIss.currentTabLink = SolidIss.revokeTabLink;
+            SolidIss.currentTabCnt = SolidIss.revokeTabCnt;
+            $(SolidIss.currentTabCnt).css('display', 'block');
+            $(event.currentTarget).addClass('active');
+            await SolidIss.loadRevokeTab();
+            break;
         }
+    },
+
+    // Load content of issue tab
+    loadIssueTab: async function() {
+        await util.trackSession();
+        // var revList = await util.getMyRevList();
+        // console.log(`Rev List: ${revList}`);
+        // const pubKeyId = await util.getPubKeyRemoteUri("https://kezike.solid.community/profile/card#me");
+        // console.log(`Pub key ID: ${pubKeyId}`);
+        // console.log(`Pub key ID Stringified: ${JSON.stringify(pubKeyId)}`);
     },
 
     // Load content of review tab
     loadReviewTab: async function() {
         await util.trackSession();
-        var inbox = util.getInbox();
+        var inbox = util.getMyInbox();
         var inboxContent = await util.loadInbox(inbox);
         console.log(`INBOX: ${inbox}`);
         console.log(`INBOX CONTENT:\n${inboxContent}`);
@@ -165,10 +186,8 @@ SolidIss = {
     },
 
     // Load content of issue tab
-    loadIssueTab: async function() {
+    loadRevokeTab: async function() {
         await util.trackSession();
-        var revList = await util.getRevListLocal();
-        console.log(`Rev List: ${revList}`);
     },
 
     formatActionElementIdx: function(actionId, idx) {
@@ -420,7 +439,7 @@ SolidIss = {
         return credential;
     },
 
-    // Serialize and sign credential prior to issuance
+    // Parse, sign, serialize, and issue credential
     issueCredential: async function(event) {
         event.preventDefault();
         await util.trackSession();
@@ -434,14 +453,14 @@ SolidIss = {
         var credDomain = credDomainElem.val();
         // var credSerialization = credDomainElem.val();
         var subjectId = subjectIdElem.val();
-        var issuerId = util.getWebId();
-        var revList = await util.getRevListLocal();
+        var issuerId = util.getMyWebId();
+        var revList = await util.getMyRevList();
         var uniqueNum = util.getUniqueNumber();
         var svcCredStatus = 'ACTIVE';
         var credId = `${revList}/${uniqueNum}`;
         var vcCredStatus = `${credId}.${util.n3}`;
         var credTitle = `${credDomain} Credential for Subject with ID '${subjectId}'`;
-        var credDesc = `Congratualations! By the powers vested in me as issuer with ID '${issuerId}', I hereby grant subject with ID '${subjectId}' a credential of type ${credDomain}`;
+        var credDesc = `Congratulations! By the powers vested in me as issuer with ID '${issuerId}', I hereby grant subject with ID '${subjectId}' a credential of type ${credDomain}`;
         var messageType = 'ISSUANCE';
 
         // Validate inputs
@@ -487,7 +506,7 @@ SolidIss = {
         console.log("credJsonLdStr\n:" + credJsonLdStr);
         var credJsonLd = JSON.parse(credJsonLdStr)[0];
         var credSignedJsonLd = await SolidIss.signCredentialJsonLD(credJsonLd, {type: 'RsaSignature2018', keyType: 'RSA'});
-        var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd, null, 4);
+        var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd);
         console.log(`credSignedJsonLdStr:\n${credSignedJsonLdStr}`);
         var subjectInbox = await util.discoverInbox(subjectId);
         util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
@@ -498,20 +517,98 @@ SolidIss = {
         var revStore = $rdf.graph();
         var REV = $rdf.Namespace(revList);
         var rev = REV('status'); 
-        revStore.add(rev, RDF('type'), SVC('Credential'));
+        revStore.add(rev, RDF('type'), SVC('CredentialStatusList'));
         revStore.add(rev, SVC('credentialId'), $rdf.Literal.fromValue(credId));
         revStore.add(rev, SVC('credentialStatus'), $rdf.Literal.fromValue(svcCredStatus));
         var revN3Str = await util.serialize(null, revStore, issuerId, util.contentTypeN3);
         util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
-        util.postOptions.headers[util.slugField] = credId;
+        util.postOptions.headers[util.slugField] = `${uniqueNum}`;
         util.postOptions.body = revN3Str;
-        util.fetcher.load(revList, util.postOptions);
+        await util.fetcher.load(revList, util.postOptions);
 
         // Clear input fields
         subjectIdElem.val("");
         credPlainElem.val("");
         credDomainElem.val("");
         // credSerializationElem.val("");
+        alert(`Successfully issued credential with ID '${credId}' to subject with ID '${subjectId}'`);
+    },
+
+    // Revoke credential
+    revokeCredential: async function(event) {
+        event.preventDefault();
+        await util.trackSession();
+
+        // Retrieve relevant credential revocation elements
+        var revokeCredIdElem = $('#revoke-cred-id');
+        var revokeCredReasonElem = $('#revoke-cred-reason');
+        var revokeCredId = revokeCredIdElem.val();
+        var revokeCredReason = revokeCredReasonElem.val();
+
+        // Validate inputs
+        if (revokeCredId === "") {
+          alert("Please provide a valid credential ID");
+          revokeCredIdElem.focus();
+          return;
+        }
+        if (revokeCredReason === "") {
+          // revokeCredReason = `Issuer with ID '${issuerId}' neglected to provide reason for revocation`;
+          alert("Please provide a valid reason for revocation");
+          revokeCredReasonElem.focus();
+          return;
+        }
+
+        // Fetch revocation list into local store
+        var revokeCred;
+        var revokeCredSub;
+        var revList = util.getMyRevList();
+        console.log(`Issuer rev list: ${revList}`);
+        await util.fetcher.load(revList);
+        var revListContent = util.fetcher.store.match($rdf.sym(revList), LDP(util.ldpContainsField), undefined);
+        console.log(`Rev list items: ${revListContent}`);
+        console.log(`Num rev list items: ${revListContent.length}`);
+        for (var i = 0; i < revListContent.length; i++) {
+          var revListItem = revListContent[i];
+          var revListItemVal = revListItem.object.value;
+          console.log(`Rev list item: ${revListItem}`);
+          console.log(`Rev list item val: ${revListItemVal}`);
+          await util.fetcher.load(revListItemVal);
+          var revokeCredQueryResult = util.fetcher.store.match(undefined, SVC(util.svcCredIdField), revokeCredId);
+          console.log(`Revoke cred: ${revokeCred}`);
+          if (revokeCredQueryResult.length != 0) {
+            revokeCredSub = revokeCredQueryResult[0].subject.value;
+            revokeCred = revListItemVal;
+            break;
+          }
+        }
+        if (!revokeCred) {
+          alert("There is no credential with that ID in your revocation list");
+          revokeCredIdElem.focus();
+          return;
+        }
+        console.log(`Found credential with ID ${revokeCredId}: ${revokeCred}`);
+        console.log(`Revoke cred:(${JSON.stringify(revokeCred)}`);
+        /*console.log(`Revoke cred sub: ${revokeCred.subject.value}`);
+        console.log(`Revoke cred pred: ${revokeCred.predicate.value}`);
+        console.log(`Revoke cred obj: ${revokeCred.object.value}`);*/
+
+        // Update appropriate credential status list
+        var updater = new $rdf.UpdateManager(util.fetcher.store);
+        var insertions = [];
+        insertions.push($rdf.st($rdf.sym(revokeCredSub), SVC(util.svcCredStatusField), util.svcCredStatusRevoked, $rdf.sym(revokeCred)));
+        insertions.push($rdf.st($rdf.sym(revokeCredSub), SVC(util.svcRevReasonField), revokeCredReason, $rdf.sym(revokeCred)));
+        var deletions = util.fetcher.store.match($rdf.sym(revokeCredSub), SVC(util.svcCredStatusField), undefined, $rdf.sym(revokeCred));
+        updater.update(deletions, insertions, (uri, ok, message, response) => {
+            if (ok) {
+              alert("Credential successfully revoked");
+            } else {
+              alert(`${message}\n\nPlease try again`);
+            }
+        });
+
+        // Clear input fields
+        revokeCredIdElem.val("");
+        revokeCredReasonElem.val("");
     }
     //// END APP ////
 };

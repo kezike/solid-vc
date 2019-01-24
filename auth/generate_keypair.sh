@@ -3,7 +3,8 @@
 # Generate key pair
 
 # Read appropriate configuration parameters
-configFile=$1
+configFile=$PWD/../config.json
+jsonApi=$PWD/../api/json.js
 pubKeyFileLocLocalKey=PUB_FILE_LOCAL
 privKeyFileLocLocalKey=PRIV_FILE_LOCAL
 pubKeyFileLocal=`node $jsonApi --read --key=$pubKeyFileLocLocalKey --json=$configFile`
@@ -11,7 +12,7 @@ privKeyFileLocal=`node $jsonApi --read --key=$privKeyFileLocLocalKey --json=$con
 
 echo Generating and storing private key in priv.pem...
 openssl genrsa -out $privKeyFileLocal 2048
-cat priv.pem
+cat $privKeyFileLocal
 echo Generating and storing public key in pub.pem...
 openssl rsa -in $privKeyFileLocal -pubout -out $pubKeyFileLocal
 cat $pubKeyFileLocal

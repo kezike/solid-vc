@@ -7,7 +7,7 @@ var $auth = require('solid-auth-client');
 // var fs = require('fs');
 var jsonld = require('jsonld');
 var jsigs = require('jsonld-signatures');
-var downloader = require('file-saver');
+// var downloader = require('file-saver');
 var SOLID = $rdf.Namespace('http://www.w3.org/ns/solid/terms#');
 var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
 var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
@@ -44,6 +44,7 @@ SolidUtil = {
       },
       mode: 'cors',
       credentials: 'include',
+      clearPreviousData: true,
       body: "" // REPLACE ME BEFORE USAGE
     },
     //// END REST CONFIGURATION ////
@@ -58,8 +59,13 @@ SolidUtil = {
     //// END KEY MANAGEMENT ////
 
     //// BEGIN REVOCATION LIST CONFIGURATION ////
+    pubKeyUriField: 'PUB_FILE_REMOTE',
     revListField: 'REV_FOLDER_REMOTE',
     //// END REVOCATION LIST CONFIGURATION ////
+
+    //// BEGIN JSONLD-SIGNATURES CONFIGURATION ////
+    jsigsRsaVerificationKey: 'RsaVerificationKey2018',
+    //// END JSONLD-SIGNATURES CONFIGURATION ////
 
     //// BEGIN ONTOLOGY METADATA ////
     // SVC ontology namespace
@@ -78,6 +84,10 @@ SolidUtil = {
     svcCredStatusExpired: 'EXPIRED',
     // SVC credential revoked status
     svcCredStatusRevoked: 'REVOKED',
+    // SVC credential id predicate
+    svcCredIdField: 'credentialId',
+    // SVC revocation reason predicate
+    svcRevReasonField: 'revocationReason',
     // VC credential status predicate
     vcCredStatus: 'credentialStatus',
     // SEC public key predicate
@@ -137,13 +147,24 @@ SolidUtil = {
     },
 
     // Get personal WebID
-    getWebId: function() {
+    getMyWebId: function() {
         return SolidUtil.session.webId;
     },
 
     // Get personal inbox
-    getInbox: function() {
+    getMyInbox: function() {
         return SolidUtil[SolidUtil.ldpInboxField];
+    },
+
+    // Retrieve svc public key URI
+    getMyPubKeyUri: function() {
+        console.log(`GET MY PUB KEY URI: ${SolidUtil[SolidUtil.pubKeyUriField]}`);
+        return SolidUtil[SolidUtil.pubKeyUriField];
+    },
+
+    // Retrieve svc revocation list
+    getMyRevList: function() {
+        return SolidUtil[SolidUtil.revListField];
     },
 
     // Get new unique number
@@ -156,8 +177,23 @@ SolidUtil = {
     // Retrieve status of credential
     getCredStatus: async function(credStatusUri) {
         await SolidUtil.fetcher.load(credStatusUri);
-        const credStatus = SolidUtil.fetcher.store.match(undefined, SVC(SolidUtil.svcCredStatusField), undefined)[0].object.value;
+        const credStatusQueryResult = SolidUtil.fetcher.store.match(undefined, SVC(SolidUtil.svcCredStatusField), undefined);
+        if (credStatusQueryResult.length == 0) {
+          return null;
+        }
+        const credStatus = credStatusQueryResult[0].object.value;
         return credStatus;
+    },
+
+    // Retrieve reason for credential revocation
+    getRevReason: async function(credStatusUri) {
+        await SolidUtil.fetcher.load(credStatusUri);
+        const credStatusQueryResult = SolidUtil.fetcher.store.match(undefined, SVC(SolidUtil.svcRevReasonField), undefined);
+        if (credStatusQueryResult.length == 0) {
+          return null;
+        }
+        const revReason = credStatusQueryResult[0].object.value;
+        return revReason;
     },
 
     // Track status of user session
@@ -185,15 +221,18 @@ SolidUtil = {
         SolidUtil.fetcher = $rdf.fetcher($rdf.graph());
         console.log(`SolidUtil.fetcher:\n${SolidUtil.fetcher}`);
         // SolidUtil.updater = new $rdf.UpdateManager(SolidUtil.fetcher.store);
-        // SolidUtil.bindKeyValue(SolidUtil, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidUtil.getWebId()) + '#'));
+        // SolidUtil.bindKeyValue(SolidUtil, 'THIS', $rdf.Namespace($rdf.uri.docpart(SolidUtil.getMyWebId()) + '#'));
         // var inbox = "https://kezike.solid.community/inbox/";
-        var inbox = await SolidUtil.discoverInbox(SolidUtil.getWebId());
+        var inbox = await SolidUtil.discoverInbox(SolidUtil.getMyWebId());
         SolidUtil.bindKeyValue(SolidUtil, SolidUtil.ldpInboxField, inbox);
         var configStr = await SolidUtil.readFile(SolidUtil.configFile);
         var configObj = JSON.parse(configStr);
+        var pubKeyFileRemote = configObj[SolidUtil.pubKeyUriField];
         var revListFolder = configObj[SolidUtil.revListField];
         console.log(`CONFIG OBJ:\n${configObj}`);
+        console.log(`PUB FILE REMOTE:\n${pubKeyFileRemote}`);
         console.log(`REV LIST FOLDER:\n${revListFolder}`);
+        SolidUtil.bindKeyValue(SolidUtil, SolidUtil.pubKeyUriField, pubKeyFileRemote);
         SolidUtil.bindKeyValue(SolidUtil, SolidUtil.revListField, revListFolder);
         SolidUtil.bindKeyValue(SolidUtil, 'session', SolidUtil.session);
         SolidUtil.bindKeyValue(SolidUtil, 'fetcher', SolidUtil.fetcher);
@@ -274,7 +313,7 @@ SolidUtil = {
     // Convert from typeFrom to typeTo
     convert: async function(text, typeFrom, typeTo) {
         var store = $rdf.graph();
-        var base = SolidUtil.getWebId();
+        var base = SolidUtil.getMyWebId();
         var parsed = await SolidUtil.parse(text, store, base, typeFrom);
         var target = null;
         var serialized = await SolidUtil.serialize(target, parsed, base, typeTo);
@@ -318,14 +357,14 @@ SolidUtil = {
     discoverAccount: async function(target) {
         await SolidUtil.fetcher.load(target);
         var account = SolidUtil.fetcher.store.any($rdf.sym(target), SOLID(SolidUtil.solidAccountField), undefined);
-        return account;
+        return account.value;
     },
 
     // Discover the inbox of a target via LDN
     discoverInbox: async function(target) {
         await SolidUtil.fetcher.load(target);
         var inbox = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpInboxField), undefined);
-        return inbox;
+        return inbox.value;
     },
 
     // Load content of inbox
@@ -339,7 +378,7 @@ SolidUtil = {
     getPubKeyRemoteUri: async function(target) {
         await SolidUtil.fetcher.load(target);
         var pubKeyUri = SolidUtil.fetcher.store.any($rdf.sym(target), SEC(SolidUtil.secPubKeyField), undefined);
-        return pubKeyUri;
+        return pubKeyUri.value;
     },
 
     // Retrieve content of svc public key of a remote target
@@ -387,7 +426,7 @@ SolidUtil = {
             rawFile.send(null);
         });
         var keyResult = await keyPromise;
-        return keyResult.trim();
+        return keyResult;
     },
 
     // Retrieve local svc public key
@@ -402,13 +441,6 @@ SolidUtil = {
         return privKey;
     },
     
-    // Retrieve local svc revocation list
-    getRevListLocal: async function() {
-        /*var revList = await SolidUtil.readFile(SolidUtil.revListFile);
-        return revList;*/
-        return SolidUtil[SolidUtil.revListField];
-    },
-
     // Sign document
     signDocument: async function(doc, /*signConfig*/) {
         // Specify signature configuration (ie., suite and purpose and setup key pair)
@@ -418,11 +450,15 @@ SolidUtil = {
         const {RSAKeyPair} = jsigs;
         const publicKeyPem = await SolidUtil.getPubKeyLocal();
         const privateKeyPem = await SolidUtil.getPrivKeyLocal();
+        const issuerId = SolidUtil.getMyWebId();
+        const pubKeyId = SolidUtil.getMyPubKeyUri();
+        console.log(`My Pub Key ID: ${pubKeyId}`);
+        console.log(`My Pub Key ID Stringified: ${JSON.stringify(pubKeyId)}`);
         var publicKey = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
-            type: "RsaVerificationKey2018",
-            id: "RsaVerification2018",
-            controller: "RsaController2018",
+            type: SolidUtil.jsigsRsaVerificationKey,
+            id: pubKeyId,
+            controller: issuerId,
             publicKeyPem
         };
         const key = new RSAKeyPair({...publicKey, privateKeyPem});
@@ -447,19 +483,29 @@ SolidUtil = {
 
         // Fetch signed credential into local store
         const signedDocStr = await SolidUtil.genericFetch(signedDocUri);
-        const signedDocStore = await SolidUtil.parse(signedDocStr, $rdf.graph(), SolidUtil.getWebId(), SolidUtil.contentTypeJsonLd);
+        const signedDocStore = await SolidUtil.parse(signedDocStr, $rdf.graph(), SolidUtil.getMyWebId(), SolidUtil.contentTypeJsonLd);
 
         // Discover credential issuer ID
         const issuerId = signedDocStore.match(undefined, SVC(SolidUtil.svcIssuerIdField), undefined)[0].object.value;
-        console.log(`Issuer ID: ${issuerId}`);
+        const pubKeyId = await SolidUtil.getPubKeyRemoteUri(issuerId);
+        console.log(`Pub key ID: ${pubKeyId}`);
+        console.log(`Pub key ID Stringified: ${JSON.stringify(pubKeyId)}`);
         const issuerPubKey = await SolidUtil.getPubKeyRemoteContent(issuerId);
+        const publicKeyPem = issuerPubKey;
+        console.log(`Issuer ID: ${issuerId}`);
+        console.log(`Pub key ID: ${pubKeyId}`);
+        console.log(`Issuer Pub Key:\n${issuerPubKey}`);
 
         // Discover credential issuer revocation list
         const credStatusUri = signedDocStore.match(undefined, VC(SolidUtil.vcCredStatus), undefined)[0].object.value;
-        console.log(`Issuer ID: ${credStatusUri}`);
+        console.log(`Cred Status URI: ${credStatusUri}`);
         const credStatus = await SolidUtil.getCredStatus(credStatusUri);
         console.log(`Cred Status: ${credStatus}`);
         switch(credStatus) {
+            case null:
+              result.verified = false;
+              result.error.message = 'The issuer of this credential has moved the credential status list';
+              return;
             case SolidUtil.svcCredStatusActive:
               break;
             case SolidUtil.svcCredStatusExpired:
@@ -468,11 +514,15 @@ SolidUtil = {
               return result;
             case SolidUtil.svcCredStatusRevoked:
               result.verified = false;
-              result.error.message `This credential has been revoked by issuer with ID '${issuerId}'`;
+              let revReason = await SolidUtil.getRevReason(credStatusUri);
+              if (!revReason) {
+                revReason = `Issuer with ID '${issuerId}' neglected to provide reason for revocation`;
+              }
+              result.error.message = `This credential has been revoked by issuer with ID '${issuerId}' for the following reason: ${revReason}`;
               return result;
             default:
               result.verified = false;
-              result.error.message = 'Cannot properly verify this this credential because it does not include a valid status';
+              result.error.message = 'Cannot properly verify this credential because it does not include a valid status';
               return result;
         }
 
@@ -482,16 +532,16 @@ SolidUtil = {
         // Specify the public key
         const publicKey = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
-            type: "RsaVerificationKey2018",
-            id: "RsaVerification2018",
-            controller: "RsaController2018",
-            publicKeyPem: issuerPubKey
+            type: SolidUtil.jsigsRsaVerificationKey,
+            id: pubKeyId,
+            controller: issuerId,
+            publicKeyPem
         };
 
         // Specify the public key controller
         const controller = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
-            id: "RsaController2018",
+            id: issuerId,
             publicKey: [publicKey],
             assertionMethod: [publicKey.id]
         };
@@ -500,7 +550,8 @@ SolidUtil = {
         const {RsaSignature2018} = jsigs.suites;
         const {AssertionProofPurpose} = jsigs.purposes;
         const {RSAKeyPair} = jsigs;
-        const privateKeyPem = null; // You do not know the private key of the signer
+        const privateKeyPem = null; // We do not know the private key of the signer
+        console.log(`Verifying signed credential with key pair:\n${privateKeyPem}\n${issuerPubKey}`);
         const key = new RSAKeyPair({...publicKey, privateKeyPem});
         result = await jsigs.verify(signedDoc, {
           suite: new RsaSignature2018({key}),

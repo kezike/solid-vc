@@ -518,7 +518,7 @@ SolidUtil = {
               if (!revReason) {
                 revReason = `Issuer with ID '${issuerId}' neglected to provide reason for revocation`;
               }
-              result.error.message = `This credential has been revoked by issuer with ID '${issuerId}' for the following reason: ${revReason}`;
+              result.error.message = `This credential has been revoked by issuer with ID '${issuerId}' for the following reason: '${revReason}'`;
               return result;
             default:
               result.verified = false;

@@ -506,7 +506,7 @@ SolidIss = {
         console.log("credJsonLdStr\n:" + credJsonLdStr);
         var credJsonLd = JSON.parse(credJsonLdStr)[0];
         var credSignedJsonLd = await SolidIss.signCredentialJsonLD(credJsonLd, {type: 'RsaSignature2018', keyType: 'RSA'});
-        var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd);
+        var credSignedJsonLdStr = JSON.stringify(credSignedJsonLd, null, 4);
         console.log(`credSignedJsonLdStr:\n${credSignedJsonLdStr}`);
         var subjectInbox = await util.discoverInbox(subjectId);
         util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;

@@ -38,7 +38,7 @@ fileNameNumPartsTwo=${#fileNamePartsTwo[@]}
 fileName=${fileNamePartsTwo[0]}
 fileExt=${fileNamePartsTwo[1]}
 IFS=$OIFS
-pubKeyUri=$pubKeyFolderRemote/$fileName.txt
+pubKeyUri=$pubKeyFolderRemote"$fileName".txt
 
 # Write pub key file to config file for future reference
 node $jsonApi --write --key=$pubKeyFileRemoteKey --value=$pubKeyUri --json=$configFile

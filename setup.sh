@@ -48,13 +48,15 @@ cd auth/
 
 # Login to Solid account
 echo To get started, please provide your Solid account info in the following section. If you do not own a Solid account, please quit this script and register for one here: https://solid.inrupt.com
-echo "Please enter your Solid WebID \(eg. https://USER.solid.community/profile/card#me\) \[ENTER\]:\n---> "
+printf "Please enter your Solid WebID (eg. https://USER.solid.community/profile/card#me) [ENTER]:\n---> "
 read webid
-account=`node $uriApi --host=$webid`
+host=`node $uriApi --host=$webid`
+protocol=`node $uriApi --protocol=$webid`
+account=$protocol://$host/
 profile=`node $uriApi --doc=$webid`
-echo "Please enter your Solid account username \[ENTER\]:\n---> "
+printf "Please enter your Solid account username [ENTER]:\n---> "
 read uname
-echo "Please enter your Solid account password \[ENTER\]:\n---> "
+printf "Please enter your Solid account password [ENTER]:\n---> "
 read pass
 node $jsonApi --write --key=$webidKey --value=$webid --json=$configFile
 node $jsonApi --write --key=$accountKey --value=$account --json=$configFile
@@ -71,9 +73,9 @@ node $jsonApi --write --key=$privKeyFileLocalKey --value=$privKeyFileLocal --jso
 node $jsonApi --delete --key=$privKeyFileLocalKey --json=$configFile
 
 # Publish public key
-echo "Please enter an existing and EMPTY public folder where you would like to store your SolidVC public key \(eg. https://USER.solid.community/public/svc/keys\) \[ENTER\]:\n---> "
+printf "Please enter an existing and EMPTY public folder where you would like to store your SolidVC public key (eg. https://USER.solid.community/public/svc/keys) [ENTER]:\n---> "
 read pubKeyFolderRemote
-node $jsonApi --write --key=$pubKeyFolderRemoteKey --value=$pubKeyFolderRemote --json=$configFile
+node $jsonApi --write --key=$pubKeyFolderRemoteKey --value=$pubKeyFolderRemote/ --json=$configFile
 node $jsonApi --write --key=$pubKeyQueryFileKey --value=$pubKeyQueryFile --json=$configFile
 node $jsonApi --write --key=$profileKey --value=$profile --json=$configFile
 ./publish_key.sh
@@ -86,7 +88,7 @@ cd ../
 # BEGIN REVOCATION LIST CONFIGURATION
 
 # Store revocation list in local file
-echo "Please enter an existing EMPTY public folder where you would like to store your SolidVC revocation list \(eg. https://USER.solid.community/public/svc/rev\) \[ENTER\]:\n---> "
+printf "Please enter an existing EMPTY public folder where you would like to store your SolidVC revocation list (eg. https://USER.solid.community/public/svc/rev) [ENTER]:\n---> "
 read revFolderRemote
 node $jsonApi --write --key=$revFolderRemoteKey --value=$revFolderRemote/ --json=$configFile
 

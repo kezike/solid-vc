@@ -10,3 +10,7 @@ if (args.host) {
 if (args.doc) {
   console.log($rdf.uri.docpart(args.doc));
 }
+
+if (args.protocol) {
+  console.log($rdf.uri.protocol(args.protocol));
+}

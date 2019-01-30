@@ -7,7 +7,7 @@ var $auth = require('solid-auth-client');
 // var fs = require('fs');
 var jsonld = require('jsonld');
 var jsigs = require('jsonld-signatures');
-// var downloader = require('file-saver');
+var downloader = require('file-saver');
 var SOLID = $rdf.Namespace('http://www.w3.org/ns/solid/terms#');
 var FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
 var SVC = $rdf.Namespace('http://dig.csail.mit.edu/2018/svc#');
@@ -442,6 +442,12 @@ SolidUtil = {
         });
         var keyResult = await keyPromise;
         return keyResult;
+    },
+
+    // Download content into local file
+    downloadFile: async function (content, filename) {
+        var blob = new Blob([content], {type: "text/plain;charset=utf-8"});
+        downloader.saveAs(blob, filename);
     },
 
     // Retrieve local svc public key

@@ -92,7 +92,7 @@ SolidIss = {
     currentTabCnt: '', // { SolidIss.issueTabCnt, SolidIss.reviewTabCnt }
     
     // Message element info
-    messageInfo: [], // has fields 'uri', 'inspectId', 'verifyId'
+    messageInfo: [], // has fields 'uri', 'inspectId', 'verifyId', 'downloadId'
 
     // Action element id delimiter
     actionElemIdDelim: '-',
@@ -111,8 +111,9 @@ SolidIss = {
     // Bind events
     bindEvents: function() {
         $(document).on('click', '.inspect-cred', SolidIss.inspectCredential);
-        $(document).on('click', '.approve-cred', SolidIss.approveCredential);
-        $(document).on('click', '.decline-cred', SolidIss.declineCredential);
+        /*$(document).on('click', '.approve-cred', SolidIss.approveCredential);
+        $(document).on('click', '.decline-cred', SolidIss.declineCredential);*/
+        $(document).on('click', '.download-msg', SolidIss.downloadMessage);
         $(document).on('click', '#issue-cred', SolidIss.issueCredential);
         $(document).on('click', '#revoke-cred', SolidIss.revokeCredential);
         $(document).on('click', '#issue-tab-link', SolidIss.displayTab);
@@ -244,6 +245,7 @@ SolidIss = {
         var downloadId = SolidIss.formatActionElementId("download", messageIdx);
         messageObj.inspectId = inspectId;
         messageObj.verifyId = verifyId;
+        messageObj.downloadId = downloadId;
         var messageUri = messageObj.uri;
         var header = "<tr>";
         var bodyLine1 = `<td style="padding:15px"><h4 style="color:blue; display:inline"><a href=${messageUri} target="_blank">${credReqMsgLabel}</a></h4></td>`;
@@ -261,14 +263,14 @@ SolidIss = {
 
     inspectCredential: async function(event) {
         // Retrieve relevant DOM elements
-        var actionElem = $(event.target).closest(".inspect-cred");
-        var actionElemId = actionElem.attr('id');
+        var inspectCredElem = $(event.target).closest(".inspect-cred");
+        var inspectCredElemId = inspectCredElem.attr('id');
         var messageModal = $("#msg-modal");
-        console.log(`Inspect Credential Target: ${actionElemId}`);
+        console.log(`Inspect Credential Target: ${inspectCredElemId}`);
         
         // Fetch credential request message
-        var actionElemIdx = SolidIss.formatActionElementIdx(actionElemId);
-        var messageUri = SolidIss.messageInfo[actionElemIdx].uri;
+        var inspectCredElemIdx = SolidIss.formatActionElementIdx(inspectCredElemId);
+        var messageUri = SolidIss.messageInfo[inspectCredElemIdx].uri;
         var message = await util.genericFetch(messageUri);
         
         // Populate and display credential request message modal
@@ -278,17 +280,31 @@ SolidIss = {
         
         // Close credential inpection modal when button pressed
         $(document).on('click', "#msg-modal-close", () => {
-            // console.log(`closeButtonId: ${closeButtonId}`);
             messageModal.css("display","none");
         });
     },
 
-    approveCredential: async function(event) {
+    /*approveCredential: async function(event) {
         console.log(`Approve Credential Target: ${event.currentTarget}`);
     },
 
     declineCredential: async function(event) {
         console.log(`Decline Credential Target: ${event.currentTarget}`);
+    },*/
+    
+    downloadMessage: async function(event) {
+        // Retrieve relevant DOM elements
+        var downloadMsgElem = $(event.target).closest(".download-msg");
+        var downloadMsgElemId = downloadMsgElem.attr('id');
+
+        // Fetch message
+        var downloadMsgElemIdx = SolidIss.formatActionElementIdx(downloadMsgElemId);
+        var messageUri = SolidIss.messageInfo[downloadMsgElemIdx].uri;
+        var message = await util.genericFetch(messageUri);
+        
+        // Download message
+        var downloadId = SolidIss.messageInfo[downloadMsgElemIdx].downloadId;
+        util.downloadFile(message, downloadId);
     },
 
     // Handle credential upload

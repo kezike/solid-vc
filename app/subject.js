@@ -170,14 +170,21 @@ SolidSub = {
 
         // Sign credential request
         // TODO - util.signDocument()
+        var requestJsonLdStr = await util.serialize(null, requestStore, subjectId, util.contentTypeJsonLd);
+        var requestJsonLd = JSON.parse(requestJsonLdStr)[0];
+        var requestSignedJsonLd = await util.signDocument(requestJsonLd);
+        var requestSignedJsonLdStr = JSON.stringify(requestSignedJsonLd, null, 4);
+        console.log(`requestSignedJsonLdStr: ${requestSignedJsonLdStr}`);
 
-        // Serialize credential request to N3
+        /*// Serialize credential request to N3
         var requestBase = request.value;
-        var requestN3 = await util.serialize(null, requestStore, requestBase, util.contentTypeN3);
+        var requestN3 = await util.serialize(null, requestStore, requestBase, util.contentTypeN3);*/
 
         // Submit credential request; TODO - Add logic to inform user of network error (ie. inexistent URI, timeout, etc.)
-        util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
-        util.postOptions.body = requestN3;
+        // util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
+        // util.postOptions.body = requestN3;
+        util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
+        util.postOptions.body = requestSignedJsonLdStr;
         util.fetcher.load(issuerInbox, util.postOptions);
 
         // Clear input fields

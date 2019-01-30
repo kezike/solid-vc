@@ -227,3 +227,10 @@ svc:revocationReason a rdf:Property ;
     rdfs:comment "Reasoning behind credential revocation"@en ;
     rdfs:domain svc:CredentialStatusList ;
     rdfs:range rdfs:Literal .
+
+svc:revocationDate a rdf:Property ;
+    rdfs:isDefinedBy <http://dig.csail.mit.edu/2018/svc#> ;
+    rdfs:label "revocationDate"@en ;
+    rdfs:comment "Date of credential revocation"@en ;
+    rdfs:domain svc:CredentialStatusList ;
+    rdfs:range xsd:dateTime .

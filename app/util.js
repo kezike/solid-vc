@@ -74,6 +74,8 @@ SolidUtil = {
     LDP: $rdf.Namespace('http://www.w3.org/ns/ldp#'),
     // SVC issuer id predicate
     svcIssuerIdField: 'issuerId',
+    // SVC subject id predicate
+    svcSubjectIdField: 'subjectId',
     // SVC revocation list predicate
     svcRevListField: 'revocationList',
     // SVC credential status predicate
@@ -88,6 +90,8 @@ SolidUtil = {
     svcCredIdField: 'credentialId',
     // SVC revocation reason predicate
     svcRevReasonField: 'revocationReason',
+    // SVC revocation date predicate
+    svcRevDateField: 'revocationDate',
     // VC credential status predicate
     vcCredStatus: 'credentialStatus',
     // SEC public key predicate
@@ -194,6 +198,17 @@ SolidUtil = {
         }
         const revReason = credStatusQueryResult[0].object.value;
         return revReason;
+    },
+
+    // Retrieve date of credential revocation
+    getRevDate: async function(credStatusUri) {
+        await SolidUtil.fetcher.load(credStatusUri);
+        const credStatusQueryResult = SolidUtil.fetcher.store.match(undefined, SVC(SolidUtil.svcRevDateField), undefined);
+        if (credStatusQueryResult.length == 0) {
+          return null;
+        }
+        const revDate = credStatusQueryResult[0].object.value;
+        return revDate;
     },
 
     // Track status of user session
@@ -475,9 +490,18 @@ SolidUtil = {
     },
 
     // Verify document
-    verifyDocument: async function(signedDocUri, /*verifyConfig*/) {
+    /*
+       User may pass in verification configuration parameters with the following keys:
+       checkCredStatus: Determines whether to check credential status during verification
+       verifyRequest: Determines whether this is a request verification
+    */
+    verifyDocument: async function(signedDocUri) {
         // Specifying verification configuration
-        // TODO - allow specification of publicKey["@id"], publicKey.owner, and publicKeyOwner["@id"] in verifyConfig
+        var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        console.log(config);
+        var checkCredStatus = ("checkCredStatus" in config) ? config.checkCredStatus : true;
+        var verifyRequest = ("verifyRequest" in config) ? config.verifyRequest : false;
+
         // Verification result
         var result = { verified: false, error: {} };
 
@@ -487,43 +511,49 @@ SolidUtil = {
 
         // Discover credential issuer ID
         const issuerId = signedDocStore.match(undefined, SVC(SolidUtil.svcIssuerIdField), undefined)[0].object.value;
-        const pubKeyId = await SolidUtil.getPubKeyRemoteUri(issuerId);
+        const subjectId = signedDocStore.match(undefined, SVC(SolidUtil.svcSubjectIdField), undefined)[0].object.value;
+        const controllerId = verifyRequest ? subjectId : issuerId;
+        const pubKeyId = await SolidUtil.getPubKeyRemoteUri(controllerId);
+        /*console.log(`Pub key ID: ${pubKeyId}`);
+        console.log(`Pub key ID Stringified: ${JSON.stringify(pubKeyId)}`);*/
+        const controllerPubKey = await SolidUtil.getPubKeyRemoteContent(controllerId);
+        const publicKeyPem = controllerPubKey;
+        /*console.log(`Issuer ID: ${issuerId}`);
         console.log(`Pub key ID: ${pubKeyId}`);
-        console.log(`Pub key ID Stringified: ${JSON.stringify(pubKeyId)}`);
-        const issuerPubKey = await SolidUtil.getPubKeyRemoteContent(issuerId);
-        const publicKeyPem = issuerPubKey;
-        console.log(`Issuer ID: ${issuerId}`);
-        console.log(`Pub key ID: ${pubKeyId}`);
-        console.log(`Issuer Pub Key:\n${issuerPubKey}`);
+        console.log(`Issuer Pub Key:\n${controllerPubKey}`);*/
 
-        // Discover credential issuer revocation list
-        const credStatusUri = signedDocStore.match(undefined, VC(SolidUtil.vcCredStatus), undefined)[0].object.value;
-        console.log(`Cred Status URI: ${credStatusUri}`);
-        const credStatus = await SolidUtil.getCredStatus(credStatusUri);
-        console.log(`Cred Status: ${credStatus}`);
-        switch(credStatus) {
-            case null:
-              result.verified = false;
-              result.error.message = 'The issuer of this credential has moved the credential status list';
-              return;
-            case SolidUtil.svcCredStatusActive:
-              break;
-            case SolidUtil.svcCredStatusExpired:
-              result.verified = false;
-              result.error.message = 'This credential has expired';
-              return result;
-            case SolidUtil.svcCredStatusRevoked:
-              result.verified = false;
-              let revReason = await SolidUtil.getRevReason(credStatusUri);
-              if (!revReason) {
-                revReason = `Issuer with ID '${issuerId}' neglected to provide reason for revocation`;
-              }
-              result.error.message = `This credential has been revoked by issuer with ID '${issuerId}' for the following reason: '${revReason}'`;
-              return result;
-            default:
-              result.verified = false;
-              result.error.message = 'Cannot properly verify this credential because it does not include a valid status';
-              return result;
+        console.log(`CHECK CRED STATUS: ${checkCredStatus}`);
+        if (checkCredStatus) {
+          // Discover credential issuer revocation list
+          const credStatusUri = signedDocStore.match(undefined, VC(SolidUtil.vcCredStatus), undefined)[0].object.value;
+          console.log(`Cred Status URI: ${credStatusUri}`);
+          const credStatus = await SolidUtil.getCredStatus(credStatusUri);
+          console.log(`Cred Status: ${credStatus}`);
+          switch(credStatus) {
+              case null:
+                result.verified = false;
+                result.error.message = 'The issuer of this credential has moved the credential status list';
+                return;
+              case SolidUtil.svcCredStatusActive:
+                break;
+              case SolidUtil.svcCredStatusExpired:
+                result.verified = false;
+                result.error.message = 'This credential has expired';
+                return result;
+              case SolidUtil.svcCredStatusRevoked:
+                result.verified = false;
+                let revReason = await SolidUtil.getRevReason(credStatusUri);
+                let revDate = await SolidUtil.getRevDate(credStatusUri);
+                if (!revReason) {
+                  revReason = `Issuer with ID '${issuerId}' neglected to provide reason for revocation`;
+                }
+                result.error.message = `This credential was revoked on ${revDate} by issuer with ID '${issuerId}' for the following reason: '${revReason}'`;
+                return result;
+              default:
+                result.verified = false;
+                result.error.message = 'Cannot properly verify this credential because it does not include a valid status';
+                return result;
+          }
         }
 
         // Parse JSON-LD string into JSON in preparation for verification
@@ -534,14 +564,14 @@ SolidUtil = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
             type: SolidUtil.jsigsRsaVerificationKey,
             id: pubKeyId,
-            controller: issuerId,
+            controller: controllerId,
             publicKeyPem
         };
 
         // Specify the public key controller
         const controller = {
             "@context": jsigs.SECURITY_CONTEXT_URL,
-            id: issuerId,
+            id: controllerId,
             publicKey: [publicKey],
             assertionMethod: [publicKey.id]
         };
@@ -551,7 +581,7 @@ SolidUtil = {
         const {AssertionProofPurpose} = jsigs.purposes;
         const {RSAKeyPair} = jsigs;
         const privateKeyPem = null; // We do not know the private key of the signer
-        console.log(`Verifying signed credential with key pair:\n${privateKeyPem}\n${issuerPubKey}`);
+        console.log(`Verifying signed credential with key pair:\n${privateKeyPem}\n${controllerPubKey}`);
         const key = new RSAKeyPair({...publicKey, privateKeyPem});
         result = await jsigs.verify(signedDoc, {
           suite: new RsaSignature2018({key}),

@@ -91,8 +91,8 @@ SolidIss = {
     currentTabLink: '', // { SolidIss.issueTabLink, SolidIss.reviewTabLink }
     currentTabCnt: '', // { SolidIss.issueTabCnt, SolidIss.reviewTabCnt }
     
-    // Message element ids
-    messageIds: [],
+    // Message element info
+    messageInfo: [], // has fields 'uri', 'inspectId', 'verifyId'
 
     // Action element id delimiter
     actionElemIdDelim: '-',
@@ -120,6 +120,17 @@ SolidIss = {
         $(document).on('click', '#revoke-tab-link', SolidIss.displayTab);
         $(document).on('click', '#switch-acct', util.switchAccounts);
         $(document).on('click', '#switch-role', util.switchRoles);
+        /*// Close credential inpection modal when button pressed
+        $(messageModal).on('click', closeButtonId, () => {
+            messageModal.css("display","none");
+        });
+        
+        // Close credential inpection modal when click scope is out of modal bounds
+        $(window).on('click', (event) => {
+            if (event.target == messageModal) {
+              messageModal.css("display","none");
+            }
+        });*/
     },
 
     // Display tab
@@ -178,16 +189,42 @@ SolidIss = {
         $('#msg-board').empty();
         for (var i = 0; i < inboxContent.length; i++) {
           var inboxItem = inboxContent[i];
-          var messageId = inboxItem[util.ldObjField][util.ldTermValueField];
-          var reqMsgElem = SolidIss.formatRequestMessageElement(messageId, i);
+          var messageUri = inboxItem.object.value;
+          var messageObj = {uri: messageUri};
+          var reqMsgElem = SolidIss.formatRequestMessageElement(messageObj, i);
+          SolidIss.messageInfo.push(messageObj);
           $('#msg-board').append(reqMsgElem);
-          SolidIss.messageIds.push(messageId);
         }
+        SolidIss.verifyRequests();
     },
 
     // Load content of issue tab
     loadRevokeTab: async function() {
         await util.trackSession();
+    },
+
+    verifyRequests: async function() {
+        for (var i = 0; i < SolidIss.messageInfo.length; i++) {
+          var messageObj = SolidIss.messageInfo[i];
+          var messageUri = messageObj.uri;
+          var messageVerifyId = messageObj.verifyId;
+          console.log(`messageVerifyId: ${messageVerifyId}`);
+          var verifyResult = await util.verifyDocument(messageUri, {checkCredStatus: false, verifyRequest: true});
+          // TODO - Set 'src' attribute of verifyRequest img and remove 'hidden' class
+          var messageVerifyElem = $('#' + messageVerifyId);
+          console.log(`verifyRequestsResult: ${verifyResult.verified}`);
+          if (verifyResult.verified) {
+            var verifyImageElem = messageVerifyElem.find(".verify-img");
+            console.log(`verifyImageElem: ${verifyImageElem}`);
+            verifyImageElem.attr('src', "./img/approve.png");
+            messageVerifyElem.removeClass('hidden');
+          } else {
+            var verifyImageElem = messageVerifyElem.find(".verify-img");
+            console.log(`verifyImageElem: ${JSON.stringify(verifyImageElem)}`);
+            verifyImageElem.attr('src', "./img/decline.png");
+            messageVerifyElem.removeClass('hidden');
+          }
+        }
     },
 
     formatActionElementIdx: function(actionId, idx) {
@@ -198,16 +235,24 @@ SolidIss = {
         return action + SolidIss.actionElemIdDelim + idx;
     },
 
-    formatRequestMessageElement: function(messageId, messageIdx) {
+    formatRequestMessageElement: function(messageObj, messageIdx) {
         var credReqMsgLabel = `Credential Request ${messageIdx + 1}`;
         var inspectId = SolidIss.formatActionElementId("inspect", messageIdx);
-        var approveId = SolidIss.formatActionElementId("approve", messageIdx);
-        var declineId = SolidIss.formatActionElementId("decline", messageIdx);
+        /*var approveId = SolidIss.formatActionElementId("approve", messageIdx);
+        var declineId = SolidIss.formatActionElementId("decline", messageIdx);*/
+        var verifyId = SolidIss.formatActionElementId("verify", messageIdx);
+        var downloadId = SolidIss.formatActionElementId("download", messageIdx);
+        messageObj.inspectId = inspectId;
+        messageObj.verifyId = verifyId;
+        var messageUri = messageObj.uri;
         var header = "<tr>";
-        var bodyLine1 = `<td style="padding:15px"><h4 style="color:blue; display:inline"><a href=${messageId} target="_blank">${credReqMsgLabel}</a></h4></td>`;
-        var bodyLine2 = `<td id=${inspectId} class=inspect-cred style="padding:15px"><input type="image" src="./img/inspect.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
-        var bodyLine3 = `<td id=${approveId} class=approve-cred style="padding:15px"><input type="image" src="./img/approve.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
-        var bodyLine4 = `<td id=${declineId} class=decline-cred style="padding:15px"><input type="image" src="./img/decline.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var bodyLine1 = `<td style="padding:15px"><h4 style="color:blue; display:inline"><a href=${messageUri} target="_blank">${credReqMsgLabel}</a></h4></td>`;
+        var bodyLine2 = `<td id="${inspectId}" class="inspect-cred" style="padding:15px"><input type="image" src="./img/inspect.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        /*var bodyLine3 = `<td id="${approveId}" class="approve-cred" style="padding:15px"><input type="image" src="./img/approve.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var bodyLine4 = `<td id="${declineId}" class="decline-cred" style="padding:15px"><input type="image" src="./img/decline.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var body = `${bodyLine1}${bodyLine2}${bodyLine3}${bodyLine4}`;*/
+        var bodyLine3 = `<td id="${downloadId}" class="download-msg" style="padding:15px"><input type="image" src="./img/download.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var bodyLine4 = `<td id="${verifyId}" class="verify-request hidden" style="padding:15px"><img class="verify-img" src="" height=25 width=25 style="display:inline; left:50em" /></td>`;
         var body = `${bodyLine1}${bodyLine2}${bodyLine3}${bodyLine4}`;
         var footer = "</tr>";
         var message = `${header}${body}${footer}`;
@@ -219,13 +264,11 @@ SolidIss = {
         var actionElem = $(event.target).closest(".inspect-cred");
         var actionElemId = actionElem.attr('id');
         var messageModal = $("#msg-modal");
-        var closeButton = $(event.target).closest(".close");
-        var closeButtonId = closeButton.attr('id');
         console.log(`Inspect Credential Target: ${actionElemId}`);
         
         // Fetch credential request message
         var actionElemIdx = SolidIss.formatActionElementIdx(actionElemId);
-        var messageUri = SolidIss.messageIds[actionElemIdx];
+        var messageUri = SolidIss.messageInfo[actionElemIdx].uri;
         var message = await util.genericFetch(messageUri);
         
         // Populate and display credential request message modal
@@ -234,15 +277,9 @@ SolidIss = {
         messageModal.css("display","block");
         
         // Close credential inpection modal when button pressed
-        $(document).on('click', closeButtonId, () => {
+        $(document).on('click', "#msg-modal-close", () => {
+            // console.log(`closeButtonId: ${closeButtonId}`);
             messageModal.css("display","none");
-        });
-        
-        // Close credential inpection modal when click scope is out of modal bounds
-        $(document).on('click', (event) => {
-            if (event.target == messageModal) {
-              messageModal.css("display","none");
-            }
         });
     },
 
@@ -544,6 +581,7 @@ SolidIss = {
         var revokeCredReasonElem = $('#revoke-cred-reason');
         var revokeCredId = revokeCredIdElem.val();
         var revokeCredReason = revokeCredReasonElem.val();
+        var revokeCredDate = new Date();
 
         // Validate inputs
         if (revokeCredId === "") {
@@ -597,6 +635,7 @@ SolidIss = {
         var insertions = [];
         insertions.push($rdf.st($rdf.sym(revokeCredSub), SVC(util.svcCredStatusField), util.svcCredStatusRevoked, $rdf.sym(revokeCred)));
         insertions.push($rdf.st($rdf.sym(revokeCredSub), SVC(util.svcRevReasonField), revokeCredReason, $rdf.sym(revokeCred)));
+        insertions.push($rdf.st($rdf.sym(revokeCredSub), SVC(util.svcRevDateField), revokeCredDate, $rdf.sym(revokeCred)));
         var deletions = util.fetcher.store.match($rdf.sym(revokeCredSub), SVC(util.svcCredStatusField), undefined, $rdf.sym(revokeCred));
         updater.update(deletions, insertions, (uri, ok, message, response) => {
             if (ok) {

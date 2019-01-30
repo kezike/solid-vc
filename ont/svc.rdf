@@ -226,6 +226,14 @@
         <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 
+    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#revocationDate">
+        <comment xml:lang="en">Date of credential revocation</comment>
+        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#CredentialStatusList"/>
+        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
+        <label xml:lang="en">revocationDate</label>
+        <range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    </rdf:Property>
+
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#revocationList">
         <comment xml:lang="en">The URI of the revocation list of a user (similar to vc:credentialStatus)</comment>
         <domain rdf:resource="http://xmlns.com/foaf/0.1/PersonalProfileDocument"/>

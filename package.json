@@ -10,7 +10,7 @@
     "generate-keypair": "cd auth/; chmod +x generate_keypair.sh; ./generate_keypair.sh; cd ../",
     "build": "webpack --config ./app/webpack.config.js --mode production",
     "dev": "webpack --config ./app/webpack.config.js --mode development",
-    "start": "webpack-dev-server --config ./app/webpack.config.js --mode production"
+    "start": "webpack-dev-server --config ./app/webpack.config.js --mode development & npm run dev"
   },
   "author": "Kayode Ezike <kezike17@mit.edu>",
   "license": "ISC",
@@ -46,8 +46,8 @@
     "file-saver": "^2.0.0",
     "get-ssl-certificate": "^2.1.2",
     "glob": "^7.1.2",
-    "jsonld": "^1.4.0",
-    "jsonld-signatures": "^3.1.0",
+    "jsonld": "^1.5.0",
+    "jsonld-signatures": "^3.3.0",
     "minimist": "^1.2.0",
     "n3": "^1.0.0-beta.1",
     "node-forge": "^0.7.5",

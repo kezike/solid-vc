@@ -14,6 +14,8 @@ chmod +x ont/*
 # Install requisite Node packages and dependencies
 echo Installing requisite Node packages...
 npm install
+npm install jsonld
+npm install jsonld-signatures
 # TODO - Follow up on issue that enables configuration of popup.html app name
 ln -fs node_modules/solid-auth-client/dist-popup/popup.html popup.html
 

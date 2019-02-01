@@ -621,6 +621,8 @@ SolidIss = {
         var revListContent = util.fetcher.store.match($rdf.sym(revList), LDP(util.ldpContainsField), undefined);
         console.log(`Rev list items: ${revListContent}`);
         console.log(`Num rev list items: ${revListContent.length}`);
+
+        // Search for credential status item with provided ID
         for (var i = 0; i < revListContent.length; i++) {
           var revListItem = revListContent[i];
           var revListItemVal = revListItem.object.value;

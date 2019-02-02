@@ -36,13 +36,6 @@
         <subClassOf rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
     </Class>
 
-    <Class rdf:about="http://dig.csail.mit.edu/2018/svc#Metadata">
-        <comment xml:lang="en">The class representing metadata about various ledgers</comment>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">Metadata</label>
-        <subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
-    </Class>
-
     <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#credentialId">
         <comment xml:lang="en">ID of a credential</comment>
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#CredentialStatusList"/>
@@ -112,86 +105,6 @@
         <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Credential"/>
         <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
         <label xml:lang="en">messageType</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaEdu">
-        <comment xml:lang="en">The URI of the education ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaEdu</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaFin">
-        <comment xml:lang="en">The URI of the finance ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaFin</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaGen">
-        <comment xml:lang="en">The URI of the general ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaGen</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaGov">
-        <comment xml:lang="en">The URI of the government ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaGov</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaHealth">
-        <comment xml:lang="en">The URI of the health ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaHealth</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaLaw">
-        <comment xml:lang="en">The URI of the law ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaLaw</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaMed">
-        <comment xml:lang="en">The URI of the medical ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaMed</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaProf">
-        <comment xml:lang="en">The URI of the profession ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaProf</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaTrans">
-        <comment xml:lang="en">The URI of the transportation ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaTrans</label>
-        <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
-    </rdf:Property>
-
-    <rdf:Property rdf:about="http://dig.csail.mit.edu/2018/svc#metaTravel">
-        <comment xml:lang="en">The URI of the travel ledger metadata document</comment>
-        <domain rdf:resource="http://dig.csail.mit.edu/2018/svc#Metadata"/>
-        <isDefinedBy rdf:resource="http://dig.csail.mit.edu/2018/svc#"/>
-        <label xml:lang="en">metaTravel</label>
         <range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     </rdf:Property>
 

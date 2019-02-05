@@ -19,12 +19,14 @@ SolidSub = {
     shareTabCnt: '#share-tab-cnt',
     currentTabLink: '', // { SolidSub.requestTabLink, SolidSub.shareTabLink }
     currentTabCnt: '', // { SolidSub.requestTabCnt, SolidSub.shareTabCnt }
+    uploadShareOption: 'upload',
+    uriShareOption: 'uri',
+    currentShareOption: 'upload', // { SolidSub.uploadShareOption, SolidSub.uriShareOption }
 
     // Initialize app
     init: function(event) {
         SolidSub.bindEvents();
         $(SolidSub.requestTabLink).click();
-        // SolidSub.generateKeyPair({keyType: 'RSA', bits: 2048, workers: 2});
     },
 
     // Bind events
@@ -61,6 +63,41 @@ SolidSub = {
             $(SolidSub.currentTabCnt).css('display', 'block');
             $(event.currentTarget).addClass('active');
             await SolidSub.loadShareTab();
+
+            // Display appropriate sharing options
+            var shareCredRadioElem = $('input[type=radio][name=share]');
+            shareCredRadioElem.change(() => {
+                var shareCredRadioCheckedElem = $('input[type=radio][name=share]:checked');
+                var shareCredRadio = shareCredRadioCheckedElem.val();
+                console.log(`shareCredRadio: ${shareCredRadio}`);
+                var shareCredUploadCntElem = $('#share-cred-upload-cnt');
+                var shareCredUriCntElem = $('#share-cred-uri-cnt');
+                switch (shareCredRadio) {
+                  case SolidSub.uploadShareOption:
+                    SolidSub.currentShareOption = SolidSub.uploadShareOption;
+                    shareCredUriCntElem.addClass('hidden');
+                    shareCredUploadCntElem.removeClass('hidden');
+                    break;
+                  case SolidSub.uriShareOption:
+                    SolidSub.currentShareOption = SolidSub.uriShareOption;
+                    shareCredUploadCntElem.addClass('hidden');
+                    shareCredUriCntElem.removeClass('hidden');
+                    break;
+                }
+            });
+
+            // Select FileList object from credential upload
+            var shareCredElem = $('#share-cred-upload');
+            console.log(`shareCredElem:\n${JSON.stringify(shareCredElem)}`);
+            shareCredElem.change(() => {
+                // Use the 1st file from the list
+                console.log(`this.files:\n${this.files}`);
+                console.log(`shareCredElem.files:\n${shareCredElem.files}`);
+                // SolidSub.fileUpload = this.files[0];
+                SolidSub.fileUpload = document.querySelector('input[type=file]').files[0];
+                // SolidSub.fileUpload = shareCredElem.files[0];
+                console.log(`SolidSub.fileUpload:\n${SolidSub.fileUpload}`);
+            });
             break;
         }
     },
@@ -77,6 +114,68 @@ SolidSub = {
 
     // Share credential with stakeholders
     shareCredential: async function(event) {
+        console.log(`SolidSub.currentShareOption: ${SolidSub.currentShareOption}`);
+        event.preventDefault();
+        await util.trackSession();
+
+        switch (SolidSub.currentShareOption) {
+          case SolidSub.uploadShareOption:
+            SolidSub.shareCredentialUpload(event);
+            break;
+          case SolidSub.uriShareOption:
+            SolidSub.shareCredentialUri(event);
+            break;
+        }
+    },
+
+    // Share credential with stakeholders via file upload
+    shareCredentialUpload: async function(event) {
+        event.preventDefault();
+        await util.trackSession();
+
+        console.log(`shareCredentialUpload event.target:\n${JSON.stringify(event.target)}`);
+
+        // Retrieve relevant share elements
+        var verifierIdElem = $('#verifier-id');
+        var verifierId = verifierIdElem.val();
+
+        // Validate inputs
+        if (verifierId === "") { // TODO - Add condition for validating proper URI format
+          alert("Please provide a valid verifier ID");
+          verifierIdElem.focus();
+          return;
+        }
+        
+        // Read upload from earlier change event
+        var file = SolidSub.fileUpload;
+
+        // Instantiate new FileReader
+        var reader = new FileReader();
+
+        // Capture the file information
+        reader.addEventListener("load", async function () {
+          // Share credential
+          var verifierInbox = await util.discoverInbox(verifierId);
+          util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
+          util.postOptions.body = reader.result;
+          util.fetcher.load(verifierInbox, util.postOptions);
+        }, false);
+
+        // Read in the file as text
+        if (file) {
+          reader.readAsText(file);
+        } else {
+          alert("Please upload a valid credential file");
+          return;
+        }
+
+        // Clear input fields
+        verifierIdElem.val("");
+        alert(`Successfully shared credential with verifier with ID '${verifierId}'`);
+    },
+
+    // Share credential with stakeholders via URI fetch and post
+    shareCredentialUri: async function(event) {
         event.preventDefault();
         await util.trackSession();
         
@@ -107,13 +206,14 @@ SolidSub = {
 
         // Share credential
         var verifierInbox = await util.discoverInbox(verifierId);
-        util.postOptions.headers[util.contentTypeField] = util.contentTypeN3;
+        util.postOptions.headers[util.contentTypeField] = util.contentTypePlain;
         util.postOptions.body = shareCred;
         util.fetcher.load(verifierInbox, util.postOptions);
 
         // Clear input fields
         shareCredUriElem.val("");
         verifierIdElem.val("");
+        alert(`Successfully shared credential with verifier with ID '${verifierId}'`);
     },
 
     // Submit request for credential

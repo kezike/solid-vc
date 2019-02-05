@@ -36,7 +36,13 @@
           <h3>Share Credential</h3>
           <form>
               <fieldset>
-                  <div>
+                  <input type="radio" name="share" value="upload" checked>Share From Computer<br>
+                  <input type="radio" name="share" value="uri">Share From URI<br>
+                  <div id="share-cred-upload-cnt">
+                      <label for="share-cred-upload">Upload Credential:</label>
+                      <input type="file" id="share-cred-upload" required><br>
+                  </div>
+                  <div id="share-cred-uri-cnt" class="hidden">
                       <label for="share-cred-uri">Provide Credential URI:</label>
                       <input type="text" placeholder="e.g., https://SUBJECT.solid.community/inbox/cred-4.n3" size=50 id="share-cred-uri"><br>
                   </div>

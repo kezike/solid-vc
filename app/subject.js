@@ -171,7 +171,7 @@ SolidSub = {
 
         // Clear input fields
         verifierIdElem.val("");
-        alert(`Successfully shared credential with verifier with ID '${verifierId}'`);
+        alert(`Successfully shared credential with Verifier with ID '${verifierId}'`);
     },
 
     // Share credential with stakeholders via URI fetch and post
@@ -192,7 +192,7 @@ SolidSub = {
           return;
         }
         if (verifierId === "") { // TODO - Add condition for validating proper URI format
-          alert("Please provide a valid verifier ID");
+          alert("Please provide a valid Verifier ID");
           verifierIdElem.focus();
           return;
         }
@@ -213,7 +213,7 @@ SolidSub = {
         // Clear input fields
         shareCredUriElem.val("");
         verifierIdElem.val("");
-        alert(`Successfully shared credential with verifier with ID '${verifierId}'`);
+        alert(`Successfully shared credential with Verifier with ID '${verifierId}'`);
     },
 
     // Submit request for credential
@@ -243,12 +243,12 @@ SolidSub = {
           credTitle = `${credDomain} Credential Request for Subject with ID '${subjectId}'`;
         }
         if (issuerId === "") { // TODO - Add condition for validating proper URI format
-          alert("Please provide a valid issuer ID");
+          alert("Please provide a valid Issuer ID");
           issuerIdElem.focus();
           return;
         }
         if (credDesc === "") {
-          credDesc = `Hello there! I am requesting issuer with ID '${issuerId}' to grant subject with ID '${subjectId}' a credential of type ${credDomain}`;
+          credDesc = `Hello there! I am requesting Issuer with ID '${issuerId}' to grant Subject with ID '${subjectId}' a credential of type ${credDomain}`;
         }
 
         // Discover issuer's inbox location
@@ -292,6 +292,7 @@ SolidSub = {
         credTitleElem.val("");
         credDescElem.val("");
         issuerIdElem.val("");
+        alert(`Successfully requested credential from Issuer with ID '${issuerId}'`);
     }
     //// END APP ////
 };

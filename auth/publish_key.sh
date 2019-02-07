@@ -17,10 +17,12 @@ pubKeyFileRemoteKey=PUB_FILE_REMOTE
 pubKeyFileLocalKey=PUB_FILE_LOCAL
 pubKeyQueryFileKey=PUB_QUERY_FILE
 profileKey=SOLID_PROFILE
+webIdKey=SOLID_WEBID
 pubKeyFolderRemote=`node $jsonApi --read --key=$pubKeyFolderRemoteKey --json=$configFile`
 pubKeyFileLocal=`node $jsonApi --read --key=$pubKeyFileLocalKey --json=$configFile`
 pubKeyQueryFile=`node $jsonApi --read --key=$pubKeyQueryFileKey --json=$configFile`
 profile=`node $jsonApi --read --key=$profileKey --json=$configFile`
+webId=`node $jsonApi --read --key=$webIdKey --json=$configFile`
 
 # Post public key to Solid pod
 $restDir/post.sh $pubKeyFolderRemote $pubKeyFileLocal
@@ -44,7 +46,7 @@ pubKeyUri=$pubKeyFolderRemote"$fileName".txt
 node $jsonApi --write --key=$pubKeyFileRemoteKey --value=$pubKeyUri --json=$configFile
 
 # Update profile document to point to public key
-echo "INSERT DATA { <> <https://w3id.org/security#publicKey> \"$pubKeyUri\" }" > $pubKeyQueryFile
+echo "INSERT DATA { <$webId> <https://w3id.org/security#publicKey> \"$pubKeyUri\" }" > $pubKeyQueryFile
 $restDir/patch.sh $profile $pubKeyQueryFile
 rm $pubKeyQueryFile
 

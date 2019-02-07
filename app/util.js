@@ -399,28 +399,6 @@ SolidUtil = {
     // Retrieve content of svc public key of a remote target
     getPubKeyRemoteContent: async function(target) {
         var pubKeyUri = await SolidUtil.getPubKeyRemoteUri(target);
-        // var pubKeyPromise = new Promise(async (resolve, reject) => {
-            /*SolidUtil.fetcher.load(pubKeyUri, SolidUtil.getOptions).then((resp) => {
-                // resolve(resp[SolidUtil.responseTextField]);
-                // var pubKeyContent = SolidUtil.fetcher.store.any($rdf.sym(target), LDP(SolidUtil.ldpContainsField), undefined);
-                // resolve(pubKeyContent);
-                var respClone = resp.clone();
-                return respClone.json();
-            }).then(function(respJson) {
-               resolve(JSON.stringify(respJson));
-            }).catch((err) => {
-               reject(err);
-            });*/
-            /*fetch(pubKeyUri).then(function(resp) {
-                return resp.json();
-            }).then(function(respJson) {
-               resolve(JSON.stringify(respJson));
-            }).catch((err) => {
-               reject(err);
-            });*/
-        // });
-        // var pubKeyResult = await pubKeyPromise;
-        // return pubKeyResult;
         var pubKeyPromise = await SolidUtil.fetcher.load(pubKeyUri);
         return pubKeyPromise[SolidUtil.responseTextField];
     },

@@ -513,12 +513,12 @@ SolidIss = {
         var credId = `${revList}${uniqueNum}`;
         var vcCredStatus = `${credId}.${util.n3}`;
         var credTitle = `${credDomain} Credential for Subject with ID '${subjectId}'`;
-        var credDesc = `Congratulations! By the powers vested in me as issuer with ID '${issuerId}', I hereby grant subject with ID '${subjectId}' a credential of type ${credDomain}`;
+        var credDesc = `Congratulations! By the powers vested in me as Issuer with ID '${issuerId}', I hereby grant Subject with ID '${subjectId}' a credential of type ${credDomain}`;
         var messageType = 'ISSUANCE';
 
         // Validate inputs
         if (subjectId === "") {
-          alert("Please provide a valid subject ID");
+          alert("Please provide a valid Subject ID");
           subjectIdElem.focus();
           return;
         }
@@ -584,7 +584,7 @@ SolidIss = {
         credPlainElem.val("");
         credDomainElem.val("");
         // credSerializationElem.val("");
-        alert(`Successfully issued credential with ID '${credId}' to subject with ID '${subjectId}'`);
+        alert(`Successfully issued credential with ID '${credId}' to Subject with ID '${subjectId}'`);
     },
 
     // Revoke credential

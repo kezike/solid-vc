@@ -1,8 +1,8 @@
 # SolidVC
-This package contains a [Verifiable Credentials](https://w3c.github.io/vc-data-model/) framework built on top of [Solid](https://solid.mit.edu/).
+This package contains a [Verifiable Credentials](https://w3c.github.io/vc-data-model/) framework built on top of [Solid](https://solid.inrupt.com/).
 
 ### Getting Started
-To get started with `solid-vc`, navigate to your local `solid-vc` directory and run `npm run setup`. This script takes care of creating keypairs, authenticating you with Solid, setting up necessary folders in your POD, and anything else you could possibly need to use the platform.
+To get started with `solid-vc`, navigate to your local `solid-vc` directory and run `npm run setup`. This script takes care of creating keypairs, authenticating you with Solid, setting up necessary folders in your POD, and anything else you could possibly need to use the platform. If you do not already own a Solid account, please visit https://solid.inrupt.com/get-a-solid-pod to get started. The sign-up process takes minutes!
 
 ### Launch `solid-vc`
 In order to launch `solid-vc`, run `npm start` and open "http://localhost:PORT", where PORT is typically a 4-5 digit number that is reported to you as an output of `npm start`. (Note: On startup, you will be prompted to login again)

@@ -26,36 +26,9 @@ SolidVC = {
         // $(document).on('change', '#creator', SolidVC.handleCreatorUpload);
         // $(document).on('click', '#issue-cred', SolidVC.issueCredential);
         // $(document).on('click', '#switch-acct, SolidVC.switchAccounts);
-        $(document).on('click', '#subject-role', SolidVC.loadSubject);
-        $(document).on('click', '#issuer-role', SolidVC.loadIssuer);
-        $(document).on('click', '#verifier-role', SolidVC.loadVerifier);
-    },
-
-    // Load subject page
-    loadSubject: function(event) {
-        // SolidVC.login();
-        SolidVC.role = 'subject';
-        SolidVC.webPage = SolidVC.role + '.html';
-        window.location.href = SolidVC.webPage;
-        // subject = require('./subject');
-    },
-
-    // Load issuer page
-    loadIssuer: function(event) {
-        // SolidVC.login();
-        SolidVC.role = 'issuer';
-        SolidVC.webPage = SolidVC.role + '.html';
-        window.location.href = SolidVC.webPage;
-        // issuer = require('./issuer');
-    },
-
-    // Load verifier page
-    loadVerifier : function(event) {
-        // SolidVC.login();
-        SolidVC.role = 'verifier';
-        SolidVC.webPage = SolidVC.role + '.html';
-        window.location.href = SolidVC.webPage;
-        // verifier = require('./verifier');
+        $(document).on('click', '#subject-role', util.loadSubject);
+        $(document).on('click', '#issuer-role', util.loadIssuer);
+        $(document).on('click', '#verifier-role', util.loadVerifier);
     },
 
     // Load user profile

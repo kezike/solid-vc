@@ -35,8 +35,11 @@ SolidSub = {
         $(document).on('click', '#share-cred', SolidSub.shareCredential);
         $(document).on('click', '#request-tab-link', SolidSub.displayTab);
         $(document).on('click', '#share-tab-link', SolidSub.displayTab);
+        $(document).on('click', '#nav-home', util.navigateHome);
+        $(document).on('click', '#subject-role', util.loadSubject);
+        $(document).on('click', '#issuer-role', util.loadIssuer);
+        $(document).on('click', '#verifier-role', util.loadVerifier);
         $(document).on('click', '#switch-acct', util.switchAccounts);
-        $(document).on('click', '#switch-role', util.switchRoles);
     },
 
     // Display tab

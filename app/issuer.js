@@ -119,8 +119,11 @@ SolidIss = {
         $(document).on('click', '#issue-tab-link', SolidIss.displayTab);
         $(document).on('click', '#review-tab-link', SolidIss.displayTab);
         $(document).on('click', '#revoke-tab-link', SolidIss.displayTab);
+        $(document).on('click', '#nav-home', util.navigateHome);
+        $(document).on('click', '#subject-role', util.loadSubject);
+        $(document).on('click', '#issuer-role', util.loadIssuer);
+        $(document).on('click', '#verifier-role', util.loadVerifier);
         $(document).on('click', '#switch-acct', util.switchAccounts);
-        $(document).on('click', '#switch-role', util.switchRoles);
         /*// Close credential inpection modal when button pressed
         $(messageModal).on('click', closeButtonId, () => {
             messageModal.css("display","none");

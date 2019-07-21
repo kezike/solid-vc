@@ -150,6 +150,33 @@ SolidUtil = {
         obj[key] = val;
     },
 
+    // Load subject page
+    loadSubject: function(event) {
+        // SolidUtil.login();
+        SolidUtil.role = 'subject';
+        SolidUtil.webPage = SolidUtil.role + '.html';
+        window.location.href = SolidUtil.webPage;
+        // subject = require('./subject');
+    },
+
+    // Load issuer page
+    loadIssuer: function(event) {
+        // SolidUtil.login();
+        SolidUtil.role = 'issuer';
+        SolidUtil.webPage = SolidUtil.role + '.html';
+        window.location.href = SolidUtil.webPage;
+        // issuer = require('./issuer');
+    },
+
+    // Load verifier page
+    loadVerifier: function(event) {
+        // SolidUtil.login();
+        SolidUtil.role = 'verifier';
+        SolidUtil.webPage = SolidUtil.role + '.html';
+        window.location.href = SolidUtil.webPage;
+        // verifier = require('./verifier');
+    },
+
     // Get personal WebID
     getMyWebId: function() {
         return SolidUtil.session.webId;
@@ -278,9 +305,9 @@ SolidUtil = {
         });*/
     },
 
-    // Change role in Verifiable Credentials ecosystem
-    switchRoles: function(event) {
-        console.log("Switching Roles...")
+    // Navigate to SolidVC homepage
+    navigateHome: function(event) {
+        console.log("Navigating Home...")
         window.location.href = SolidUtil.homePage;
     },
 

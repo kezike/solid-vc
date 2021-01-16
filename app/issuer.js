@@ -97,10 +97,6 @@ SolidIss = {
     // Action element id delimiter
     actionElemIdDelim: '-',
     
-    // SolidVC roles and associated web pages
-    role: "",
-    webPage: "",
-
     // Initialize app
     init: function(event) {
         SolidIss.bindEvents();
@@ -111,8 +107,6 @@ SolidIss = {
     // Bind events
     bindEvents: function() {
         $(document).on('click', '.inspect-cred', SolidIss.inspectCredential);
-        /*$(document).on('click', '.approve-cred', SolidIss.approveCredential);
-        $(document).on('click', '.decline-cred', SolidIss.declineCredential);*/
         $(document).on('click', '.download-msg', SolidIss.downloadMessage);
         $(document).on('click', '#issue-cred', SolidIss.issueCredential);
         $(document).on('click', '#revoke-cred', SolidIss.revokeCredential);
@@ -120,9 +114,10 @@ SolidIss = {
         $(document).on('click', '#review-tab-link', SolidIss.displayTab);
         $(document).on('click', '#revoke-tab-link', SolidIss.displayTab);
         $(document).on('click', '#nav-home', util.navigateHome);
-        $(document).on('click', '#subject-role', util.loadSubject);
-        $(document).on('click', '#issuer-role', util.loadIssuer);
-        $(document).on('click', '#verifier-role', util.loadVerifier);
+        $(document).on('click', '#nav-subject', util.loadSubject);
+        $(document).on('click', '#nav-issuer', util.loadIssuer);
+        $(document).on('click', '#nav-verifier', util.loadVerifier);
+        $(document).on('click', '#nav-inbox', util.loadInbox);
         $(document).on('click', '#switch-acct', util.switchAccounts);
         /*// Close credential inpection modal when button pressed
         $(messageModal).on('click', closeButtonId, () => {
@@ -187,7 +182,7 @@ SolidIss = {
     loadReviewTab: async function() {
         await util.trackSession();
         var inbox = util.getMyInbox();
-        var inboxContent = await util.loadInbox(inbox);
+        var inboxContent = await util.loadInboxContent(inbox);
         console.log(`INBOX: ${inbox}`);
         console.log(`INBOX CONTENT:\n${inboxContent}`);
         $('#msg-board').empty();
@@ -287,14 +282,6 @@ SolidIss = {
         });
     },
 
-    /*approveCredential: async function(event) {
-        console.log(`Approve Credential Target: ${event.currentTarget}`);
-    },
-
-    declineCredential: async function(event) {
-        console.log(`Decline Credential Target: ${event.currentTarget}`);
-    },*/
-    
     downloadMessage: async function(event) {
         // Retrieve relevant DOM elements
         var downloadMsgElem = $(event.target).closest(".download-msg");
@@ -308,64 +295,6 @@ SolidIss = {
         // Download message
         var downloadId = SolidIss.messageInfo[downloadMsgElemIdx].downloadId;
         util.downloadFile(message, downloadId);
-    },
-
-    // Handle credential upload
-    handleCredentialUpload: function(event) {
-        var files = event.target.files; // FileList object
-
-        // use the 1st file from the list
-        var file = files[0];
-        console.log(file);
-
-        var reader = new FileReader();
-
-        // Closure to capture the file information.
-        reader.onload = function(e) {
-            SolidIss.credential = JSON.parse(reader.result);
-            console.log("Credential:", SolidIss.credential);
-        };
-
-        // Read in the image file as a data URL.
-        reader.readAsText(file);
-    },
-
-    // Handle signature upload
-    handleSignatureUpload: function(event) {
-        var files = event.target.files; // FileList object
-
-        // use the 1st file from the list
-        var file = files[0];
-
-        var reader = new FileReader();
-
-        // Closure to capture the file information.
-        reader.onload = function(e) {
-            SolidIss.signature = reader.result;
-            console.log("Signature:", SolidIss.signature);
-        };
-
-        // Read in the image file as a data URL.
-        reader.readAsText(file);
-    },
-
-    // Handle creator upload
-    handleCreatorUpload: function(event) {
-        var files = event.target.files; // FileList object
-
-        // use the 1st file from the list
-        var file = files[0];
-
-        var reader = new FileReader();
-
-        // Closure to capture the file information.
-        reader.onload = function(e) {
-            SolidIss.creator = reader.result;
-            console.log("Creator:", SolidIss.creator);
-        };
-
-        // Read in the image file as a data URL.
-        reader.readAsText(file);
     },
 
     // Serialize credential for purposes of verifying at a later point in time

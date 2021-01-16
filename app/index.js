@@ -29,6 +29,8 @@ SolidVC = {
         $(document).on('click', '#subject-role', util.loadSubject);
         $(document).on('click', '#issuer-role', util.loadIssuer);
         $(document).on('click', '#verifier-role', util.loadVerifier);
+        $(document).on('click', '#nav-inbox', util.loadInbox);
+        $(document).on('click', '#switch-acct', util.switchAccounts);
     },
 
     // Load user profile

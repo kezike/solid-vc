@@ -9,99 +9,100 @@
         <link rel="shortcut icon" type="./img/png" href="./img/favicon.png"/>
         <link rel="stylesheet" href="./css/styles.css">
     </head>
-  <body class="container">
-      <!-- Body Header -->
-      <div>
-          <img style="vertical-align:middle" src="./img/favicon.png" alt="Solid logo" height=80 width=80>
-          <div style="vertical-align:middle; display:inline">
-              <h1 style="display:inline">SolidVC Subject</h1>
-          </div>
-          <div>
-              <button id="nav-home">Home</button>
-              <button id="subject-role" style="color:#C0C0C0" disabled>Subject</button>
-              <button id="issuer-role">Issuer</button>
-              <button id="verifier-role">Verifier</button>
-              <button id="switch-acct">Switch Accounts</button>
-          </div>
-      </div>
+    <body class="container">
+        <!-- Body Header -->
+        <div>
+            <img style="vertical-align:middle" src="./img/favicon.png" alt="Solid logo" height=80 width=80>
+            <div style="vertical-align:middle; display:inline">
+                <h1 style="display:inline">SolidVC Subject</h1>
+            </div>
+            <div>
+                <button id="nav-home">Home</button>
+                <button id="nav-subject" style="color:#C0C0C0" disabled>Subject</button>
+                <button id="nav-issuer">Issuer</button>
+                <button id="nav-verifier">Verifier</button>
+                <!--<button id="nav-inbox">Inbox</button>-->
+                <button id="switch-acct">Switch Accounts</button>
+            </div>
+        </div>
 
-      <!-- Personal Profile -->
-      <div id="profile" class="hidden">
-          <h3 id="name"></h3>
-          <div>
-              <img id="image" height="100" width="100">
-          </div>
-      </div>
+        <!-- Personal Profile -->
+        <div id="profile" class="hidden">
+            <h3 id="name"></h3>
+            <div>
+                <img id="image" height="100" width="100">
+            </div>
+        </div>
 
-      <!-- Tab Template -->
-      <div class="tab">
-          <button class="tablinks" id="request-tab-link">Request</button>
-          <button class="tablinks" id="share-tab-link">Share</button>
-      </div>
+        <!-- Tab Template -->
+        <div class="tab">
+            <button class="tablinks" id="request-tab-link">Request</button>
+            <button class="tablinks" id="share-tab-link">Share</button>
+        </div>
 
-      <!-- Credential Share Tab -->
-      <div class="tabcontent" id="share-tab-cnt">
-          <h3>Share Credential</h3>
-          <form>
-              <fieldset>
-                  <input type="radio" name="share" value="upload" checked>Share From Computer<br>
-                  <input type="radio" name="share" value="uri">Share From URI<br>
-                  <div id="share-cred-upload-cnt">
-                      <label for="share-cred-upload">Upload Credential:</label>
-                      <input type="file" id="share-cred-upload" required><br>
-                  </div>
-                  <div id="share-cred-uri-cnt" class="hidden">
-                      <label for="share-cred-uri">Provide Credential URI:</label>
-                      <input type="text" placeholder="e.g., https://SUBJECT.solid.community/inbox/cred-4.n3" size=50 id="share-cred-uri"><br>
-                  </div>
-                  <div>
-                      <label for="verifier-id">Provide Verifier ID:</label>
-                      <input type="text" placeholder="e.g., https://VERIFIER.solid.community/profile/card#me" size=50 id="verifier-id"><br>
-                  </div>
-                  <input type="submit" value="Share Credential" id="share-cred" style="float: right">
-              </fieldset>
-          </form>
-      </div>
+        <!-- Credential Share Tab -->
+        <div class="tabcontent" id="share-tab-cnt">
+            <h3>Share Credential</h3>
+            <form>
+                <fieldset>
+                    <input type="radio" name="share" value="upload" checked>Share From Computer<br>
+                    <input type="radio" name="share" value="uri">Share From URI<br>
+                    <div id="share-cred-upload-cnt">
+                        <label for="share-cred-upload">Upload Credential:</label>
+                        <input type="file" id="share-cred-upload" required><br>
+                    </div>
+                    <div id="share-cred-uri-cnt" class="hidden">
+                        <label for="share-cred-uri">Provide Credential URI:</label>
+                        <input type="text" placeholder="e.g., https://SUBJECT.solid.community/inbox/cred-4.n3" size=50 id="share-cred-uri"><br>
+                    </div>
+                    <div>
+                        <label for="verifier-id">Provide Verifier ID:</label>
+                        <input type="text" placeholder="e.g., https://VERIFIER.solid.community/profile/card#me" size=50 id="verifier-id"><br>
+                    </div>
+                    <input type="submit" value="Share Credential" id="share-cred" style="float: right">
+                </fieldset>
+            </form>
+        </div>
 
-      <!-- Credential Request Tab -->
-      <div class="tabcontent" id="request-tab-cnt">
-          <h3>Request Verifiable Credential</h3>
-          <form>
-              <fieldset>
-                  <div>
-                      <label for="cred-domain">Select Credential Domain:</label>
-                      <select id="cred-domain">
-                          <option value="">Select "General" if unsure</option>
-                          <option value="EDUCATION">Education</option>
-                          <option value="FINANCE">Finance</option>
-                          <option value="GENERAL">General</option>
-                          <option value="GOVERNMENT">Government</option>
-                          <option value="HEALTH">Health</option>
-                          <option value="LAW">Law</option>
-                          <option value="MEDICINE">Medicine</option>
-                          <option value="PROFESSION">Profession</option>
-                          <option value="TRANSPORTATION">Transportation</option>
-                          <option value="TRAVEL">Travel</option>
-                      </select>
-                  </div>
-                  <div>
-                      <label for="cred-title">Select Credential Title:</label>
-                      <input type="text" placeholder="e.g., MEng. Degree Application for Kayode Ezike" style="width: 50%" id="cred-title"><br>
-                  </div>
-                  <div>
-                      <label for="issuer-id">Provide Credential Issuer ID:</label>
-                      <input type="text" placeholder="e.g., https://ISSUER.solid.community/profile/card#me" style="width: 46%" id="issuer-id"><br>
-                  </div>
-                  <!--<h4>Upload Required Documents</h4>
-                  <i><h5>Use guide above to determine required documents for credential of interest</h5></i>-->
-                  <h4>Optional Credential Description</h4>
-                  <textarea id="cred-desc" rows=15 cols=100 form="vcform" placeholder="Use this area to provide additional information, request clarification, or make any other miscellaneous inquiry"></textarea>
-                  <input type="submit" value="Request Credential" id="request-cred"> <!--style="float: right">-->
-              </fieldset>
-          </form>
-      </div>
-  </body>
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  <script src="./app/dist/app.bundle.js" charset="utf-8"></script>
+        <!-- Credential Request Tab -->
+        <div class="tabcontent" id="request-tab-cnt">
+            <h3>Request Verifiable Credential</h3>
+            <form>
+                <fieldset>
+                    <div>
+                        <label for="cred-domain">Select Credential Domain:</label>
+                        <select id="cred-domain">
+                            <option value="">Select "General" if unsure</option>
+                            <option value="EDUCATION">Education</option>
+                            <option value="FINANCE">Finance</option>
+                            <option value="GENERAL">General</option>
+                            <option value="GOVERNMENT">Government</option>
+                            <option value="HEALTH">Health</option>
+                            <option value="LAW">Law</option>
+                            <option value="MEDICINE">Medicine</option>
+                            <option value="PROFESSION">Profession</option>
+                            <option value="TRANSPORTATION">Transportation</option>
+                            <option value="TRAVEL">Travel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="cred-title">Select Credential Title:</label>
+                        <input type="text" placeholder="e.g., MEng. Degree Application for Kayode Ezike" style="width: 50%" id="cred-title"><br>
+                    </div>
+                    <div>
+                        <label for="issuer-id">Provide Credential Issuer ID:</label>
+                        <input type="text" placeholder="e.g., https://ISSUER.solid.community/profile/card#me" style="width: 46%" id="issuer-id"><br>
+                    </div>
+                    <!--<h4>Upload Required Documents</h4>
+                    <i><h5>Use guide above to determine required documents for credential of interest</h5></i>-->
+                    <h4>Optional Credential Description</h4>
+                    <textarea id="cred-desc" rows=15 cols=100 form="vcform" placeholder="Use this area to provide additional information, request clarification, or make any other miscellaneous inquiry"></textarea>
+                    <input type="submit" value="Request Credential" id="request-cred"> <!--style="float: right">-->
+                </fieldset>
+            </form>
+        </div>
+    </body>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="./app/dist/app.bundle.js" charset="utf-8"></script>
 </html>

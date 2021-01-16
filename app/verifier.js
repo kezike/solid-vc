@@ -17,9 +17,10 @@ SolidVer = {
     bindEvents: function() {
         $(document).on('click', '#verify-cred', SolidVer.verifyCredential);
         $(document).on('click', '#nav-home', util.navigateHome);
-        $(document).on('click', '#subject-role', util.loadSubject);
-        $(document).on('click', '#issuer-role', util.loadIssuer);
-        $(document).on('click', '#verifier-role', util.loadVerifier);
+        $(document).on('click', '#nav-subject', util.loadSubject);
+        $(document).on('click', '#nav-issuer', util.loadIssuer);
+        $(document).on('click', '#nav-verifier', util.loadVerifier);
+        $(document).on('click', '#nav-inbox', util.loadInbox);
         $(document).on('click', '#switch-acct', util.switchAccounts);
     },
 

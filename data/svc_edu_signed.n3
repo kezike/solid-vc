@@ -1,23 +1,24 @@
-@prefix : <#>.
-@prefix svc: <http://dig.csail.mit.edu/2018/svc#>.
-@prefix kezike: <https://kezike.solid.community/profile/card#me>.
-@prefix lkagal: <https://lkagal.solid.community/profile/card#me>.
-@prefix sec: <https://w3id.org/security#>.
+@prefix svc: <http://dig.csail.mit.edu/2018/svc#> .
+@prefix vc: <https://w3id.org/credentials/v1#> .
+@prefix rmv: <https://rmv-test.inrupt.net/profile/card#> .
+@prefix alice: <https://https://alice-test.inrupt.net/profile/card#> .
+@prefix sec: <https://w3id.org/security#> .
 
-:cred
-    a svc:Credential;
-    svc:plain """
-                  @prefix kezike: <https://kezike.solid.community/profile/card#me>.
-                  @prefix edu: <https://kezike.solid.community/public/svc/edu.n3#>.
-                  @prefix mit: <https://www.mit.edu>
-                  kezike: edu:meng mit.
-              """;
-    svc:context "edu";
-    svc:subject kezike:;
+alice:cred a svc:Credential ;
+    svc:title "Congratulations! By the powers vested in me as issuer with ID 'https://rmv-test.inrupt.net/profile/card#me', I hereby grant subject with ID 'https://https://alice-test.inrupt.net/profile/card#me' a credential of type TRANSPORTATION" ;
+    svc:id "https://rmv-test.inrupt.net/public/svc/rev/12345678" ;
+    svc:domain "TRANSPORTATION" ;
+    svc:title "Class D License for Alice" ;
+    svc:description "TRANSPORTATION" ;
+    svc:subjectId alice:me ;
+    svc:issuerId rmv:me ;
+    svc:messageType "ISSUANCE" ;
+    vc:credentialStatus "https://rmv-test.inrupt.net/public/svc/rev/12345678.txt" ;
     svc:proof [
-                  a sec:RsaSignature2018;
-                  sec:created "2018-12-20T09:00:00+00:00";
-                  sec:creator lkagal:;
-                  sec:nonce "RSA2018_NONCE";
-                  sec:signatureValue "RSA2018_SIGNATURE_VALUE".
-              ].
+                  a sec:RsaSignature2018 ;
+                  sec:creator rmv:me ;
+                  sec:created "2019-1-20T10:00:00+00:00" ;
+                  sec:jws "eyJhbGciOiJQUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..NhuIvO--aldDKWNwDt6bHUxRdqUvb2AFECzB-KE8uVimFFcRXcUzTOSerF5yVjTPr6yCuSVyfDKhSpdAlJFZ5g2vG74Igc-JQbArPxynk9MOIIJY5cWs6fVDaBKoH6zfCL3MsUHtihxOVfU4wN7r4nMHGzq8ZDJ0YLrzKQw3Y3HgcK2qPoE4put3f3S5yVT0cgt0XrnS3kKbhcB4xzppK9OLw6tNVmTN8kEvWCwmSNH5XTRJSO8HVDKWKREN7EIGxhsiYMShdTr62obdPrDiWocZpEEd98LhHZFroAiTb9Nk4h5NT7nk7AO0yHP-CTFCMkled7G_nin0eeyWmGrl8A" ;
+                  sec:verificationMethod sec:assertionMethod https://rmv-test.inrupt.net/public/svc/keys/pub.txt ;
+                  sec:proofPurpose sec:assertionMethod .
+              ] .

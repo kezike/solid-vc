@@ -25,6 +25,7 @@ nquadsMime='application/n-quads'
 ntriplesMime='application/n-triples'
 jsonldMime='application/ld+json'
 jsonMime='application/json' # // TODO - Currently unsupported by Solid Tabulator
+htmlMime='text/html'
 plainMime='text/plain'
 
 # Supported file extensions
@@ -37,6 +38,7 @@ nquadsTwoExt='n4'
 ntriplesExt='nt'
 jsonldExt='jsonld'
 jsonExt='json'
+htmlExt='html'
 plainExt='txt'
 
 # Determine appropriate MIME Type
@@ -59,6 +61,8 @@ case $fileExt in
     $jsonldExt) mimeType=$jsonldMime
     ;;
     $jsonExt) mimeType=$jsonMime # TODO - Currently unsupported by Solid Tabulator
+    ;;
+    $htmlExt) mimeType=$htmlMime # TODO - Currently unsupported by Solid Tabulator
     ;;
     *) mimeType=$plainMime
     ;;

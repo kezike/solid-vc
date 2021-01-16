@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SolidVC Inbox</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"/>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+        <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+        <link rel="shortcut icon" type="./img/png" href="./img/favicon.png"/>
+        <link rel="stylesheet" href="./css/styles.css">
+    </head>
+  <body class="container">
+      <!-- Body Header -->
+      <div>
+          <img style="vertical-align:middle" src="./img/favicon.png" alt="Solid logo" height=80 width=80>
+          <div style="vertical-align:middle; display:inline">
+              <h1 style="display:inline">SolidVC Inbox</h1>
+          </div>
+          <div>
+              <button id="nav-home">Home</button>
+              <button id="subject-role">Subject</button>
+              <button id="issuer-role">Issuer</button>
+              <button id="verifier-role">Verifier</button>
+              <button id="inbox" style="color:#C0C0C0" disabled>Inbox</button>
+              <button id="switch-acct">Switch Accounts</button>
+          </div>
+      </div>
+
+      <!-- Personal Profile -->
+      <div id="profile" class="hidden">
+          <h3 id="name"></h3>
+          <div>
+              <img id="image" height="100" width="100">
+          </div>
+      </div>
+
+      <!-- Tab Template -->
+      <div>
+          <button class="tablinks" id="review-tab-link">Review</button>
+      </div>
+
+      <!-- Modal Template -->
+      <div id="msg-modal" class="modal">
+          <!-- Modal content -->
+          <div class="msg-modal-content">
+              <span id="msg-modal-close" class="close">&times;</span>
+              <!--<button id="msg-modal-close" class="close">&times;</button>-->
+              <div id="msg-modal-text" style="white-space: pre-wrap"></div>
+          </div>
+      </div>
+
+      <!-- Credential Requests -->
+      <div>
+          <h3>Credential Requests</h3>
+          <table id="inbox" border=1 frame=void rules=rows style="width:100%"></table>
+      </div>
+
+      <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons" target="_blank">Smashicons</a> from <a href="https://www.flaticon.com/"                           title="Flaticon" target="_blank">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"                      title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="./app/dist/app.bundle.js" charset="utf-8"></script>
+</html>

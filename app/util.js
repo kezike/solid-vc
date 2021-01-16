@@ -133,6 +133,12 @@ SolidUtil = {
     homePage: '/',
     popupUri: 'popup.html',
 
+    // Message element info
+    messageInfo: [], // has fields 'uri', 'inspectId', 'verifyId', 'downloadId'
+
+    // Action element id delimiter
+    actionElemIdDelim: '-',
+
     // Minimum unique number
     minUniqueNum: 0,
 
@@ -151,40 +157,156 @@ SolidUtil = {
     },
 
     // Load subject page
-    loadSubject: function(event) {
-        // SolidUtil.login();
+    loadSubject: async function(event) {
+        await SolidUtil.trackSession();
         SolidUtil.role = 'subject';
         SolidUtil.webPage = SolidUtil.role + '.html';
         window.location.href = SolidUtil.webPage;
-        // subject = require('./subject');
     },
 
     // Load issuer page
-    loadIssuer: function(event) {
-        // SolidUtil.login();
+    loadIssuer: async function(event) {
+        await SolidUtil.trackSession();
         SolidUtil.role = 'issuer';
         SolidUtil.webPage = SolidUtil.role + '.html';
         window.location.href = SolidUtil.webPage;
-        // issuer = require('./issuer');
     },
 
     // Load verifier page
-    loadVerifier: function(event) {
-        // SolidUtil.login();
+    loadVerifier: async function(event) {
+        await SolidUtil.trackSession();
         SolidUtil.role = 'verifier';
         SolidUtil.webPage = SolidUtil.role + '.html';
         window.location.href = SolidUtil.webPage;
-        // verifier = require('./verifier');
     },
 
-    // Get personal WebID
-    getMyWebId: function() {
-        return SolidUtil.session.webId;
+    // Load inbox page
+    loadInbox: async function(event) {
+        await SolidUtil.trackSession();
+        var inbox = SolidUtil.getMyInbox();
+        var inboxContent = await SolidUtil.loadInboxContent(inbox);
+        console.log(`INBOX: ${inbox}`);
+        console.log(`INBOX CONTENT:\n${inboxContent}`);
+        $('#inbox').empty();
+        for (var i = 0; i < inboxContent.length; i++) {
+          var inboxItem = inboxContent[i];
+          var messageUri = inboxItem.object.value;
+          var messageObj = {uri: messageUri};
+          var reqMsgElem = SolidUtil.formatRequestMessageElement(messageObj, i);
+          SolidUtil.messageInfo.push(messageObj);
+          $('#inbox').append(reqMsgElem);
+        }
+        SolidUtil.verifyRequests();
+        SolidUtil.role = 'inbox';
+        SolidUtil.webPage = SolidUtil.role + '.html';
+        window.location.href = SolidUtil.webPage;
+    },
+
+    //// BEGIN INBOX FUNCTIONS ////
+    verifyRequests: async function() {
+        for (var i = 0; i < SolidUtil.messageInfo.length; i++) {
+          var messageObj = SolidUtil.messageInfo[i];
+          var messageUri = messageObj.uri;
+          var messageVerifyId = messageObj.verifyId;
+          console.log(`messageVerifyId: ${messageVerifyId}`);
+          var verifyResult = await util.verifyDocument(messageUri, {checkCredStatus: false, verifyRequest: true});
+          // TODO - Set 'src' attribute of verifyRequest img and remove 'hidden' class
+          var messageVerifyElem = $('#' + messageVerifyId);
+          console.log(`verifyRequestsResult: ${verifyResult.verified}`);
+          if (verifyResult.verified) {
+            var verifyImageElem = messageVerifyElem.find(".verify-img");
+            console.log(`verifyImageElem: ${verifyImageElem}`);
+            verifyImageElem.attr('src', "./img/approve.png");
+            messageVerifyElem.removeClass('hidden');
+          } else {
+            var verifyImageElem = messageVerifyElem.find(".verify-img");
+            console.log(`verifyImageElem: ${JSON.stringify(verifyImageElem)}`);
+            verifyImageElem.attr('src', "./img/decline.png");
+            messageVerifyElem.removeClass('hidden');
+          }
+        }
+    },
+
+    formatActionElementIdx: function(actionId, idx) {
+        return parseInt(actionId.split(SolidUtil.actionElemIdDelim)[1]);
+    },
+
+    formatActionElementId: function(action, idx) {
+        return action + SolidUtil.actionElemIdDelim + idx;
+    },
+
+    formatRequestMessageElement: function(messageObj, messageIdx) {
+        var credReqMsgLabel = `Credential Request ${messageIdx + 1}`;
+        var inspectId = SolidUtil.formatActionElementId("inspect", messageIdx);
+        /*var approveId = SolidUtil.formatActionElementId("approve", messageIdx);
+        var declineId = SolidUtil.formatActionElementId("decline", messageIdx);*/
+        var verifyId = SolidUtil.formatActionElementId("verify", messageIdx);
+        var downloadId = SolidUtil.formatActionElementId("download", messageIdx);
+        messageObj.inspectId = inspectId;
+        messageObj.verifyId = verifyId;
+        messageObj.downloadId = downloadId;
+        var messageUri = messageObj.uri;
+        var header = "<tr>";
+        var bodyLine1 = `<td style="padding:15px"><h4 style="color:blue; display:inline"><a href=${messageUri} target="_blank">${credReqMsgLabel}</a></h4></td>`;
+        var bodyLine2 = `<td id="${inspectId}" class="inspect-cred" style="padding:15px"><input type="image" src="./img/inspect.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        /*var bodyLine3 = `<td id="${approveId}" class="approve-cred" style="padding:15px"><input type="image" src="./img/approve.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var bodyLine4 = `<td id="${declineId}" class="decline-cred" style="padding:15px"><input type="image" src="./img/decline.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var body = `${bodyLine1}${bodyLine2}${bodyLine3}${bodyLine4}`;*/
+        var bodyLine3 = `<td id="${downloadId}" class="download-msg" style="padding:15px"><input type="image" src="./img/download.png" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var bodyLine4 = `<td id="${verifyId}" class="verify-request hidden" style="padding:15px"><img class="verify-img" src="" height=25 width=25 style="display:inline; left:50em" /></td>`;
+        var body = `${bodyLine1}${bodyLine2}${bodyLine3}${bodyLine4}`;
+        var footer = "</tr>";
+        var message = `${header}${body}${footer}`;
+        return message;
+    },
+
+    inspectCredential: async function(event) {
+        // Retrieve relevant DOM elements
+        var inspectCredElem = $(event.target).closest(".inspect-cred");
+        var inspectCredElemId = inspectCredElem.attr('id');
+        var messageModal = $("#msg-modal");
+        console.log(`Inspect Credential Target: ${inspectCredElemId}`);
+        
+        // Fetch credential request message
+        var inspectCredElemIdx = SolidUtil.formatActionElementIdx(inspectCredElemId);
+        var messageUri = SolidUtil.messageInfo[inspectCredElemIdx].uri;
+        var message = await util.genericFetch(messageUri);
+        
+        // Populate and display credential request message modal
+        var messageModalText = $("#msg-modal-text");
+        messageModalText.text(message);
+        messageModal.css("display","block");
+        
+        // Close credential inpection modal when button pressed
+        $(document).on('click', "#msg-modal-close", () => {
+            messageModal.css("display","none");
+        });
+    },
+
+    downloadMessage: async function(event) {
+        // Retrieve relevant DOM elements
+        var downloadMsgElem = $(event.target).closest(".download-msg");
+        var downloadMsgElemId = downloadMsgElem.attr('id');
+
+        // Fetch message
+        var downloadMsgElemIdx = SolidUtil.formatActionElementIdx(downloadMsgElemId);
+        var messageUri = SolidUtil.messageInfo[downloadMsgElemIdx].uri;
+        var message = await util.genericFetch(messageUri);
+        
+        // Download message
+        var downloadId = SolidUtil.messageInfo[downloadMsgElemIdx].downloadId;
+        util.downloadFile(message, downloadId);
     },
 
     // Get personal inbox
     getMyInbox: function() {
         return SolidUtil[SolidUtil.ldpInboxField];
+    },
+    //// END INBOX FUNCTIONS ////
+
+    // Get personal WebID
+    getMyWebId: function() {
+        return SolidUtil.session.webId;
     },
 
     // Retrieve svc public key URI
@@ -410,7 +532,7 @@ SolidUtil = {
     },
 
     // Load content of inbox
-    loadInbox: async function(inbox) {
+    loadInboxContent: async function(inbox) {
         await SolidUtil.fetcher.load(inbox);
         var inboxContent = SolidUtil.fetcher.store.match($rdf.sym(inbox), LDP(SolidUtil.ldpContainsField), undefined);
         return inboxContent;
